@@ -1,0 +1,1202 @@
+<!-- STERYL_UP/backend/app/templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — Steryl</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles for enhanced design */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Custom focus styles */
+        input:focus, select:focus, textarea:focus {
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+        
+        /* Smooth transitions */
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        /* Card hover effect */
+        .register-card {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+        
+        .register-card:hover {
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Button hover effect */
+        .btn-register {
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-register:hover:not(:disabled) {
+            background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(13, 148, 136, 0.2);
+        }
+        
+        .btn-register:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Navbar animation */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* Floating label styles - FIXED */
+        .floating-label-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .floating-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .floating-input:focus {
+            outline: none;
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+        
+        .floating-select {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        .floating-select:focus {
+            outline: none;
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+        
+        .floating-label {
+            position: absolute;
+            left: 3rem;
+            top: 1rem;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            font-size: 1rem;
+            background: transparent;
+            padding: 0 0.25rem;
+            z-index: 1;
+        }
+        
+        /* When input is focused OR has content, move label up */
+        .floating-input:focus ~ .floating-label,
+        .floating-input:not(:placeholder-shown) ~ .floating-label,
+        .floating-select:focus ~ .floating-label,
+        .floating-select:has(option:checked:not([value=""])) ~ .floating-label {
+            top: -0.65rem;
+            left: 1rem;
+            font-size: 0.75rem;
+            color: #0d9488;
+            background: white;
+            padding: 0 0.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+        }
+        
+        /* Hide placeholder text initially */
+        .floating-input::placeholder {
+            opacity: 0;
+        }
+        
+        /* Show placeholder when input is focused or has content */
+        .floating-input:focus::placeholder,
+        .floating-input:not(:placeholder-shown)::placeholder {
+            opacity: 0.5;
+        }
+        
+        /* Input icons */
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0d9488;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #0d9488;
+            z-index: 2;
+        }
+        
+        .select-arrow {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0d9488;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        /* Password strength indicator */
+        .password-strength {
+            height: 4px;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        
+        .strength-weak { width: 25%; background-color: #ef4444; }
+        .strength-fair { width: 50%; background-color: #f59e0b; }
+        .strength-good { width: 75%; background-color: #3b82f6; }
+        .strength-strong { width: 100%; background-color: #10b981; }
+        
+        /* Account type card selection */
+        .account-type-card {
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .account-type-card:hover {
+            border-color: #0d9488;
+            transform: translateY(-3px);
+        }
+        
+        .account-type-card.selected {
+            border-color: #0d9488;
+            background-color: #f0fdfa;
+        }
+        
+        /* Error message styling */
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .error-icon {
+            color: #ef4444;
+        }
+        
+        /* Success message styling */
+        .success-message {
+            color: #10b981;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .success-icon {
+            color: #10b981;
+        }
+        
+        /* Validation styling */
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+        
+        .input-success {
+            border-color: #10b981 !important;
+        }
+        
+        /* Flash messages */
+        .flash-messages {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .flash-message {
+            margin-bottom: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .flash-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .flash-danger {
+            background-color: #fee2e2;
+            color: #7f1d1d;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .flash-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .flash-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        /* Terms checkbox styling */
+        .terms-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            accent-color: #0d9488;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .floating-input, .floating-select {
+                font-size: 16px; /* Prevents zoom on mobile */
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-teal-50 to-cyan-50 min-h-screen">
+    <!-- Flash Messages Container -->
+    <div id="flash-messages" class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                {% elif category == 'danger' %}
+                                    <i class="fas fa-exclamation-circle mr-2"></i>
+                                {% elif category == 'info' %}
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                {% endif %}
+                                <span>{{ message }}</span>
+                            </div>
+                            <button class="flash-close ml-4 text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Navbar -->
+    <header class="navbar shadow-md fixed top-0 w-full z-50 py-3">
+        <div class="container mx-auto flex justify-between items-center px-4 md:px-8">
+            <div class="logo flex items-center space-x-3">
+                <div class="bg-gradient-to-br from-teal-600 to-teal-800 text-white rounded-xl p-3 flex items-center justify-center">
+                    <i class="fas fa-heartbeat text-xl"></i>
+                </div>
+                <span class="font-bold text-teal-700 text-2xl">Steryl</span>
+            </div>
+            
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-button" class="md:hidden text-teal-700">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
+            <!-- Desktop menu -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="/about" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About</span>
+                </a>
+                <a href="/contact" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="/login" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg py-4 px-6">
+            <div class="flex flex-col space-y-4">
+                <a href="/about" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3">
+                    <i class="fas fa-info-circle w-6"></i>
+                    <span>About</span>
+                </a>
+                <a href="/contact" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3">
+                    <i class="fas fa-envelope w-6"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="/login" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3">
+                    <i class="fas fa-sign-in-alt w-6"></i>
+                    <span>Login</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Registration Form Section -->
+    <section class="flex justify-center items-center min-h-screen pt-16 pb-12 px-4">
+        <div class="bg-white register-card rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden">
+            <div class="md:flex">
+                <!-- Left side - Branding and info -->
+                <div class="md:w-2/5 bg-gradient-to-br from-teal-600 to-teal-800 text-white p-8 md:p-10 flex flex-col justify-center">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold mb-3">Join Steryl Today</h1>
+                        <p class="text-teal-100">Create your account to access advanced healthcare solutions and connect with medical professionals worldwide.</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-teal-500 rounded-full p-2 mt-1">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold">Secure & Compliant</h3>
+                                <p class="text-teal-100 text-sm">HIPAA compliant data protection</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-teal-500 rounded-full p-2 mt-1">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold">Global Network</h3>
+                                <p class="text-teal-100 text-sm">Connect with healthcare professionals worldwide</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-teal-500 rounded-full p-2 mt-1">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold">24/7 Support</h3>
+                                <p class="text-teal-100 text-sm">Dedicated customer support team</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-10 pt-6 border-t border-teal-500">
+                        <p class="text-sm text-teal-200">Already have an account? <a href="/login" class="font-bold text-white hover:text-teal-100">Sign in here</a></p>
+                    </div>
+                </div>
+                
+                <!-- Right side - Registration form -->
+                <div class="md:w-3/5 p-6 md:p-10">
+                    <h2 class="text-3xl font-bold text-teal-800 mb-2">Create Your Account</h2>
+                    <p class="text-gray-600 mb-8">Fill in your details to get started</p>
+                    
+                    <form id="registrationForm" class="space-y-6">
+                        <!-- Full Name - First and Last -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- First Name -->
+                            <div class="floating-label-group">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" name="first_name" id="first_name" 
+                                       class="floating-input" 
+                                       placeholder="First Name" 
+                                       autocomplete="given-name"
+                                       required>
+                                <label for="first_name" class="floating-label">First Name</label>
+                                <div id="first_name_error" class="error-message hidden">
+                                    <i class="fas fa-exclamation-circle error-icon"></i>
+                                    <span>First name is required</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Last Name -->
+                            <div class="floating-label-group">
+                                <i class="fas fa-user-friends input-icon"></i>
+                                <input type="text" name="last_name" id="last_name" 
+                                       class="floating-input" 
+                                       placeholder="Last Name" 
+                                       autocomplete="family-name"
+                                       required>
+                                <label for="last_name" class="floating-label">Last Name</label>
+                                <div id="last_name_error" class="error-message hidden">
+                                    <i class="fas fa-exclamation-circle error-icon"></i>
+                                    <span>Last name is required</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="floating-label-group">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" name="email" id="email" 
+                                   class="floating-input" 
+                                   placeholder="Email Address" 
+                                   autocomplete="email"
+                                   required>
+                            <label for="email" class="floating-label">Email Address</label>
+                            <div id="email_error" class="error-message hidden">
+                                <i class="fas fa-exclamation-circle error-icon"></i>
+                                <span>Please enter a valid email address</span>
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="floating-label-group">
+                            <i class="fas fa-phone input-icon"></i>
+                            <input type="tel" name="phone" id="phone" 
+                                   class="floating-input" 
+                                   placeholder="Phone Number" 
+                                   autocomplete="tel"
+                                   required>
+                            <label for="phone" class="floating-label">Phone Number</label>
+                            <div id="phone_error" class="error-message hidden">
+                                <i class="fas fa-exclamation-circle error-icon"></i>
+                                <span>Please enter a valid phone number</span>
+                            </div>
+                        </div>
+
+                        <!-- Country -->
+                        <div class="floating-label-group">
+                            <i class="fas fa-globe-americas input-icon"></i>
+                            <select name="country" id="country" class="floating-select" required>
+                                <option value="" selected disabled>Select your country</option>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                            <label for="country" class="floating-label">Country</label>
+                            <div id="country_error" class="error-message hidden">
+                                <i class="fas fa-exclamation-circle error-icon"></i>
+                                <span>Please select your country</span>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="floating-label-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="password" id="password" 
+                                   class="floating-input" 
+                                   placeholder="Password" 
+                                   autocomplete="new-password"
+                                   required>
+                            <i id="togglePassword" class="fas fa-eye password-toggle"></i>
+                            <label for="password" class="floating-label">Password</label>
+                            <div id="password_error" class="error-message hidden">
+                                <i class="fas fa-exclamation-circle error-icon"></i>
+                                <span>Password must be at least 8 characters</span>
+                            </div>
+                            
+                            <!-- Password strength indicator -->
+                            <div class="mt-2">
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>Password strength:</span>
+                                    <span id="password-strength-text">-</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                                    <div id="password-strength-bar" class="h-full password-strength"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="floating-label-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="confirm_password" id="confirm_password" 
+                                   class="floating-input" 
+                                   placeholder="Confirm Password" 
+                                   autocomplete="new-password"
+                                   required>
+                            <label for="confirm_password" class="floating-label">Confirm Password</label>
+                            <div id="confirm_password_error" class="error-message hidden">
+                                <i class="fas fa-exclamation-circle error-icon"></i>
+                                <span>Passwords do not match</span>
+                            </div>
+                            <div id="confirm_password_success" class="success-message hidden">
+                                <i class="fas fa-check-circle success-icon"></i>
+                                <span>Passwords match</span>
+                            </div>
+                        </div>
+
+                        <!-- Account Type -->
+                        <div class="mb-6">
+                            <label class="block text-teal-800 font-medium mb-3">Account Type <span class="text-gray-500 text-sm">(Select one)</span></label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div class="account-type-card rounded-xl p-4 text-center" data-value="hospital">
+                                    <i class="fas fa-hospital text-2xl text-teal-600 mb-2"></i>
+                                    <p class="font-medium text-teal-800">Hospital</p>
+                                </div>
+                                <div class="account-type-card rounded-xl p-4 text-center" data-value="lab">
+                                    <i class="fas fa-flask text-2xl text-teal-600 mb-2"></i>
+                                    <p class="font-medium text-teal-800">Lab</p>
+                                </div>
+                                <div class="account-type-card rounded-xl p-4 text-center" data-value="research">
+                                    <i class="fas fa-microscope text-2xl text-teal-600 mb-2"></i>
+                                    <p class="font-medium text-teal-800">Research</p>
+                                </div>
+                                <div class="account-type-card rounded-xl p-4 text-center" data-value="supplier">
+                                    <i class="fas fa-boxes text-2xl text-teal-600 mb-2"></i>
+                                    <p class="font-medium text-teal-800">Supplier</p>
+                                </div>
+                                <div class="account-type-card rounded-xl p-4 text-center" data-value="professional">
+                                    <i class="fas fa-user-md text-2xl text-teal-600 mb-2"></i>
+                                    <p class="font-medium text-teal-800">Professional</p>
+                                </div>
+                                <div class="account-type-card rounded-xl p-4 text-center" data-value="student">
+                                    <i class="fas fa-graduation-cap text-2xl text-teal-600 mb-2"></i>
+                                    <p class="font-medium text-teal-800">Student</p>
+                                </div>
+                            </div>
+                            <input type="hidden" name="account_type" id="account_type" value="" required>
+                            <div id="account_type_error" class="error-message mt-2 hidden">
+                                <i class="fas fa-exclamation-circle error-icon"></i>
+                                <span>Please select an account type</span>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="flex items-start space-x-3 mb-2">
+                            <input type="checkbox" name="terms" id="terms" class="terms-checkbox mt-1">
+                            <label for="terms" class="text-gray-700 text-sm">
+                                I agree to the <a href="/terms" class="text-teal-600 hover:text-teal-800 font-medium">Terms of Service</a> and <a href="/privacy" class="text-teal-600 hover:text-teal-800 font-medium">Privacy Policy</a>
+                            </label>
+                        </div>
+                        <div id="terms_error" class="error-message hidden">
+                            <i class="fas fa-exclamation-circle error-icon"></i>
+                            <span>You must agree to the terms and conditions</span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-2">
+                            <button type="submit" id="submitButton" class="btn-register w-full py-4 text-white font-bold rounded-xl shadow-lg" disabled>
+                                Create Account <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Demo info note -->
+                        <div class="mt-4 p-4 bg-teal-50 rounded-lg border border-teal-100">
+                            <p class="text-sm text-teal-800 flex items-start">
+                                <i class="fas fa-info-circle mt-0.5 mr-2"></i>
+                                <span>All fields are required. Your information is secure and will be used in accordance with our privacy policy.</span>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-teal-700 to-teal-900 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="bg-teal-500 rounded-xl p-2">
+                            <i class="fas fa-heartbeat text-xl"></i>
+                        </div>
+                        <span class="font-bold text-2xl">Steryl</span>
+                    </div>
+                    <p class="text-teal-200 text-sm">Advanced healthcare solutions for professionals</p>
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="#" class="text-teal-200 hover:text-white">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-teal-200 hover:text-white">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-teal-200 hover:text-white">
+                        <i class="fab fa-facebook text-xl"></i>
+                    </a>
+                    <a href="#" class="text-teal-200 hover:text-white">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="border-t border-teal-600 mt-6 pt-6 text-center text-teal-300 text-sm">
+                <p>&copy; 2026 Steryl Health Ltd. All rights reserved. | <a href="/privacy" class="hover:text-white">Privacy Policy</a> | <a href="/terms" class="hover:text-white">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // All countries of the world
+        const countries = [
+            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", 
+            "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", 
+            "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", 
+            "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", 
+            "Chad", "Chile", "China", "Colombia", "Comoros", "Congo, Democratic Republic of the", "Congo, Republic of the", 
+            "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", 
+            "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", 
+            "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", 
+            "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", 
+            "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", 
+            "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", 
+            "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", 
+            "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", 
+            "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", 
+            "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", 
+            "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", 
+            "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", 
+            "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", 
+            "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", 
+            "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", 
+            "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", 
+            "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", 
+            "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", 
+            "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate country select dropdown
+            const countrySelect = document.getElementById('country');
+            countries.sort().forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countrySelect.appendChild(option);
+            });
+            
+            // Initialize form validation
+            initFormValidation();
+        });
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                const icon = this.querySelector('i');
+                if (mobileMenu.classList.contains('hidden')) {
+                    icon.className = 'fas fa-bars text-xl';
+                } else {
+                    icon.className = 'fas fa-times text-xl';
+                }
+            });
+        }
+
+        // Initialize form validation
+        function initFormValidation() {
+            const form = document.getElementById('registrationForm');
+            const submitButton = document.getElementById('submitButton');
+            const flashContainer = document.getElementById('flash-messages');
+            
+            // Get all form inputs
+            const firstNameInput = document.getElementById('first_name');
+            const lastNameInput = document.getElementById('last_name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const countrySelect = document.getElementById('country');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const accountTypeInput = document.getElementById('account_type');
+            const termsCheckbox = document.getElementById('terms');
+            
+            // Store validation state
+            let formValidationState = {
+                firstName: false,
+                lastName: false,
+                email: false,
+                phone: false,
+                country: false,
+                password: false,
+                confirmPassword: false,
+                accountType: false,
+                terms: false
+            };
+            
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            if (togglePassword) {
+                togglePassword.addEventListener('click', function () {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            // Close flash messages
+            if (flashContainer) {
+                flashContainer.addEventListener('click', function(e) {
+                    if (e.target.closest('.flash-close')) {
+                        const flashMessage = e.target.closest('.flash-message');
+                        if (flashMessage) {
+                            flashMessage.style.opacity = '0';
+                            flashMessage.style.transform = 'translateX(100%)';
+                            setTimeout(() => {
+                                flashMessage.remove();
+                            }, 300);
+                        }
+                    }
+                });
+                
+                setTimeout(() => {
+                    const flashMessages = flashContainer.querySelectorAll('.flash-message');
+                    flashMessages.forEach(msg => {
+                        msg.style.opacity = '0';
+                        msg.style.transform = 'translateX(100%)';
+                        setTimeout(() => msg.remove(), 300);
+                    });
+                }, 5000);
+            }
+            
+            // Account type selection
+            const accountTypeCards = document.querySelectorAll('.account-type-card');
+            
+            accountTypeCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    accountTypeCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const value = this.getAttribute('data-value');
+                    accountTypeInput.value = value;
+                    validateAccountType();
+                    updateSubmitButton();
+                    document.getElementById('account_type_error').classList.add('hidden');
+                });
+            });
+            
+            // Password strength indicator
+            const passwordStrengthBar = document.getElementById('password-strength-bar');
+            const passwordStrengthText = document.getElementById('password-strength-text');
+            
+            passwordInput.addEventListener('input', function() {
+                const passwordValue = this.value;
+                let strength = 0;
+                let strengthText = '';
+                let strengthClass = '';
+                
+                if (passwordValue.length >= 8) strength++;
+                if (/[A-Z]/.test(passwordValue)) strength++;
+                if (/[0-9]/.test(passwordValue)) strength++;
+                if (/[^A-Za-z0-9]/.test(passwordValue)) strength++;
+                
+                switch(strength) {
+                    case 0:
+                    case 1:
+                        strengthText = 'Weak';
+                        strengthClass = 'strength-weak';
+                        break;
+                    case 2:
+                        strengthText = 'Fair';
+                        strengthClass = 'strength-fair';
+                        break;
+                    case 3:
+                        strengthText = 'Good';
+                        strengthClass = 'strength-good';
+                        break;
+                    case 4:
+                        strengthText = 'Strong';
+                        strengthClass = 'strength-strong';
+                        break;
+                }
+                
+                passwordStrengthBar.className = `h-full password-strength ${strengthClass}`;
+                passwordStrengthText.textContent = strengthText;
+                passwordStrengthText.className = strength === 4 ? 'text-green-600 font-medium' : 
+                                                strength === 3 ? 'text-blue-600 font-medium' : 
+                                                strength === 2 ? 'text-yellow-600 font-medium' : 
+                                                'text-red-600 font-medium';
+                
+                validatePassword();
+                validateConfirmPassword();
+                updateSubmitButton();
+            });
+            
+            // Confirm password validation
+            confirmPasswordInput.addEventListener('input', function() {
+                validateConfirmPassword();
+                updateSubmitButton();
+            });
+            
+            // Form field validations
+            firstNameInput.addEventListener('input', function() {
+                validateFirstName();
+                updateSubmitButton();
+            });
+            
+            lastNameInput.addEventListener('input', function() {
+                validateLastName();
+                updateSubmitButton();
+            });
+            
+            emailInput.addEventListener('input', function() {
+                validateEmail();
+                updateSubmitButton();
+            });
+            
+            phoneInput.addEventListener('input', function() {
+                validatePhone();
+                updateSubmitButton();
+            });
+            
+            countrySelect.addEventListener('change', function() {
+                validateCountry();
+                updateSubmitButton();
+                // Trigger floating label update
+                if (this.value) {
+                    this.classList.add('has-value');
+                }
+            });
+            
+            termsCheckbox.addEventListener('change', function() {
+                validateTerms();
+                updateSubmitButton();
+            });
+            
+            // Validation functions
+            function validateFirstName() {
+                const value = firstNameInput.value.trim();
+                const errorElement = document.getElementById('first_name_error');
+                
+                if (value === '') {
+                    formValidationState.firstName = false;
+                    firstNameInput.classList.add('input-error');
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.firstName = true;
+                    firstNameInput.classList.remove('input-error');
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function validateLastName() {
+                const value = lastNameInput.value.trim();
+                const errorElement = document.getElementById('last_name_error');
+                
+                if (value === '') {
+                    formValidationState.lastName = false;
+                    lastNameInput.classList.add('input-error');
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.lastName = true;
+                    lastNameInput.classList.remove('input-error');
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function validateEmail() {
+                const value = emailInput.value.trim();
+                const errorElement = document.getElementById('email_error');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (value === '' || !emailRegex.test(value)) {
+                    formValidationState.email = false;
+                    emailInput.classList.add('input-error');
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.email = true;
+                    emailInput.classList.remove('input-error');
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function validatePhone() {
+                const value = phoneInput.value.trim();
+                const errorElement = document.getElementById('phone_error');
+                const phoneRegex = /^[\d\s\-\+\(\)]{7,}$/;
+                
+                if (value === '' || !phoneRegex.test(value)) {
+                    formValidationState.phone = false;
+                    phoneInput.classList.add('input-error');
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.phone = true;
+                    phoneInput.classList.remove('input-error');
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function validateCountry() {
+                const value = countrySelect.value;
+                const errorElement = document.getElementById('country_error');
+                
+                if (value === '' || value === null) {
+                    formValidationState.country = false;
+                    countrySelect.classList.add('input-error');
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.country = true;
+                    countrySelect.classList.remove('input-error');
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function validatePassword() {
+                const value = passwordInput.value;
+                const errorElement = document.getElementById('password_error');
+                
+                if (value === '' || value.length < 8) {
+                    formValidationState.password = false;
+                    passwordInput.classList.add('input-error');
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.password = true;
+                    passwordInput.classList.remove('input-error');
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function validateConfirmPassword() {
+                const value = confirmPasswordInput.value;
+                const passwordValue = passwordInput.value;
+                const errorElement = document.getElementById('confirm_password_error');
+                const successElement = document.getElementById('confirm_password_success');
+                
+                if (value === '') {
+                    formValidationState.confirmPassword = false;
+                    confirmPasswordInput.classList.remove('input-success');
+                    confirmPasswordInput.classList.add('input-error');
+                    errorElement.classList.add('hidden');
+                    successElement.classList.add('hidden');
+                    return false;
+                } else if (value !== passwordValue) {
+                    formValidationState.confirmPassword = false;
+                    confirmPasswordInput.classList.remove('input-success');
+                    confirmPasswordInput.classList.add('input-error');
+                    errorElement.classList.remove('hidden');
+                    successElement.classList.add('hidden');
+                    return false;
+                } else {
+                    formValidationState.confirmPassword = true;
+                    confirmPasswordInput.classList.remove('input-error');
+                    confirmPasswordInput.classList.add('input-success');
+                    errorElement.classList.add('hidden');
+                    successElement.classList.remove('hidden');
+                    return true;
+                }
+            }
+            
+            function validateAccountType() {
+                const value = accountTypeInput.value;
+                const errorElement = document.getElementById('account_type_error');
+                
+                if (value === '' || value === null) {
+                    formValidationState.accountType = false;
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.accountType = true;
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function validateTerms() {
+                const isChecked = termsCheckbox.checked;
+                const errorElement = document.getElementById('terms_error');
+                
+                if (!isChecked) {
+                    formValidationState.terms = false;
+                    errorElement.classList.remove('hidden');
+                    return false;
+                } else {
+                    formValidationState.terms = true;
+                    errorElement.classList.add('hidden');
+                    return true;
+                }
+            }
+            
+            function updateSubmitButton() {
+                const isFormValid = Object.values(formValidationState).every(value => value === true);
+                submitButton.disabled = !isFormValid;
+            }
+            
+            // Form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const validations = [
+                    validateFirstName(),
+                    validateLastName(),
+                    validateEmail(),
+                    validatePhone(),
+                    validateCountry(),
+                    validatePassword(),
+                    validateConfirmPassword(),
+                    validateAccountType(),
+                    validateTerms()
+                ];
+                
+                const isFormValid = validations.every(result => result === true);
+                
+                if (!isFormValid) {
+                    const firstError = document.querySelector('.error-message:not(.hidden)');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                }
+                
+                const formData = {
+                    first_name: firstNameInput.value.trim(),
+                    last_name: lastNameInput.value.trim(),
+                    email: emailInput.value.trim().toLowerCase(),
+                    password: passwordInput.value,
+                    confirm_password: confirmPasswordInput.value,
+                    phone: phoneInput.value.trim(),
+                    country: countrySelect.value,
+                    account_type: accountTypeInput.value,
+                    terms: termsCheckbox.checked
+                };
+                
+                const originalText = submitButton.innerHTML;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating Account...';
+                submitButton.disabled = true;
+                
+                try {
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        showSuccessMessage(data.message || 'Account created successfully!');
+                        setTimeout(() => {
+                            if (data.meta && data.meta.redirect) {
+                                window.location.href = data.meta.redirect;
+                            } else {
+                                window.location.href = '/';
+                            }
+                        }, 1500);
+                    } else {
+                        if (data.errors && Array.isArray(data.errors)) {
+                            data.errors.forEach(error => showErrorMessage(error));
+                        } else {
+                            showErrorMessage(data.message || 'An error occurred during registration. Please try again.');
+                        }
+                        submitButton.innerHTML = originalText;
+                        submitButton.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    showErrorMessage('Network error. Please check your connection and try again.');
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }
+            });
+            
+            function showSuccessMessage(message) {
+                const flashDiv = document.createElement('div');
+                flashDiv.className = 'flash-message flash-success';
+                flashDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span>${message}</span>
+                        </div>
+                        <button class="flash-close ml-4 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                if (flashContainer) {
+                    flashContainer.appendChild(flashDiv);
+                    setTimeout(() => {
+                        flashDiv.style.opacity = '0';
+                        flashDiv.style.transform = 'translateX(100%)';
+                        setTimeout(() => flashDiv.remove(), 300);
+                    }, 5000);
+                } else {
+                    alert(message);
+                }
+            }
+            
+            function showErrorMessage(message) {
+                const flashDiv = document.createElement('div');
+                flashDiv.className = 'flash-message flash-danger';
+                flashDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span>${message}</span>
+                        </div>
+                        <button class="flash-close ml-4 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                if (flashContainer) {
+                    flashContainer.appendChild(flashDiv);
+                    setTimeout(() => {
+                        flashDiv.style.opacity = '0';
+                        flashDiv.style.transform = 'translateX(100%)';
+                        setTimeout(() => flashDiv.remove(), 300);
+                    }, 5000);
+                } else {
+                    alert(message);
+                }
+            }
+            
+            updateSubmitButton();
+        }
+    </script>
+</body>
+</html>
