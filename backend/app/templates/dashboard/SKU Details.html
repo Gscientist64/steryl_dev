@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SKU Details &amp; Batch History - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#14ebd9",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<header class="sticky top-0 z-10 flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4 border-b border-primary/10 justify-between">
+<div class="flex items-center gap-3">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 items-center justify-center rounded-full bg-primary/10" role="button">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight">SKU Details</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center rounded-full size-10 bg-primary/10 text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+</button>
+<button class="flex items-center justify-center rounded-full size-10 bg-transparent text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<main class="flex-1 pb-24">
+<div class="flex p-4 @container">
+<div class="flex w-full flex-col gap-4">
+<div class="flex gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl min-h-24 w-24 bg-slate-200 dark:bg-slate-800" data-alt="Box of blue nitrile medical gloves" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD2pwLREppMvsCdr80TVotO_3BIQVmi_0tfMV0qrFso4c-Qtgzji0z3BkIvSklGDOaN4CodLm6rXgqGLtKgiqMAaV348vgilKgib24A5bRPhYIzvbMenTltORV6Jik4IXAA1P6EE3pIJ3XHLTzl4RR_znv0FvQEmhc0Jvdw7aDlWJ7JrXI7Igr98BEQxZdCBlCcNM7w04S_ZZiIW-mW0Fbnvph9JWojcOWd9zJKuUmEBMFGKptCZGLW47SLyk3zcUqRdQxcPPT7Rzw");'></div>
+<div class="flex flex-col justify-center">
+<h1 class="text-xl font-bold leading-tight">Nitrile Gloves, Size M</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Personal Protective Equipment</p>
+<p class="text-primary text-xs font-bold mt-1 uppercase tracking-wider">SKU: STY-GLV-002</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-3 px-4">
+<div class="flex flex-1 flex-col gap-1 rounded-xl p-4 border border-primary/20 bg-white dark:bg-slate-900 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Stock</p>
+<p class="text-2xl font-bold leading-tight">450 units</p>
+<div class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+12% this month</span>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-1 rounded-xl p-4 border border-primary/20 bg-white dark:bg-slate-900 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Stock Health</p>
+<p class="text-2xl font-bold leading-tight text-primary">Optimal</p>
+<div class="flex items-center gap-1 text-primary text-xs font-bold">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span>No risk detected</span>
+</div>
+</div>
+</div>
+<section class="mt-6">
+<div class="px-4 mb-3 flex items-center justify-between">
+<h2 class="text-lg font-bold leading-tight">Batch History</h2>
+<button class="text-primary text-sm font-bold">Filter</button>
+</div>
+<div class="flex flex-col gap-3 px-4">
+<div class="rounded-xl border border-primary/10 bg-white dark:bg-slate-900 overflow-hidden">
+<div class="p-4 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold">Batch #B2405-01</span>
+<span class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary uppercase">
+<span class="material-symbols-outlined text-[12px]">verified</span> QR Verified
+                                        </span>
+</div>
+<span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">MFG: 12 Jan 2024</span>
+</div>
+<div class="text-right">
+<span class="text-lg font-bold">200 units</span>
+</div>
+</div>
+<div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Expiry Date</span>
+<span class="text-sm font-bold text-rose-500">12 Jan 2026</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="rounded-xl border border-primary/10 bg-white dark:bg-slate-900 overflow-hidden opacity-80">
+<div class="p-4 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold">Batch #B2311-44</span>
+<span class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary uppercase">
+<span class="material-symbols-outlined text-[12px]">verified</span> QR Verified
+                                        </span>
+</div>
+<span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">MFG: 05 Nov 2023</span>
+</div>
+<div class="text-right">
+<span class="text-lg font-bold">250 units</span>
+</div>
+</div>
+<div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Expiry Date</span>
+<span class="text-sm font-bold text-slate-700 dark:text-slate-300">05 Nov 2025</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="mt-8">
+<div class="px-4 mb-3">
+<h2 class="text-lg font-bold leading-tight">Recent Activity</h2>
+</div>
+<div class="flex flex-col bg-white dark:bg-slate-900 border-y border-primary/10">
+<div class="flex items-start gap-4 p-4 border-b border-slate-100 dark:border-slate-800">
+<div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-lg">move_down</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-semibold">Stock Inbound</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">200 units added to Batch #B2405-01</p>
+<p class="text-[10px] text-slate-400 mt-1 uppercase font-bold">Today, 09:45 AM • Nurse A. Mensah</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 border-b border-slate-100 dark:border-slate-800">
+<div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+<span class="material-symbols-outlined text-lg">sync_alt</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-semibold">Internal Transfer</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">50 units moved to ER Unit</p>
+<p class="text-[10px] text-slate-400 mt-1 uppercase font-bold">Yesterday, 02:20 PM • Dr. Okafor</p>
+</div>
+</div>
+<div class="flex items-center justify-center p-3">
+<button class="text-xs font-bold text-primary uppercase tracking-widest">View Full Audit Log</button>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 z-20 flex gap-2 border-t border-primary/10 bg-background-light dark:bg-background-dark px-4 pb-6 pt-2 ios-safe-area">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-900 dark:text-slate-100" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Inventory</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Procure</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Analytics</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Settings</p>
+</a>
+</nav>
+</div>
+<style>
+        .ios-safe-area {
+            padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+        }
+    </style>
+</body></html>

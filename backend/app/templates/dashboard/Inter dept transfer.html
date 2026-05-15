@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inter-Dept Transfer - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13daec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102022",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+        }
+</style>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: #f6f8f8;
+            color: #1e293b;
+            font-family: Inter, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+        .dark body {
+            background-color: #102022;
+            color: #f1f5f9;
+        }
+</style>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgb(226, 232, 240);
+            border-radius: 9999px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgb(30, 41, 59);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display">
+<div class="flex h-screen w-full overflow-hidden">
+<aside class="hidden lg:flex w-[400px] flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-8 shrink-0">
+<div class="flex items-center gap-2 text-slate-500 mb-8 cursor-pointer hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">arrow_back</span>
+<span class="font-semibold text-sm">Back to Inventory</span>
+</div>
+<div class="sticky top-8">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl w-full mb-6 shadow-md border border-slate-100 dark:border-slate-800" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCOC40xOrGa0iy9ZKBDZW-9EmldiG2p24MSTGvx2_GRoEI2_JC5t0zSjMW7X1spu84kL05H3VIbHCueEN1PPYn3db3_ud8ZreYWFV1RHLfqMAoUhSqn8yUoJhElqjiWLU4fQivnDbzR9XdjBNHVO5tmAjc_lGhsk0Z4R8mp8uiH0J8GUUCmqpiRDW64djQDuxMzEmk99CVgC95cP-Yqsjb82TnqX3ad8m7VOnUGmIEFA2GXY6XRKCrzQHhOJuzySDlsuMwCB2Rs58w");'></div>
+<div class="space-y-4">
+<div>
+<span class="text-xs font-bold text-primary uppercase tracking-widest block mb-1">Product Details</span>
+<h2 class="text-3xl font-bold leading-tight">Latex Gloves L</h2>
+</div>
+<div class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500">inventory_2</span>
+</div>
+<div>
+<p class="text-xs text-slate-400 font-bold uppercase tracking-tighter">SKU Code</p>
+<p class="font-semibold">ST-LG-001</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">database</span>
+</div>
+<div>
+<p class="text-xs text-slate-400 font-bold uppercase tracking-tighter">Current Stock</p>
+<p class="font-bold text-lg text-primary">450 units</p>
+</div>
+</div>
+</div>
+<div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<p class="text-xs text-slate-500 leading-relaxed italic">
+                        "Nitrile medical grade gloves, powder-free, blue. Standard size Large. 100 per box."
+                    </p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark overflow-y-auto custom-scrollbar">
+<header class="flex items-center justify-between px-6 py-6 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-20 lg:bg-transparent lg:border-none">
+<div class="flex items-center gap-4">
+<button class="lg:hidden text-slate-900 dark:text-slate-100 flex size-10 items-center justify-center rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</button>
+<h1 class="text-2xl font-bold tracking-tight">Inter-Department Stock Transfer</h1>
+</div>
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm font-medium hidden md:block">View History</span>
+</div>
+</header>
+<div class="lg:hidden p-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<div class="flex gap-4 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-20 shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCOC40xOrGa0iy9ZKBDZW-9EmldiG2p24MSTGvx2_GRoEI2_JC5t0zSjMW7X1spu84kL05H3VIbHCueEN1PPYn3db3_ud8ZreYWFV1RHLfqMAoUhSqn8yUoJhElqjiWLU4fQivnDbzR9XdjBNHVO5tmAjc_lGhsk0Z4R8mp8uiH0J8GUUCmqpiRDW64djQDuxMzEmk99CVgC95cP-Yqsjb82TnqX3ad8m7VOnUGmIEFA2GXY6XRKCrzQHhOJuzySDlsuMwCB2Rs58w");'></div>
+<div>
+<h2 class="text-lg font-bold">Latex Gloves L</h2>
+<p class="text-sm text-slate-500">SKU: ST-LG-001 • <span class="text-primary font-bold">450 Units</span></p>
+</div>
+</div>
+</div>
+<div class="flex-1 w-full max-w-4xl mx-auto p-6 lg:p-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6 md:col-span-2">
+<div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+<span class="material-symbols-outlined text-primary">swap_horiz</span>
+<h3 class="text-lg font-bold">Transfer Logistics</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-bold px-1">From Department</label>
+<div class="flex items-center gap-3 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 h-16 px-5 transition-all">
+<span class="material-symbols-outlined text-slate-400">home_health</span>
+<div class="flex flex-col">
+<span class="text-xs text-slate-400 font-bold uppercase tracking-tighter">Current Source</span>
+<span class="text-slate-500 dark:text-slate-400 font-bold">Main Pharmacy (Central)</span>
+</div>
+<span class="ml-auto material-symbols-outlined text-slate-300 dark:text-slate-600">lock</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-bold px-1">To Department</label>
+<div class="relative">
+<select class="appearance-none flex w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-16 pl-12 pr-12 text-slate-900 dark:text-slate-100 font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none">
+<option disabled="" selected="" value="">Select destination department...</option>
+<option value="er">Emergency Room (ER)</option>
+<option value="surgery">Surgery Wing A</option>
+<option value="icu">Intensive Care Unit (ICU)</option>
+<option value="pediatrics">Pediatrics Department</option>
+<option value="lab">Diagnostic Lab</option>
+</select>
+<div class="absolute left-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">
+<span class="material-symbols-outlined">move_up</span>
+</div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+<span class="material-symbols-outlined">search</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center px-1">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-bold">Quantity to Transfer</label>
+<span class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-tighter">Max Available: 450</span>
+</div>
+<div class="relative">
+<input class="flex w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-16 pl-12 pr-4 text-2xl font-bold text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none placeholder:text-slate-200 dark:placeholder:text-slate-800" placeholder="0" type="number"/>
+<div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+<span class="material-symbols-outlined">numbers</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-slate-700 dark:text-slate-300 text-sm font-bold px-1">Reason for Transfer <span class="text-rose-500">*</span></label>
+<div class="relative">
+<textarea class="flex w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 pt-10 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 resize-none min-h-[64px]" placeholder="Explain why stock is being moved..." rows="1"></textarea>
+<div class="absolute left-5 top-3 text-slate-400 pointer-events-none">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+</div>
+</div>
+</div>
+<div class="md:col-span-2 pt-6">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
+<div class="flex flex-col md:flex-row items-center gap-6">
+<div class="flex-1">
+<p class="text-sm font-medium text-slate-600 dark:text-slate-400">Please review all transfer details before proceeding. This action will update inventory counts across both departments immediately.</p>
+</div>
+<div class="w-full md:w-auto shrink-0">
+<button class="w-full md:w-64 bg-primary hover:bg-primary/90 text-slate-900 font-bold py-5 px-8 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex flex-col items-center justify-center">
+<span class="text-lg">Complete Transfer</span>
+<span class="text-[10px] uppercase tracking-widest opacity-70 font-bold mt-0.5">Updates immediately offline</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="mt-12 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-8 pb-12">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">offline_pin</span>
+<span class="text-[11px] font-bold tracking-widest uppercase">STERYL HEALTH OS v2.4 - PROTECTED SYNC</span>
+</div>
+<div class="flex gap-6 text-[11px] font-bold uppercase tracking-widest">
+<a class="hover:text-primary transition-colors" href="#">Safety Protocol</a>
+<a class="hover:text-primary transition-colors" href="#">Help Center</a>
+</div>
+</footer>
+</div>
+</main>
+</div>
+
+</body></html>

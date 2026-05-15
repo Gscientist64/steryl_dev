@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manufacturer Login - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .form-toggle button.active {
+        color: #0df2f2;
+        border-bottom-color: #0df2f2;
+    }
+    .btn-primary {
+        background-color: #0df2f2;
+        color: #0a1616;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        background-color: #0bcece;
+        transform: translateY(-2px);
+    }
+    .btn-secondary {
+        background-color: #1e293b;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+        background-color: #334155;
+        transform: translateY(-2px);
+    }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-6xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+            <!-- Left Side - Branding -->
+            <section class="px-8 py-10 lg:px-12 lg:py-14 bg-teal-50 dark:bg-gray-900">
+                <div class="max-w-xl">
+                    <div class="inline-flex items-center gap-2 rounded-full bg-teal-500/10 px-4 py-2 text-sm font-semibold text-teal-600 mb-6">
+                        <span class="material-symbols-outlined">verified_user</span>
+                        Manufacturer Portal
+                    </div>
+                    <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4">Steryl Health OS</h1>
+                    <p class="text-gray-600 dark:text-gray-300 text-lg">Secure access for authorized manufacturing partners.</p>
+                </div>
+                <div class="mt-12 space-y-4">
+                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                            <span class="material-symbols-outlined text-teal-500">shield</span>
+                            Regulatory-grade authentication
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                            <span class="material-symbols-outlined text-teal-500">receipt_long</span>
+                            Single sign-on ready
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                            <span class="material-symbols-outlined text-teal-500">verified</span>
+                            Built for manufacturer workflows
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side - Login/Signup Form -->
+            <section class="px-8 py-10 lg:px-12 lg:py-14 bg-white dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-gray-200 pb-4 dark:border-gray-700">
+                    <div>
+                        <p class="text-sm uppercase tracking-wider text-gray-400">Manufacturer Access</p>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-2">Login or Create Account</h2>
+                    </div>
+                    <div class="form-toggle flex gap-4 text-sm font-semibold">
+                        <button id="loginTab" class="active border-b-2 border-teal-500 pb-2 transition-colors text-teal-600">Login</button>
+                        <button id="signupTab" class="border-b-2 border-transparent pb-2 transition-colors text-gray-500 hover:text-gray-900">Sign Up</button>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <!-- Login Form -->
+                    <form id="loginForm" class="space-y-5">
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">Email Address</label>
+                            <input id="loginEmail" type="email" placeholder="manufacturer@company.com" 
+                                   class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">Password</label>
+                            <input id="loginPassword" type="password" placeholder="••••••••" 
+                                   class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <label class="inline-flex items-center gap-2">
+                                <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-500 focus:ring-teal-500">
+                                <span class="text-gray-500">Remember me</span>
+                            </label>
+                            <a href="#" class="font-semibold text-gray-600 hover:text-teal-600">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="w-full rounded-xl btn-primary px-5 py-3 text-sm font-semibold shadow-lg">Sign in</button>
+                    </form>
+
+                    <!-- Signup Form -->
+                    <form id="signupForm" class="hidden space-y-5">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Company Name</label>
+                                <input id="companyName" type="text" placeholder="Steryl Labs Ltd." 
+                                       class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">License Number</label>
+                                <input id="licenseNumber" type="text" placeholder="REG-2024-0001" 
+                                       class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700">Business Email</label>
+                            <input id="signupEmail" type="email" placeholder="compliance@company.com" 
+                                   class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Create Password</label>
+                                <input id="signupPassword" type="password" placeholder="••••••••" 
+                                       class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+                            </div>
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700">Confirm Password</label>
+                                <input id="confirmPassword" type="password" placeholder="••••••••" 
+                                       class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700">Contact Phone</label>
+                            <input id="signupPhone" type="tel" placeholder="+1 555 012 345" 
+                                   class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+                        </div>
+                        <button type="submit" class="w-full rounded-xl btn-secondary px-5 py-3 text-sm font-semibold shadow-lg">Create manufacturer account</button>
+                    </form>
+                </div>
+
+                <div class="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-5 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+                    <p class="font-semibold text-gray-800">Need help?</p>
+                    <p class="mt-2">Contact manufacturer support to request portal access.</p>
+                    <div class="mt-3 flex items-center gap-2 text-teal-600 font-semibold">
+                        <span class="material-symbols-outlined">support_agent</span>
+                        <span>support@sterylhealth.io</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+const loginTab = document.getElementById('loginTab');
+const signupTab = document.getElementById('signupTab');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+
+function switchForm(tab) {
+    if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+        loginTab.classList.add('active', 'text-teal-600', 'border-teal-500');
+        signupTab.classList.remove('active', 'text-teal-600', 'border-teal-500');
+    } else {
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        signupTab.classList.add('active', 'text-teal-600', 'border-teal-500');
+        loginTab.classList.remove('active', 'text-teal-600', 'border-teal-500');
+    }
+}
+
+loginTab.addEventListener('click', () => switchForm('login'));
+signupTab.addEventListener('click', () => switchForm('signup'));
+
+// Login submission - FIXED URL
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = 'Signing in...';
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/manufacturer/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = data.meta.redirect;
+        } else {
+            alert(data.message);
+            submitBtn.innerHTML = 'Sign in';
+            submitBtn.disabled = false;
+        }
+    } catch (error) {
+        alert('Login failed. Please try again.');
+        submitBtn.innerHTML = 'Sign in';
+        submitBtn.disabled = false;
+    }
+});
+
+// Signup submission
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (document.getElementById('signupPassword').value !== document.getElementById('confirmPassword').value) {
+        alert('Passwords do not match!');
+        return;
+    }
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = 'Creating account...';
+    submitBtn.disabled = true;
+    
+    const formData = {
+        company_name: document.getElementById('companyName').value,
+        license_number: document.getElementById('licenseNumber').value,
+        email: document.getElementById('signupEmail').value,
+        password: document.getElementById('signupPassword').value,
+        confirm_password: document.getElementById('confirmPassword').value,
+        phone: document.getElementById('signupPhone').value
+    };
+    
+    try {
+        const response = await fetch('/manufacturer/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Registration successful! Redirecting to dashboard...');
+            window.location.href = data.meta.redirect;
+        } else {
+            alert('Error: ' + data.message);
+            submitBtn.innerHTML = 'Create manufacturer account';
+            submitBtn.disabled = false;
+        }
+    } catch (error) {
+        alert('Registration failed. Please try again.');
+        submitBtn.innerHTML = 'Create manufacturer account';
+        submitBtn.disabled = false;
+    }
+});
+</script>
+</body>
+</html>

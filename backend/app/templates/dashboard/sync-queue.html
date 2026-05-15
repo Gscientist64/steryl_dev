@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sync Queue Manager - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<!-- Top Navigation -->
+<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="h-8 w-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
+                    </div>
+                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-teal-500">Health</span></span>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:space-x-8">
+                    <a href="{{ url_for('main.dashboard') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
+                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
+                    <a href="{{ url_for('main.budget') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Budget</a>
+                    <a href="{{ url_for('main.sync_queue') }}" class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 px-3 py-2 text-sm font-medium">Sync Queue</a>
+                    <a href="{{ url_for('main.shipment_intake') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Shipments</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="connection-status" class="hidden md:flex items-center space-x-2 px-3 py-1 bg-green-50 dark:bg-green-900/20 rounded-full">
+                    <div class="h-2 w-2 bg-green-500 rounded-full pulse"></div>
+                    <span class="text-xs font-medium text-green-700 dark:text-green-400">Online</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
+                        <span class="text-sm font-bold text-teal-600 dark:text-teal-300">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Sync Queue Manager</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Manage and monitor offline synchronization queue</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Queued</p>
+                    <p id="total-queued" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">0</p>
+                </div>
+                <div class="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">list_alt</span>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+                    <p id="pending-items" class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">0</p>
+                </div>
+                <div class="h-12 w-12 bg-amber-100 dark:bg-amber-900 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">pending</span>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Failed</p>
+                    <p id="sync-errors" class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">0</p>
+                </div>
+                <div class="h-12 w-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 dark:text-red-400">error_outline</span>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Storage Usage</p>
+                    <p id="storage-usage" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">0 MB</p>
+                </div>
+                <div class="h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">database</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div class="flex flex-wrap gap-3">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+                    <input id="search-input" type="text" placeholder="Search sync items..." 
+                           class="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+                <button id="filter-failed" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">filter_list</span>
+                    Show Failed Only
+                </button>
+            </div>
+            <button id="sync-all-btn" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2 font-medium">
+                <span class="material-symbols-outlined text-lg">sync</span>
+                Sync All Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Sync Queue Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <tr class="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-4 w-12">
+                            <input id="select-all" type="checkbox" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                        </th>
+                        <th class="px-6 py-4">Action Type</th>
+                        <th class="px-6 py-4">Description</th>
+                        <th class="px-6 py-4">Timestamp</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sync-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr><td colspan="6" class="text-center py-8 text-gray-500">Loading sync queue...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let syncItems = [];
+let filterFailedOnly = false;
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+
+function getActionIcon(actionType) {
+    const icons = {
+        'stock_adjustment': 'inventory_2',
+        'order_submission': 'shopping_cart',
+        'batch_scan': 'qr_code_scanner',
+        'returns_processing': 'assignment_return'
+    };
+    return icons[actionType] || 'sync';
+}
+
+function getStatusBadge(status) {
+    if (status === 'pending') {
+        return '<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Pending</span>';
+    } else if (status === 'failed') {
+        return '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Failed</span>';
+    } else {
+        return '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Completed</span>';
+    }
+}
+
+function renderSyncTable() {
+    const tbody = document.getElementById('sync-table-body');
+    let filtered = syncItems;
+    
+    if (filterFailedOnly) {
+        filtered = filtered.filter(item => item.status === 'failed');
+    }
+    
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    if (searchTerm) {
+        filtered = filtered.filter(item => 
+            item.description.toLowerCase().includes(searchTerm) ||
+            item.action_type.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No sync items found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filtered.map(item => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${item.status === 'failed' ? 'bg-red-50/30 dark:bg-red-900/10' : ''}">
+            <td class="px-6 py-4">
+                <input class="sync-checkbox rounded border-gray-300 text-teal-600 focus:ring-teal-500" type="checkbox" data-id="${item.id}">
+            </td>
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 bg-amber-100 dark:bg-amber-900/20 rounded flex items-center justify-center">
+                        <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-lg">${getActionIcon(item.action_type)}</span>
+                    </div>
+                    <span class="font-semibold text-sm text-gray-900 dark:text-white">${item.action_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                </div>
+            </td>
+            <td class="px-6 py-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">${item.description}</p>
+                ${item.error_message ? `<p class="text-xs text-red-500 mt-1">Error: ${item.error_message}</p>` : ''}
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">${formatDate(item.created_at)}</td>
+            <td class="px-6 py-4">${getStatusBadge(item.status)}</td>
+            <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                    ${item.status === 'failed' ? `<button onclick="retryItem(${item.id})" class="px-3 py-1 text-sm text-teal-600 hover:text-teal-700 font-medium">Retry</button>` : ''}
+                    <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-700">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function loadSyncQueue() {
+    fetch('/api/sync-queue')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                syncItems = data.data;
+                const total = syncItems.length;
+                const errors = syncItems.filter(i => i.status === 'failed').length;
+                const pending = syncItems.filter(i => i.status === 'pending').length;
+                
+                document.getElementById('total-queued').textContent = total;
+                document.getElementById('sync-errors').textContent = errors;
+                document.getElementById('pending-items').textContent = pending;
+                document.getElementById('storage-usage').textContent = `${Math.ceil(total * 0.2)} MB`;
+                
+                renderSyncTable();
+            }
+        });
+}
+
+function retryItem(itemId) {
+    fetch(`/api/sync-queue/${itemId}/retry`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) loadSyncQueue();
+        });
+}
+
+function deleteItem(itemId) {
+    if (confirm('Delete this sync item?')) {
+        fetch(`/api/sync-queue/${itemId}/delete`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) loadSyncQueue();
+            });
+    }
+}
+
+document.getElementById('sync-all-btn').addEventListener('click', () => {
+    fetch('/api/sync-queue/retry-all', { method: 'POST' })
+        .then(response => response.json())
+        .then(() => loadSyncQueue());
+});
+
+document.getElementById('filter-failed').addEventListener('click', (e) => {
+    filterFailedOnly = !filterFailedOnly;
+    e.target.classList.toggle('bg-teal-100', filterFailedOnly);
+    renderSyncTable();
+});
+
+document.getElementById('search-input').addEventListener('input', () => renderSyncTable());
+
+loadSyncQueue();
+setInterval(loadSyncQueue, 30000);
+</script>
+</body>
+</html>

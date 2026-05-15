@@ -1,0 +1,25 @@
+Start with the landing page – /
+
+Show registration – /register (create a new test account)
+
+Login as regular user – use samuel@steryl.com
+
+Dashboard – /dashboard (stats, alerts, activity)
+
+Order Cart – /order-cart (add items, submit order)
+
+Approvals – /approvals (approve/reject the order you just made)
+
+Budget – /budget (visual charts)
+
+Settings – /settings (change theme, request upgrade)
+
+Manufacturer Login – /manufacturer/login (use manufacturer credentials)
+
+Manufacturer SKUs – /manufacturer/skus (view product list)
+
+Batch Registration – /manufacturer/batch/register (create new batch)
+
+Batch Dashboard – /manufacturer/batches (see newly created batch)
+
+Print Queue – /manufacturer/print-queue (download QR label)

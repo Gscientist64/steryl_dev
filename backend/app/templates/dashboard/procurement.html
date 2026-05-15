@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Procurement Dashboard - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    .slide-in { animation: slideIn 0.5s ease-out; }
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #ef4444;
+        color: white;
+        border-radius: 9999px;
+        font-size: 10px;
+        padding: 2px 6px;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<!-- Top Navigation -->
+<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="h-8 w-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
+                    </div>
+                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-teal-500">Health</span></span>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:space-x-8">
+                    <a href="{{ url_for('main.dashboard') }}" class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 px-3 py-2 text-sm font-medium">Dashboard</a>
+                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
+                    <a href="{{ url_for('main.approvals') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Approvals</a>
+                    <a href="{{ url_for('main.budget') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Budget</a>
+                    <a href="{{ url_for('main.shipment_intake') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Shipments</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button id="notifications-btn" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span id="notification-badge" class="notification-badge hidden">0</span>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
+                        <span class="text-sm font-bold text-teal-600 dark:text-teal-300">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">{{ current_user.first_name }} {{ current_user.last_name }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome back, {{ current_user.first_name }}!</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Here's what's happening with your procurement today.</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Inventory Health</p>
+                    <p id="inventory-health" class="text-3xl font-bold text-gray-900 dark:text-white mt-1">--%</p>
+                </div>
+                <div class="h-12 w-12 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-teal-600 dark:text-teal-400">health_metrics</span>
+                </div>
+            </div>
+            <div class="mt-2 flex items-center gap-1">
+                <span id="health-trend-icon" class="material-symbols-outlined text-green-500 text-sm">trending_up</span>
+                <span id="health-trend" class="text-xs text-green-500 font-medium">--</span>
+            </div>
+        </div>
+
+        <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Pending Approvals</p>
+                    <p id="pending-approvals" class="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-1">--</p>
+                </div>
+                <div class="h-12 w-12 bg-amber-100 dark:bg-amber-900 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">pending_actions</span>
+                </div>
+            </div>
+            <p id="approvals-status" class="text-xs text-gray-500 mt-2">Loading...</p>
+        </div>
+
+        <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Monthly Spend</p>
+                    <p id="monthly-spend" class="text-3xl font-bold text-gray-900 dark:text-white mt-1">$--</p>
+                </div>
+                <div class="h-12 w-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">payments</span>
+                </div>
+            </div>
+            <div class="mt-2 flex items-center gap-1">
+                <span id="spend-trend-icon" class="material-symbols-outlined text-green-500 text-sm">trending_up</span>
+                <span id="spend-trend" class="text-xs text-green-500 font-medium">--</span>
+            </div>
+        </div>
+
+        <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Active Orders</p>
+                    <p id="active-orders" class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">--</p>
+                </div>
+                <div class="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">shopping_cart</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Stock Alerts Section -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Critical Stock Alerts</h2>
+                    <button onclick="location.href='{{ url_for('main.order_cart') }}'" class="text-teal-600 dark:text-teal-400 text-sm font-medium hover:underline">View All</button>
+                </div>
+                <div id="stock-alerts-container" class="space-y-3">
+                    <div class="text-center py-8 text-gray-500">Loading stock alerts...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Quick Actions</h2>
+                <div class="space-y-3">
+                    <button onclick="location.href='{{ url_for('main.order_cart') }}'" class="w-full flex items-center justify-between p-4 bg-teal-50 dark:bg-teal-900/20 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/30 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-teal-600">add_shopping_cart</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Create New Order</span>
+                        </div>
+                        <span class="material-symbols-outlined text-gray-400">arrow_forward</span>
+                    </button>
+                    <button onclick="location.href='{{ url_for('main.qr_scanner') }}'" class="w-full flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-purple-600">qr_code_scanner</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Scan QR Code</span>
+                        </div>
+                        <span class="material-symbols-outlined text-gray-400">arrow_forward</span>
+                    </button>
+                    <button onclick="location.href='{{ url_for('main.shipment_intake') }}'" class="w-full flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-blue-600">local_shipping</span>
+                            <span class="font-medium text-gray-900 dark:text-white">Receive Shipment</span>
+                        </div>
+                        <span class="material-symbols-outlined text-gray-400">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recent Activity</h2>
+            <button class="text-teal-600 dark:text-teal-400 text-sm font-medium hover:underline">View All</button>
+        </div>
+        <div id="recent-activity-container" class="space-y-3">
+            <div class="text-center py-8 text-gray-500">Loading activity...</div>
+        </div>
+    </div>
+    {% include 'dashboard/_bottom_nav.html' %}
+</div>
+
+<script>
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+    }
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / (1000 * 60));
+    
+    if (diff < 60) return `${diff} minutes ago`;
+    if (diff < 1440) return `${Math.floor(diff / 60)} hours ago`;
+    return date.toLocaleDateString();
+}
+
+// Fetch dashboard stats
+fetch('/api/dashboard-stats')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('inventory-health').textContent = data.data.inventory_health + '%';
+            document.getElementById('pending-approvals').textContent = data.data.pending_approvals;
+            document.getElementById('monthly-spend').textContent = formatCurrency(data.data.monthly_spend);
+            document.getElementById('active-orders').textContent = data.data.active_orders || 0;
+            
+            if (data.data.inventory_health_change) {
+                const trend = data.data.inventory_health_change;
+                const trendIcon = document.getElementById('health-trend-icon');
+                const trendText = document.getElementById('health-trend');
+                if (trend >= 0) {
+                    trendIcon.textContent = 'trending_up';
+                    trendIcon.className = 'material-symbols-outlined text-green-500 text-sm';
+                    trendText.textContent = `+${trend}% from last month`;
+                } else {
+                    trendIcon.textContent = 'trending_down';
+                    trendIcon.className = 'material-symbols-outlined text-red-500 text-sm';
+                    trendText.textContent = `${trend}% from last month`;
+                }
+            }
+            
+            const approvalsText = document.getElementById('approvals-status');
+            if (data.data.pending_approvals > 0) {
+                approvalsText.textContent = `${data.data.pending_approvals} orders need your attention`;
+                approvalsText.className = 'text-xs text-red-500 font-medium mt-2';
+            } else {
+                approvalsText.textContent = 'All caught up!';
+                approvalsText.className = 'text-xs text-green-500 font-medium mt-2';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching dashboard stats:', error);
+    });
+
+// Fetch stock alerts
+fetch('/api/stock-alerts')
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('stock-alerts-container');
+        if (data.success && data.data.length > 0) {
+            container.innerHTML = data.data.slice(0, 5).map(alert => {
+                const severityColor = alert.severity === 'critical' ? 'red' : 'amber';
+                const bgColor = alert.severity === 'critical' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-amber-50 dark:bg-amber-900/20';
+                return `
+                    <div class="flex items-center justify-between p-4 ${bgColor} rounded-lg">
+                        <div class="flex items-center gap-3 flex-1">
+                            <div class="h-10 w-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-${severityColor}-500">warning</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 dark:text-white">${alert.product.name}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-bold text-${severityColor}-600">${alert.current_stock} units left</span> • Min: ${alert.reorder_level}
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="location.href='{{ url_for('main.order_cart') }}?product=${alert.product.id}'" 
+                                class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+                            Reorder
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <span class="material-symbols-outlined text-4xl text-green-500 mb-2">check_circle</span>
+                    <p class="text-gray-500">No stock alerts! All inventory levels are healthy.</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching stock alerts:', error);
+        document.getElementById('stock-alerts-container').innerHTML = '<div class="text-center py-8 text-red-500">Error loading stock alerts</div>';
+    });
+
+// Fetch recent activity
+fetch('/api/recent-activity')
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('recent-activity-container');
+        if (data.success && data.data.length > 0) {
+            container.innerHTML = data.data.slice(0, 5).map(activity => {
+                const icon = activity.type === 'order' ? 'shopping_cart' : 'swap_horiz';
+                const color = activity.type === 'order' ? 'text-blue-500' : 'text-purple-500';
+                return `
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div class="h-8 w-8 rounded-full ${color.replace('text', 'bg')}/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined ${color} text-sm">${icon}</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">${activity.description}</p>
+                            <p class="text-xs text-gray-500 mt-1">${formatDate(activity.created_at)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = '<div class="text-center py-8 text-gray-500">No recent activity</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching recent activity:', error);
+    });
+</script>
+</body>
+</html>

@@ -1,11 +1,18 @@
-# STERYL_UP/app/__init__.py
+# STERYL_UP/app/__init__.py (top of the file)
+import os
+from dotenv import load_dotenv
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-import os
 from datetime import timedelta
+
+# Load environment variables from .env file - MUST BE FIRST
+load_dotenv()
+
+# Print for debugging (remove in production)
+print(f"Loading database from: {os.getenv('DATABASE_URL', 'Using default SQLite')}")
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -16,10 +23,24 @@ def create_app():
     """Application factory function"""
     app = Flask(__name__)
     
+    # Get database URL from environment
+    database_url = os.environ.get('DATABASE_URL')
+    
+    # If no DATABASE_URL, use PostgreSQL with default values
+    if not database_url:
+        database_url = 'postgresql://postgres:lamis@localhost:5432/steryl_db'
+        print(f"⚠️  No DATABASE_URL found, using default: {database_url}")
+    else:
+        print(f"✅ Using DATABASE_URL from environment: {database_url[:30]}...")  # Only show first 30 chars
+    
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'your-secret-key-change-this-in-production'
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///steryl.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_recycle': 3600,
+    }
     
     # Security configurations
     app.config['SESSION_COOKIE_SECURE'] = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
@@ -27,45 +48,12 @@ def create_app():
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     
-    # Session security
-    app.config['REMEMBER_COOKIE_SECURE'] = os.environ.get('REMEMBER_COOKIE_SECURE', 'False').lower() == 'true'
-    app.config['REMEMBER_COOKIE_HTTPONLY'] = True
-    app.config['REMEMBER_COOKIE_SAMESITE'] = 'Lax'
-    
-    # CSRF Protection (if using Flask-WTF)
-    app.config['WTF_CSRF_ENABLED'] = True
-    app.config['WTF_CSRF_SECRET_KEY'] = os.environ.get('CSRF_SECRET_KEY') or 'csrf-secret-key-change-this'
-    
-    # Logging configuration
-    app.config['LOG_LEVEL'] = os.environ.get('LOG_LEVEL', 'INFO')
-    app.config['LOG_TO_CONSOLE'] = app.debug or os.environ.get('LOG_TO_CONSOLE', 'False').lower() == 'true'
-    app.config['LOG_REQUESTS'] = True
-    app.config['LOG_RESPONSES'] = True
-    
-    # Email for error alerts (optional)
-    if not app.debug:
-        app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
-        app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 25)) if os.environ.get('MAIL_PORT') else 25
-        app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-        app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-        app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
-        app.config['MAIL_ADMINS'] = os.environ.get('MAIL_ADMINS', '').split(',') if os.environ.get('MAIL_ADMINS') else []
-    else:
-        # In development, disable email logging
-        app.config['MAIL_SERVER'] = None
-        app.config['MAIL_ADMINS'] = []
-    
-    # Rate limiting
-    app.config['ENABLE_RATE_LIMITING'] = os.environ.get('ENABLE_RATE_LIMITING', 'True').lower() == 'true'
+    # Rest of your configuration...
     
     # Enable CORS with more restrictive settings
-    cors_origins = os.environ.get('CORS_ORIGINS', '*')
-    if cors_origins != '*':
-        cors_origins = cors_origins.split(',')
-    
     CORS(app, resources={
         r"/api/*": {
-            "origins": cors_origins,
+            "origins": os.environ.get('CORS_ORIGINS', '*').split(','),
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True

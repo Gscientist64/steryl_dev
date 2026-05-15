@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Approvals - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .approval-card { transition: all 0.3s ease; }
+    .approval-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<!-- Top Navigation -->
+<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="h-8 w-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
+                    </div>
+                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-teal-500">Health</span></span>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:space-x-8">
+                    <a href="{{ url_for('main.dashboard') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
+                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
+                    <a href="{{ url_for('main.approvals') }}" class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 px-3 py-2 text-sm font-medium">Approvals</a>
+                    <a href="{{ url_for('main.budget') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Budget</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
+                        <span class="text-sm font-bold text-teal-600 dark:text-teal-300">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">{{ current_user.first_name }} {{ current_user.last_name }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Approval Queue</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Review and approve procurement requests</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+                    <p id="pending-count" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-amber-500">pending</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Approved</p>
+                    <p id="approved-count" class="text-2xl font-bold text-green-600 mt-1">0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-green-500">check_circle</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Rejected</p>
+                    <p id="rejected-count" class="text-2xl font-bold text-red-600 mt-1">0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-red-500">cancel</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Value</p>
+                    <p id="total-value" class="text-2xl font-bold text-teal-600 mt-1">₦0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-teal-500">payments</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+        <div class="flex flex-wrap gap-3">
+            <button id="filter-pending" class="filter-btn px-4 py-2 bg-teal-600 text-white rounded-lg font-medium transition-all">Pending</button>
+            <button id="filter-approved" class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all hover:bg-gray-300 dark:hover:bg-gray-600">Approved</button>
+            <button id="filter-rejected" class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all hover:bg-gray-300 dark:hover:bg-gray-600">Rejected</button>
+            <button id="filter-all" class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all hover:bg-gray-300 dark:hover:bg-gray-600">All</button>
+        </div>
+    </div>
+
+    <!-- Approvals List -->
+    <div id="approvals-container" class="space-y-4">
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
+            <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">hourglass_empty</span>
+            <p class="text-gray-500">Loading approvals...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+let allApprovals = [];
+let currentFilter = 'pending';
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-NG') + ' ' + date.toLocaleTimeString('en-NG');
+}
+
+function getPriorityBadge(priority) {
+    const badges = {
+        'urgent': '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">Urgent</span>',
+        'high': '<span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700">High</span>',
+        'normal': '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">Normal</span>',
+        'low': '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Low</span>'
+    };
+    return badges[priority] || badges['normal'];
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'pending': '<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700">Pending</span>',
+        'approved': '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Approved</span>',
+        'rejected': '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">Rejected</span>'
+    };
+    return badges[status] || badges['pending'];
+}
+
+function renderApprovals() {
+    const container = document.getElementById('approvals-container');
+    let filtered = allApprovals;
+    
+    if (currentFilter !== 'all') {
+        filtered = allApprovals.filter(a => a.order.status === currentFilter);
+    }
+    
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
+                <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">inbox</span>
+                <p class="text-gray-500">No ${currentFilter} approvals found</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = filtered.map(item => {
+        const order = item.order;
+        const isUrgent = order.priority === 'urgent';
+        const borderClass = isUrgent ? 'border-l-4 border-l-red-500' : '';
+        
+        return `
+            <div class="approval-card bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden ${borderClass}">
+                <div class="p-6">
+                    <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Order #${order.order_number}</h3>
+                                ${getPriorityBadge(order.priority)}
+                                ${getStatusBadge(order.status)}
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">${order.notes || 'No description provided'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">${formatCurrency(order.total_amount)}</p>
+                            <p class="text-xs text-gray-500">Requested: ${formatDate(order.created_at)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Requester</p>
+                            <p class="font-medium text-gray-900 dark:text-white">${order.requester_name || 'Unknown'}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Department</p>
+                            <p class="font-medium text-gray-900 dark:text-white">${order.department || 'N/A'}</p>
+                        </div>
+                    </div>
+                    
+                    ${order.items && order.items.length > 0 ? `
+                        <div class="mb-4">
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Items:</p>
+                            <div class="space-y-2">
+                                ${order.items.slice(0, 3).map(item => `
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600 dark:text-gray-400">${item.product_name || 'Product'} x ${item.quantity}</span>
+                                        <span class="font-medium">${formatCurrency(item.subtotal)}</span>
+                                    </div>
+                                `).join('')}
+                                ${order.items.length > 3 ? `<p class="text-xs text-gray-500">+${order.items.length - 3} more items</p>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${order.status === 'pending' ? `
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="processApproval(${order.id}, 'approve')" 
+                                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
+                                Approve
+                            </button>
+                            <button onclick="processApproval(${order.id}, 'reject')" 
+                                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
+                                Reject
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <span class="inline-flex items-center gap-2 text-sm">
+                                <span class="material-symbols-outlined text-gray-400 text-sm">history</span>
+                                <span class="text-gray-500">Processed on ${formatDate(order.updated_at)}</span>
+                            </span>
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function processApproval(orderId, action) {
+    if (!confirm(`Are you sure you want to ${action} this order?`)) return;
+    
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Processing...';
+    btn.disabled = true;
+    
+    fetch(`/api/approvals/${orderId}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comments: '' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            loadApprovals();
+        } else {
+            alert('Error: ' + data.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to process approval');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+
+function updateStats() {
+    const pending = allApprovals.filter(a => a.order.status === 'pending').length;
+    const approved = allApprovals.filter(a => a.order.status === 'approved').length;
+    const rejected = allApprovals.filter(a => a.order.status === 'rejected').length;
+    const totalValue = allApprovals.reduce((sum, a) => sum + (a.order.total_amount || 0), 0);
+    
+    document.getElementById('pending-count').textContent = pending;
+    document.getElementById('approved-count').textContent = approved;
+    document.getElementById('rejected-count').textContent = rejected;
+    document.getElementById('total-value').textContent = formatCurrency(totalValue);
+}
+
+function loadApprovals() {
+    fetch('/api/approvals')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                allApprovals = data.data;
+                updateStats();
+                renderApprovals();
+            } else {
+                console.error('Failed to fetch approvals:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('approvals-container').innerHTML = `
+                <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
+                    <span class="material-symbols-outlined text-4xl text-red-400 mb-2">error</span>
+                    <p class="text-red-500">Error loading approvals</p>
+                </div>
+            `;
+        });
+}
+
+// Filter buttons
+document.getElementById('filter-pending').addEventListener('click', () => {
+    currentFilter = 'pending';
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-teal-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+    });
+    document.getElementById('filter-pending').classList.add('bg-teal-600', 'text-white');
+    renderApprovals();
+});
+
+document.getElementById('filter-approved').addEventListener('click', () => {
+    currentFilter = 'approved';
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-teal-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+    });
+    document.getElementById('filter-approved').classList.add('bg-teal-600', 'text-white');
+    renderApprovals();
+});
+
+document.getElementById('filter-rejected').addEventListener('click', () => {
+    currentFilter = 'rejected';
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-teal-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+    });
+    document.getElementById('filter-rejected').classList.add('bg-teal-600', 'text-white');
+    renderApprovals();
+});
+
+document.getElementById('filter-all').addEventListener('click', () => {
+    currentFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-teal-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+    });
+    document.getElementById('filter-all').classList.add('bg-teal-600', 'text-white');
+    renderApprovals();
+});
+
+// Load approvals on page load
+loadApprovals();
+
+// Auto-refresh every 30 seconds
+setInterval(loadApprovals, 30000);
+</script>
+</body>
+</html>

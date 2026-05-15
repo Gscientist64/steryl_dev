@@ -66,9 +66,12 @@ class ErrorHandler:
                 'message': str(e),
                 'traceback': traceback.format_exc().split('\n')
             }
-            return APIResponse.server_error(
+            # Return as JSON error response
+            return APIResponse.error(
                 message="An unexpected error occurred",
-                errors=error_details
+                status_code=500,
+                errors=error_details,
+                error_code="SERVER_ERROR"
             )
         else:
             # Log the error but return generic message
@@ -138,18 +141,31 @@ class SecurityMiddleware:
         response.headers['X-XSS-Protection'] = '1; mode=block'
         
         # Content Security Policy (UPDATED to allow required resources)
-        response.headers['Content-Security-Policy'] = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; "
-            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
-            "img-src 'self' data: https://images.unsplash.com https:; "
-            "connect-src 'self' http://localhost:5003; "
-            "frame-src 'self'; "
-            "object-src 'none'; "
-            "base-uri 'self'; "
-            "form-action 'self'"
-        )
+        if current_app.debug:
+            # Relaxed CSP for development
+            response.headers['Content-Security-Policy'] = (
+                "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; "
+                "script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; "
+                "style-src * 'unsafe-inline'; "
+                "font-src * data:; "
+                "img-src * data: blob:; "
+                "connect-src *; "
+                "frame-src *;"
+            )
+        else:
+            # Strict CSP for production
+            response.headers['Content-Security-Policy'] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; "
+                "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+                "img-src 'self' data: https://images.unsplash.com https:; "
+                "connect-src 'self' http://localhost:5003; "
+                "frame-src 'self'; "
+                "object-src 'none'; "
+                "base-uri 'self'; "
+                "form-action 'self'"
+            )
         
         # Referrer Policy
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'

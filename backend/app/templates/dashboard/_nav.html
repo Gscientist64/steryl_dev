@@ -1,0 +1,30 @@
+<!-- STERYL_UP/app/templates/dashboard/_nav.html -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-background-dark/90 ios-blur border-t border-primary/10 pb-6 pt-2">
+    <div class="flex items-center justify-around px-2">
+        <a href="{{ url_for('main.dashboard') }}" 
+           class="flex flex-col items-center gap-1 p-2 transition-colors {% if request.endpoint == 'main.dashboard' %}text-primary{% else %}text-slate-400{% endif %}">
+            <span class="material-symbols-outlined text-[28px]">dashboard</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
+        </a>
+        <a href="{{ url_for('main.order_cart') }}" 
+           class="flex flex-col items-center gap-1 p-2 transition-colors {% if request.endpoint == 'main.order_cart' %}text-primary{% else %}text-slate-400{% endif %}">
+            <span class="material-symbols-outlined text-[28px]">shopping_cart</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Orders</span>
+        </a>
+        <a href="{{ url_for('main.approvals') }}" 
+           class="flex flex-col items-center gap-1 p-2 transition-colors {% if request.endpoint == 'main.approvals' %}text-primary{% else %}text-slate-400{% endif %}">
+            <span class="material-symbols-outlined text-[28px]">fact_check</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Approvals</span>
+        </a>
+        <a href="{{ url_for('main.qr_scanner') }}" 
+           class="flex flex-col items-center gap-1 p-2 transition-colors {% if request.endpoint == 'main.qr_scanner' %}text-primary{% else %}text-slate-400{% endif %}">
+            <span class="material-symbols-outlined text-[28px]">qr_code_scanner</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Scan</span>
+        </a>
+        <a href="{{ url_for('main.profile') }}" 
+           class="flex flex-col items-center gap-1 p-2 transition-colors {% if request.endpoint == 'main.profile' %}text-primary{% else %}text-slate-400{% endif %}">
+            <span class="material-symbols-outlined text-[28px]">person</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+        </a>
+    </div>
+</nav>

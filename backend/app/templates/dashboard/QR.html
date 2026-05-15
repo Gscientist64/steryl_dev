@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0d968b",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .scanner-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+        .scanner-window {
+            box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.6);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<!-- Main Container (Mobile Form Factor) -->
+<div class="relative flex h-screen w-full flex-col overflow-hidden bg-black">
+<!-- Top App Bar -->
+<div class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent">
+<button class="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="text-white text-lg font-bold leading-tight tracking-tight">Scan Medical Stock</h2>
+<button class="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md">
+<span class="material-symbols-outlined">flashlight_on</span>
+</button>
+</div>
+<!-- Simulated Camera Viewfinder -->
+<div class="relative flex-1 flex items-center justify-center overflow-hidden">
+<!-- Camera Background Placeholder -->
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-slate-800 flex items-center justify-center">
+<img alt="Medicine packaging with barcode and labels" class="w-full h-full object-cover opacity-60" data-alt="Medicine packaging with barcode and labels" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjVExPASX-8hVeqGSxQVxF2_ItEXgN37pdAJEBNWEi-V4hdpN-1LV9oeNUvA_M1oM1UpsN9WB0c4kOJ44FHSwmVVKR2oKWtQyb_83lKgcxNWQA818Or8r2ige_x57hQTdEMu_ZVI-L3t1ytnvtsjHfWgTLx1Oi9UWdNOq0zZts55J916YktPQZ71LXGIjiJm25c_Pyfv7gvPqnzRGhHHCtMvPp0MJRZWAmz99r8HysheBPWNf_bxI4T45paVCFlOhijBEvAwCzzSg"/>
+</div>
+</div>
+<!-- Scanning UI Overlay -->
+<div class="relative z-10 w-full h-full flex flex-col items-center justify-center">
+<!-- Center Square Area -->
+<div class="relative w-64 h-64 sm:w-80 sm:h-80 border-2 border-primary/50 rounded-xl overflow-hidden scanner-window">
+<!-- Corner Brackets -->
+<div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg"></div>
+<div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg"></div>
+<div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-lg"></div>
+<div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-lg"></div>
+<!-- Scanning Animation Line -->
+<div class="absolute top-0 left-0 w-full h-1 bg-primary/80 shadow-[0_0_15px_rgba(13,150,139,0.8)] opacity-60"></div>
+</div>
+<p class="mt-8 text-white/90 text-sm font-medium bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm">Align QR code within the frame</p>
+</div>
+</div>
+<!-- Bottom Controls & Entry -->
+<div class="absolute bottom-0 left-0 right-0 z-20 p-4 pb-10 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+<div class="flex flex-col gap-4 max-w-md mx-auto">
+<!-- Actions -->
+<div class="flex justify-center gap-6 mb-2">
+<button class="flex flex-col items-center gap-1 text-white/80">
+<div class="flex size-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+<span class="material-symbols-outlined">image</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider">Gallery</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-white/80">
+<div class="flex size-12 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40">
+<span class="material-symbols-outlined text-3xl">qr_code_scanner</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary">Scan</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-white/80">
+<div class="flex size-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+<span class="material-symbols-outlined">history</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider">History</span>
+</button>
+</div>
+<!-- Manual Input -->
+<div class="flex flex-col gap-2">
+<div class="flex items-stretch rounded-xl bg-white/10 backdrop-blur-md border border-white/20">
+<input class="flex-1 bg-transparent border-none text-white placeholder:text-white/40 focus:ring-0 px-4 h-12 text-sm" placeholder="Manual Batch ID Entry" type="text"/>
+<button class="px-4 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Verification Results Tray (Slide-up simulation) -->
+<div class="absolute bottom-0 left-0 right-0 z-30 flex flex-col items-stretch bg-background-light dark:bg-background-dark rounded-t-xl shadow-[0_-8px_30px_rgba(0,0,0,0.3)] transition-transform translate-y-0">
+<!-- Drag Handle -->
+<button class="flex h-6 w-full items-center justify-center pt-2">
+<div class="h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+</button>
+<div class="px-5 pb-8 pt-2">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold">Verification Result</h2>
+<span class="text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">ID: BT-99210-X</span>
+</div>
+<!-- Result Status Card -->
+<div class="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-4">
+<div class="size-14 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-3xl">verified</span>
+</div>
+<div>
+<h3 class="text-primary font-bold text-lg leading-tight">Authentic Product</h3>
+<p class="text-primary/80 text-sm">Verified by Steryl Health Registry</p>
+</div>
+</div>
+<!-- Product Details List -->
+<div class="space-y-4">
+<div class="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-800">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Manufacturer</span>
+<span class="text-slate-900 dark:text-slate-100 font-semibold text-sm">AstraZeneca Africa</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-800">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Expiry Date</span>
+<span class="text-slate-900 dark:text-slate-100 font-semibold text-sm">Oct 2025</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-800">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Status</span>
+<span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-bold text-sm">
+<span class="size-2 bg-green-500 rounded-full"></span>
+                            In Stock
+                        </span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-8 flex gap-3">
+<button class="flex-1 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold py-4 rounded-xl text-sm">
+                        Dismiss
+                    </button>
+<button class="flex-[2] bg-primary text-white font-bold py-4 rounded-xl text-sm shadow-lg shadow-primary/25">
+                        Accept into Inventory
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!-- app/templates/manufacturer/batch-dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Batch Dashboard - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-3px); }
+    body { padding-bottom: 80px; }
+</style>
+</head>
+<body class="bg-gray-50">
+<!-- Top Navigation -->
+<nav class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="px-6 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Batch Dashboard</h1>
+            <p class="text-gray-500 text-sm">Monitor all registered batches</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{{ url_for('main.manufacturer_batch_register') }}" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">add_circle</span>
+                New Batch
+            </a>
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                    <span class="text-sm font-bold text-teal-600" id="user-initial">U</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="p-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Total Batches</p><p id="total-batches" class="text-3xl font-bold text-gray-800 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-teal-600 text-3xl">inventory_2</span>
+            </div>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Active Batches</p><p id="active-batches" class="text-3xl font-bold text-green-600 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
+            </div>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Total Units</p><p id="total-units" class="text-3xl font-bold text-gray-800 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-teal-600 text-3xl">package_2</span>
+            </div>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Expiring Soon</p><p id="expiring-batches" class="text-3xl font-bold text-amber-600 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-amber-600 text-3xl">warning</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batches Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="font-bold text-gray-800">All Batches</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-6 py-4">Batch Number</th>
+                        <th class="px-6 py-4">Product</th>
+                        <th class="px-6 py-4">Quantity</th>
+                        <th class="px-6 py-4">Mfg Date</th>
+                        <th class="px-6 py-4">Expiry Date</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="batches-table-body" class="divide-y divide-gray-100">
+                    <tr><td colspan="7" class="text-center py-8 text-gray-500">Loading batches...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Bottom Navigation -->
+{% include 'components/bottom_nav.html' %}
+
+<script>
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+}
+
+function loadStats() {
+    fetch('/api/manufacturer/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('total-batches').textContent = data.data.total_batches || 0;
+                document.getElementById('active-batches').textContent = data.data.active_skus || 0;
+                document.getElementById('total-units').textContent = (data.data.total_units || 0).toLocaleString();
+            }
+        });
+}
+
+function loadBatches() {
+    fetch('/api/manufacturer/batches')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('batches-table-body');
+            if (data.success && data.data && data.data.length > 0) {
+                const expiringCount = data.data.filter(b => {
+                    if (!b.expiry_date) return false;
+                    const expiry = new Date(b.expiry_date);
+                    const today = new Date();
+                    const daysLeft = (expiry - today) / (1000 * 60 * 60 * 24);
+                    return daysLeft <= 90 && daysLeft > 0;
+                }).length;
+                document.getElementById('expiring-batches').textContent = expiringCount;
+                
+                tbody.innerHTML = data.data.map(batch => `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4"><code class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">${batch.batch_number}</code></td>
+                        <td class="px-6 py-4 font-medium text-gray-800">${batch.product_name || 'N/A'}</td>
+                        <td class="px-6 py-4 text-gray-600">${batch.quantity} units</td>
+                        <td class="px-6 py-4 text-gray-600">${formatDate(batch.manufacturing_date)}</td>
+                        <td class="px-6 py-4 text-gray-600">${formatDate(batch.expiry_date)}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">${batch.status}</span></td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{{ url_for('main.manufacturer_print_queue') }}" class="text-teal-600 hover:text-teal-700">
+                                <span class="material-symbols-outlined">print</span>
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No batches found. Create your first batch!</td></tr>';
+            }
+        });
+}
+
+function loadUserProfile() {
+    fetch('/api/user-profile')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('user-initial').textContent = data.data.first_name.charAt(0);
+            }
+        });
+}
+
+loadUserProfile();
+loadStats();
+loadBatches();
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scan History - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<!-- Top Navigation -->
+<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="h-8 w-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
+                    </div>
+                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-teal-500">Health</span></span>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:space-x-8">
+                    <a href="{{ url_for('main.dashboard') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
+                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
+                    <a href="{{ url_for('main.budget') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Budget</a>
+                    <a href="{{ url_for('main.scan_history') }}" class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 px-3 py-2 text-sm font-medium">Scan History</a>
+                    <a href="{{ url_for('main.shipment_intake') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Shipments</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('main.qr_scanner') }}" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">qr_code_scanner</span>
+                    New Scan
+                </a>
+                <div class="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
+                    <span class="text-sm font-bold text-teal-600 dark:text-teal-300">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Scan History Log</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Track all QR code and batch scans</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Scans</p>
+                    <p id="total-scans" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-teal-600 dark:text-teal-400">qr_code</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Authentic</p>
+                    <p id="authentic-count" class="text-2xl font-bold text-green-600">0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-green-600">verified</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Failed</p>
+                    <p id="failed-count" class="text-2xl font-bold text-red-600">0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-red-600">error</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Expiring Soon</p>
+                    <p id="expiring-count" class="text-2xl font-bold text-amber-600">0</p>
+                </div>
+                <span class="material-symbols-outlined text-3xl text-amber-600">warning</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                <input id="search-input" type="text" placeholder="Search by SKU, Batch ID..." 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500">
+            </div>
+            <div>
+                <select id="status-filter" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500">
+                    <option value="">All Status</option>
+                    <option value="authentic">Authentic</option>
+                    <option value="failed">Failed</option>
+                    <option value="expiring">Expiring</option>
+                    <option value="recalled">Recalled</option>
+                </select>
+            </div>
+            <div>
+                <input id="start-date" type="date" placeholder="Start Date" 
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500">
+            </div>
+            <div>
+                <input id="end-date" type="date" placeholder="End Date" 
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500">
+            </div>
+        </div>
+        <div class="flex justify-between items-center mt-4">
+            <div class="flex gap-2">
+                <button onclick="applyQuickFilter('authentic')" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full hover:bg-green-200">Authentic Only</button>
+                <button onclick="applyQuickFilter('failed')" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-full hover:bg-red-200">Failed Only</button>
+                <button onclick="applyQuickFilter('expiring')" class="px-3 py-1 text-sm bg-amber-100 text-amber-700 rounded-full hover:bg-amber-200">Expiring Soon</button>
+            </div>
+            <button id="apply-filters" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">Apply Filters</button>
+        </div>
+    </div>
+
+    <!-- Scan History Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <tr class="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Product / SKU</th>
+                        <th class="px-6 py-4">Batch ID</th>
+                        <th class="px-6 py-4">Scan Location</th>
+                        <th class="px-6 py-4">Date & Time</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="scan-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr><td colspan="6" class="text-center py-8 text-gray-500">Loading scan history...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <p id="pagination-info" class="text-sm text-gray-500">Loading...</p>
+            <div class="flex gap-2">
+                <button id="prev-page" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50" disabled>Previous</button>
+                <button id="next-page" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentPage = 1;
+let totalPages = 1;
+let currentScans = [];
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'authentic': '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Authentic</span>',
+        'failed': '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Failed</span>',
+        'expiring': '<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Expiring</span>',
+        'recalled': '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Recalled</span>'
+    };
+    return badges[status] || badges['authentic'];
+}
+
+function renderScanTable(scans) {
+    const tbody = document.getElementById('scan-table-body');
+    
+    if (!scans || scans.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No scan records found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = scans.map(scan => {
+        const product = scan.batch?.product || {};
+        return `
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <td class="px-6 py-4">${getStatusBadge(scan.status)}</td>
+                <td class="px-6 py-4">
+                    <p class="font-medium text-gray-900 dark:text-white">${product.name || 'Unknown Product'}</p>
+                    <p class="text-xs text-gray-500">SKU: ${product.sku || 'N/A'}</p>
+                </td>
+                <td class="px-6 py-4">
+                    <code class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">${scan.batch?.batch_number || 'N/A'}</code>
+                </td>
+                <td class="px-6 py-4 text-gray-600 dark:text-gray-400">${scan.scan_location || 'Unknown'}</td>
+                <td class="px-6 py-4 text-gray-500 whitespace-nowrap">${formatDate(scan.scan_time)}</td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="viewScanDetail(${scan.id})" class="text-teal-600 hover:text-teal-700">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function loadScanHistory() {
+    const search = document.getElementById('search-input').value;
+    const status = document.getElementById('status-filter').value;
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    
+    let url = `/api/scan-history?page=${currentPage}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (status) url += `&status=${status}`;
+    if (startDate) url += `&start_date=${startDate}`;
+    if (endDate) url += `&end_date=${endDate}`;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentScans = data.data.scans || [];
+                renderScanTable(currentScans);
+                document.getElementById('total-scans').textContent = data.data.total_scans || 0;
+                document.getElementById('pagination-info').textContent = `Showing ${currentScans.length} of ${data.data.filtered_count || 0} scans`;
+                totalPages = Math.ceil((data.data.filtered_count || 0) / 25);
+                document.getElementById('prev-page').disabled = currentPage === 1;
+                document.getElementById('next-page').disabled = currentPage >= totalPages;
+            }
+        });
+}
+
+function applyQuickFilter(status) {
+    document.getElementById('status-filter').value = status;
+    currentPage = 1;
+    loadScanHistory();
+}
+
+document.getElementById('apply-filters').addEventListener('click', () => {
+    currentPage = 1;
+    loadScanHistory();
+});
+
+document.getElementById('prev-page').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        loadScanHistory();
+    }
+});
+
+document.getElementById('next-page').addEventListener('click', () => {
+    currentPage++;
+    loadScanHistory();
+});
+
+function viewScanDetail(scanId) {
+    alert(`View details for scan ID: ${scanId}`);
+}
+
+loadScanHistory();
+</script>
+</body>
+</html>

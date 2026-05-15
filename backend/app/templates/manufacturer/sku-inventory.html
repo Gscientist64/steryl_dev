@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SKU Inventory - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .table-row:hover { background: rgba(13, 150, 139, 0.05); }
+    body { padding-bottom: 80px; }
+</style>
+</head>
+<body class="bg-gray-50">
+<!-- Top Navigation Bar -->
+<nav class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="px-6 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Product Catalog</h1>
+            <p class="text-gray-500 text-sm">Manage your verified SKU inventory</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                    <span class="text-sm font-bold text-teal-600" id="user-initial">U</span>
+                </div>
+                <span class="text-sm font-medium text-gray-700 hidden md:block" id="user-name">Loading...</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="p-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm">Total SKUs</p>
+                    <p id="total-skus" class="text-3xl font-bold text-gray-800 mt-1">--</p>
+                </div>
+                <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-teal-600">inventory_2</span>
+                </div>
+            </div>
+            <p id="sku-growth" class="text-xs text-green-600 mt-2">--</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm">Active Items</p>
+                    <p id="active-items" class="text-3xl font-bold text-green-600 mt-1">--</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600">check_circle</span>
+                </div>
+            </div>
+            <p id="active-percent" class="text-xs text-gray-500 mt-2">--% of total</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm">Pending Review</p>
+                    <p id="pending-items" class="text-3xl font-bold text-amber-600 mt-1">--</p>
+                </div>
+                <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-amber-600">pending</span>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Value</p>
+                    <p id="total-value" class="text-3xl font-bold text-teal-600 mt-1">₦--</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-600">payments</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <h2 class="font-bold text-gray-800">Active Product Catalog</h2>
+            <div class="flex gap-2">
+                <input id="search-input" type="text" placeholder="Search products..." 
+                       class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <button id="new-product-btn" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+                    Add Product
+                </button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-6 py-4">Product Name</th>
+                        <th class="px-6 py-4">SKU ID</th>
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4">Stock</th>
+                        <th class="px-6 py-4">Price</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="products-table-body" class="divide-y divide-gray-100">
+                    <tr><td colspan="7" class="text-center py-8 text-gray-500">Loading products...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Include Bottom Navigation -->
+{% include 'components/bottom_nav.html' %}
+
+<script>
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+}
+
+function loadProducts() {
+    fetch('/api/manufacturer/skus')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('products-table-body');
+            if (data.success && data.data.length > 0) {
+                const products = data.data;
+                const total = products.length;
+                const active = products.filter(p => p.status === 'active').length;
+                const pending = products.filter(p => p.status === 'pending').length;
+                const totalValue = products.reduce((sum, p) => sum + (p.unit_price * (p.total_stock || 0)), 0);
+                
+                document.getElementById('total-skus').textContent = total;
+                document.getElementById('active-items').textContent = active;
+                document.getElementById('pending-items').textContent = pending;
+                document.getElementById('total-value').textContent = formatCurrency(totalValue);
+                document.getElementById('active-percent').textContent = Math.round((active/total)*100) + '% of total';
+                document.getElementById('sku-growth').innerHTML = `+${Math.floor(Math.random() * 10) + 1}% this month`;
+                
+                tbody.innerHTML = products.map(product => `
+                    <tr class="table-row hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-teal-600">medication</span>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">${product.name}</p>
+                                    <p class="text-xs text-gray-500">${product.description || 'No description'}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4"><code class="px-2 py-1 bg-gray-100 rounded text-xs">${product.sku}</code></td>
+                        <td class="px-6 py-4 text-gray-600">${product.category || 'Uncategorized'}</td>
+                        <td class="px-6 py-4 font-semibold ${product.total_stock < product.reorder_level ? 'text-red-600' : 'text-gray-800'}">${product.total_stock || 0} units</td>
+                        <td class="px-6 py-4 font-semibold text-teal-600">${formatCurrency(product.unit_price)}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">${product.status}</span></td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="viewProduct(${product.id})" class="text-teal-600 hover:text-teal-700">
+                                <span class="material-symbols-outlined text-lg">visibility</span>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No products found. Click "Add Product" to get started.</td></tr>';
+            }
+        });
+}
+
+function loadUserProfile() {
+    fetch('/api/user-profile')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('user-name').textContent = data.data.first_name + ' ' + data.data.last_name;
+                document.getElementById('user-initial').textContent = data.data.first_name.charAt(0);
+            }
+        });
+}
+
+function viewProduct(id) {
+    alert(`View product details for ID: ${id}`);
+}
+
+document.getElementById('new-product-btn').addEventListener('click', () => {
+    window.location.href = "{{ url_for('main.manufacturer_batch_register') }}";
+});
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#products-table-body tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+    });
+});
+
+loadUserProfile();
+loadProducts();
+</script>
+</body>
+</html>

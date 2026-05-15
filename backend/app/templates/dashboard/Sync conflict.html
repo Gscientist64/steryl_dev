@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resolve Sync Conflict - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#14ebd9",
+                        "background-light": "#f1f5f9",
+                        "background-dark": "#0f172a",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-radio {
+            --radio-dot-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27%2314ebd9%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3ccircle cx=%278%27 cy=%278%27 r=%273%27/%3e%3c/svg%3e');
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr 1fr;
+            align-items: center;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex items-center justify-center p-6">
+<div class="fixed inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
+<div class="p-8 space-y-8">
+<div class="h-8 w-48 bg-slate-300 dark:bg-slate-700 rounded"></div>
+<div class="grid grid-cols-4 gap-6">
+<div class="h-32 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+<div class="h-32 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+<div class="h-32 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+<div class="h-32 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+</div>
+<div class="h-96 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+</div>
+</div>
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-10 flex items-center justify-center p-4">
+<div class="relative w-full max-w-5xl bg-surface-light dark:bg-surface-dark rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400">sync_problem</span>
+</div>
+<div>
+<h2 class="text-xl font-bold tracking-tight">Resolve Sync Conflict</h2>
+<p class="text-sm text-slate-500">Mismatched data detected for <span class="font-semibold text-slate-900 dark:text-slate-100">Paracetamol 500mg</span></p>
+</div>
+</div>
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto">
+<div class="comparison-grid bg-slate-50 dark:bg-slate-900/50 sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
+<div class="p-4 text-xs font-bold uppercase tracking-wider text-slate-400">Field Name</div>
+<div class="p-4 text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">laptop_mac</span>
+                    Local Data (This Device)
+                </div>
+<div class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">cloud</span>
+                    Server Data (System)
+                </div>
+</div>
+<div class="divide-y divide-slate-100 dark:divide-slate-800">
+<div class="comparison-grid hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<div class="p-6 flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">inventory_2</span>
+<span class="font-semibold text-sm">Stock Quantity</span>
+</div>
+<div class="p-4">
+<label class="group relative flex cursor-pointer items-start gap-4 rounded-xl border-2 border-primary/20 bg-white dark:bg-slate-900 p-4 transition-all hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input checked="" class="mt-1 h-5 w-5 border-2 border-primary/30 bg-transparent text-transparent checked:border-primary checked:bg-[image:var(--radio-dot-svg)] focus:outline-none focus:ring-0 custom-radio" name="stock_qty" type="radio"/>
+<div class="flex flex-col">
+<p class="text-lg font-bold">450 units</p>
+<p class="text-xs text-slate-500 mt-1">Edited 2 mins ago by Nurse Akua</p>
+</div>
+</label>
+</div>
+<div class="p-4">
+<label class="group relative flex cursor-pointer items-start gap-4 rounded-xl border-2 border-transparent bg-slate-50/50 dark:bg-slate-800/50 p-4 transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="mt-1 h-5 w-5 border-2 border-slate-300 dark:border-slate-600 bg-transparent text-transparent checked:border-primary checked:bg-[image:var(--radio-dot-svg)] focus:outline-none focus:ring-0 custom-radio" name="stock_qty" type="radio"/>
+<div class="flex flex-col">
+<p class="text-lg font-bold">520 units</p>
+<p class="text-xs text-slate-500 mt-1">Updated by Pharmacy Dept 10 mins ago</p>
+</div>
+</label>
+</div>
+</div>
+<div class="comparison-grid hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<div class="p-6 flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">calendar_today</span>
+<span class="font-semibold text-sm">Expiry Date</span>
+</div>
+<div class="p-4">
+<label class="group relative flex cursor-pointer items-start gap-4 rounded-xl border-2 border-transparent bg-slate-50/50 dark:bg-slate-800/50 p-4 transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="mt-1 h-5 w-5 border-2 border-slate-300 dark:border-slate-600 bg-transparent text-transparent checked:border-primary checked:bg-[image:var(--radio-dot-svg)] focus:outline-none focus:ring-0 custom-radio" name="expiry_date" type="radio"/>
+<div class="flex flex-col">
+<p class="text-lg font-bold">12 / 2026</p>
+</div>
+</label>
+</div>
+<div class="p-4">
+<label class="group relative flex cursor-pointer items-start gap-4 rounded-xl border-2 border-primary/20 bg-white dark:bg-slate-900 p-4 transition-all hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input checked="" class="mt-1 h-5 w-5 border-2 border-primary/30 bg-transparent text-transparent checked:border-primary checked:bg-[image:var(--radio-dot-svg)] focus:outline-none focus:ring-0 custom-radio" name="expiry_date" type="radio"/>
+<div class="flex flex-col">
+<p class="text-lg font-bold">08 / 2026</p>
+</div>
+</label>
+</div>
+</div>
+<div class="comparison-grid hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<div class="p-6 flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">location_on</span>
+<span class="font-semibold text-sm">Storage Location</span>
+</div>
+<div class="p-4">
+<label class="group relative flex cursor-pointer items-start gap-4 rounded-xl border-2 border-primary/20 bg-white dark:bg-slate-900 p-4 transition-all hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input checked="" class="mt-1 h-5 w-5 border-2 border-primary/30 bg-transparent text-transparent checked:border-primary checked:bg-[image:var(--radio-dot-svg)] focus:outline-none focus:ring-0 custom-radio" name="location" type="radio"/>
+<div class="flex flex-col">
+<p class="text-lg font-bold">Ward B - Shelf 4</p>
+</div>
+</label>
+</div>
+<div class="p-4">
+<label class="group relative flex cursor-pointer items-start gap-4 rounded-xl border-2 border-transparent bg-slate-50/50 dark:bg-slate-800/50 p-4 transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="mt-1 h-5 w-5 border-2 border-slate-300 dark:border-slate-600 bg-transparent text-transparent checked:border-primary checked:bg-[image:var(--radio-dot-svg)] focus:outline-none focus:ring-0 custom-radio" name="location" type="radio"/>
+<div class="flex flex-col">
+<p class="text-lg font-bold">Central Pharmacy</p>
+</div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+<div class="flex items-center gap-4 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 rounded-lg border border-amber-200 dark:border-amber-900/40 max-w-xl">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400 flex-shrink-0">info</span>
+<p class="text-sm text-amber-800 dark:text-amber-200 font-medium">
+                    Confirming will permanently overwrite the data on the opposing side. This operation is irreversible.
+                </p>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-6 py-3 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                    Cancel
+                </button>
+<button class="px-8 py-3 bg-primary text-slate-900 font-bold rounded-xl shadow-xl shadow-primary/20 transition-all hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0">
+                    Resolve Conflict
+                </button>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!-- Bottom Navigation Bar - Shared Component -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-around items-center h-16">
+            <!-- Dashboard -->
+            <a href="{{ url_for('main.dashboard') }}" 
+               class="flex flex-col items-center justify-center px-3 py-1 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.dashboard' %}text-teal-600 dark:text-teal-400{% else %}text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400{% endif %}">
+                <span class="material-symbols-outlined text-2xl transition-transform group-hover:scale-110">dashboard</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider mt-1">Home</span>
+            </a>
+
+            <!-- Orders -->
+            <a href="{{ url_for('main.order_cart') }}" 
+               class="flex flex-col items-center justify-center px-3 py-1 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.order_cart' %}text-teal-600 dark:text-teal-400{% else %}text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400{% endif %}">
+                <span class="material-symbols-outlined text-2xl transition-transform group-hover:scale-110">shopping_cart</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider mt-1">Orders</span>
+            </a>
+
+            <!-- Approvals with Badge -->
+            <a href="{{ url_for('main.approvals') }}" 
+               class="flex flex-col items-center justify-center px-3 py-1 rounded-lg transition-all duration-200 group relative
+                      {% if request.endpoint == 'main.approvals' %}text-teal-600 dark:text-teal-400{% else %}text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400{% endif %}">
+                <div class="relative">
+                    <span class="material-symbols-outlined text-2xl transition-transform group-hover:scale-110">fact_check</span>
+                    <span id="approval-badge" class="absolute -top-1 -right-2 hidden min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full items-center justify-center px-1">0</span>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-wider mt-1">Approvals</span>
+            </a>
+
+            <!-- Inventory -->
+            <a href="{{ url_for('main.manufacturer_skus') }}" 
+               class="flex flex-col items-center justify-center px-3 py-1 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.manufacturer_skus' %}text-teal-600 dark:text-teal-400{% else %}text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400{% endif %}">
+                <span class="material-symbols-outlined text-2xl transition-transform group-hover:scale-110">inventory_2</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider mt-1">Inventory</span>
+            </a>
+
+            <!-- Profile -->
+            <a href="{{ url_for('main.profile') }}" 
+               class="flex flex-col items-center justify-center px-3 py-1 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.profile' %}text-teal-600 dark:text-teal-400{% else %}text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400{% endif %}">
+                <span class="material-symbols-outlined text-2xl transition-transform group-hover:scale-110">person</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider mt-1">Profile</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<script>
+// Fetch and update approval badge count
+function updateApprovalBadge() {
+    fetch('/api/approvals')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const pendingCount = data.data.filter(a => a.order && a.order.status === 'pending').length;
+                const badge = document.getElementById('approval-badge');
+                if (badge) {
+                    if (pendingCount > 0) {
+                        badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+                        badge.classList.remove('hidden');
+                        badge.classList.add('inline-flex');
+                    } else {
+                        badge.classList.add('hidden');
+                        badge.classList.remove('inline-flex');
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Error fetching approvals:', error));
+}
+
+// Run when page loads
+if (document.getElementById('approval-badge')) {
+    updateApprovalBadge();
+    setInterval(updateApprovalBadge, 30000);
+}
+</script>

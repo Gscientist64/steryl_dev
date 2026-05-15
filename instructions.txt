@@ -1,1 +1,9 @@
 To start the backend - flask run --host=0.0.0.0 --port=5003
+
+
+Test Credentials:
+   Admin: admin@steryl.com / Admin123!
+   User:  samuel@steryl.com / Password123!
+
+   Email: manufacturer@steryl.com
+   Password: Admin123!

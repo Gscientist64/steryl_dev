@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Compliance Gap Review - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2ceddd",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-nav .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+    </style>
+<style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* Button Click Effects */
+    .btn-click {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-click::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .btn-click:active::after {
+      animation: ripple 0.6s ease-out;
+    }
+
+    @keyframes ripple {
+      to {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+      }
+    }
+
+    /* Smooth transitions for button interactions */
+    button {
+      transition: all 0.2s ease-in-out;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    /* Desktop Sidebar */
+    aside.sidebar {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    aside.sidebar nav {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Mobile Bottom Navigation */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      z-index: 40;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .dark .bottom-nav {
+      background: #0f172a;
+      border-top-color: #1e293b;
+    }
+
+    .bottom-nav-content {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 64px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      min-width: 60px;
+      height: 100%;
+      gap: 4px;
+      text-decoration: none;
+      color: #64748b;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      border-radius: 0;
+      padding: 0 8px;
+    }
+
+    .dark .bottom-nav-item {
+      color: #94a3b8;
+    }
+
+    .bottom-nav-item:hover {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .dark .bottom-nav-item:hover {
+      background: #1e293b;
+      color: #cbd5e1;
+    }
+
+    .bottom-nav-item.active {
+      color: #2ceddd;
+      background: #2ceddd/5;
+    }
+
+    .bottom-nav-item span:first-child {
+      font-size: 24px;
+    }
+
+    .bottom-nav-item span:last-child {
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Main content scrollability */
+    main {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content-area {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .table-responsive {
+      overflow-y: auto;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .right-sidebar {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+    }
+
+    /* Responsive behavior */
+    @media (max-width: 1023px) {
+      aside.sidebar {
+        display: none !important;
+      }
+
+      .bottom-nav {
+        display: block !important;
+      }
+
+      main {
+        width: 100% !important;
+        padding-bottom: 64px !important;
+      }
+
+      .content-area {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+      }
+
+      .right-sidebar {
+        width: 100% !important;
+        border-left: none !important;
+        border-top: 1px solid #e2e8f0 !important;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .bottom-nav {
+        display: none !important;
+      }
+
+      aside.sidebar {
+        display: flex !important;
+      }
+
+      main {
+        padding-bottom: 0 !important;
+      }
+    }
+
+    /* Responsive table */
+    @media (max-width: 1024px) {
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 800px;
+      }
+    }
+
+    /* Mobile-first responsive design */
+    @media (max-width: 640px) {
+      header {
+        padding: 1rem !important;
+        flex-direction: column;
+        gap: 1rem;
+        height: auto !important;
+      }
+
+      .header-search {
+        width: 100% !important;
+      }
+
+      .header-buttons {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+      }
+    }
+
+    /* Smooth animations */
+    @media (prefers-reduced-motion: no-preference) {
+      * {
+        scroll-behavior: smooth;
+      }
+    }
+
+    /* Focus states for accessibility */
+    button:focus-visible,
+    input:focus-visible,
+    a:focus-visible {
+      outline: 2px solid #2ceddd;
+      outline-offset: 2px;
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display overflow-hidden">
+<div class="flex h-screen w-full overflow-hidden flex-col lg:flex-row">
+
+<!-- Desktop Sidebar -->
+<aside class="sidebar w-64 bg-white dark:bg-sidebar-dark border-r border-slate-200 dark:border-slate-800 shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-900 font-bold">health_and_safety</span>
+</div>
+<h1 class="font-bold text-lg tracking-tight">STERYL <span class="text-primary">OS</span></h1>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors btn-click" href="#" data-nav="dashboard">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-semibold">Dashboard</span>
+</a>
+<a class="active-nav flex items-center gap-3 px-3 py-2.5 text-primary bg-primary/5 rounded-lg transition-colors btn-click" href="#" data-nav="inventory">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-sm font-semibold">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors btn-click" href="#" data-nav="orders">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="text-sm font-semibold">Orders</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors btn-click" href="#" data-nav="audits">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="text-sm font-semibold">Audits</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors btn-click" href="#" data-nav="reports">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-semibold">Reports</span>
+</a>
+<div class="pt-4 pb-2">
+<p class="px-3 text-[10px] uppercase font-bold text-slate-400 tracking-widest">Admin</p>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors btn-click" href="#" data-nav="settings">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-semibold">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 cursor-pointer btn-click hover:bg-slate-100 dark:hover:bg-slate-700">
+<div class="size-8 rounded-full bg-slate-300 dark:bg-slate-600 overflow-hidden shrink-0">
+<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCINm80c4DoybWSyDcKMN0HwjcGxTOzkGO-r2DUgrztZEERBQz9-EH0Dfi7f7MqbFnKMbUxHvVFFQRsn-Bu5GkcQdEdiAHkQqpvfkGOQZOJgwbZ11D8r5otqKpj-ASReDyso2UToFsVdP3ccaYv-slBdfNUbwYGMvlRFPsKv_rKa6H9QSed-V5sAmo-oBEE9XokZYDoqa60gO8pnTSFi8G285WxTZFYlsAUJKTm7pRe7oSoWlQD1qg4dTnNM5j90Jz6E6zN-ACmU0M"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold truncate">Dr. Aris Thorne</p>
+<p class="text-[10px] text-slate-500 truncate">Administrator</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">unfold_more</span>
+</div>
+</div>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-slate-950 overflow-hidden">
+<!-- Header -->
+<header class="h-16 md:h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-8 shrink-0 flex-wrap md:flex-nowrap gap-2 md:gap-0">
+<div class="flex items-center gap-2 md:gap-4 w-full md:w-auto">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 btn-click">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="min-w-0 flex-1 md:flex-none">
+<h2 class="font-bold text-base md:text-lg truncate">Gap Resolution</h2>
+<nav class="flex text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 gap-1 md:gap-2 overflow-x-auto">
+<span class="shrink-0">Compliance</span>
+<span class="shrink-0">/</span>
+<span class="shrink-0">Audit Prep 2024</span>
+<span class="shrink-0">/</span>
+<span class="text-primary shrink-0">Stock Adjustments</span>
+</nav>
+</div>
+</div>
+<div class="flex items-center gap-2 md:gap-4 w-full md:w-auto">
+<div class="relative flex-1 md:flex-none">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-slate-100 dark:bg-slate-800 border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-full md:w-64 transition-all" placeholder="Search batch or ID..." type="text"/>
+</div>
+<button class="relative size-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 btn-click hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-rose-500 rounded-full"></span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-full bg-primary/10 text-primary btn-click hover:bg-primary/20">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+
+<!-- Content Area -->
+<div class="content-area flex-1 flex overflow-hidden flex-col lg:flex-row">
+<!-- Main Table Section -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<div class="p-4 md:p-6 pb-0 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0">
+<div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 w-full md:w-auto">
+<h3 class="font-bold text-slate-500 text-xs uppercase tracking-widest">Pending Adjustments (12)</h3>
+<div class="flex gap-2 flex-wrap">
+<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors btn-click">Batch: ALL</span>
+<span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors btn-click">Risk: HIGH</span>
+</div>
+</div>
+<div class="flex items-center gap-2 md:gap-3 w-full md:w-auto flex-wrap">
+<button class="flex items-center gap-2 px-3 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold rounded hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors btn-click">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+<span class="hidden sm:inline">Filter</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-1.5 bg-primary text-slate-900 text-xs font-bold rounded shadow-sm hover:brightness-105 transition-all btn-click">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span class="hidden sm:inline">Verify Selected</span>
+</button>
+</div>
+</div>
+
+<!-- Table Container -->
+<div class="table-responsive flex-1 p-4 md:p-6 overflow-auto">
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse text-sm md:text-base">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="p-3 md:p-4 w-12"><input class="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/></th>
+<th class="p-3 md:p-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Batch ID</th>
+<th class="p-3 md:p-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Adjustment</th>
+<th class="p-3 md:p-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden md:table-cell">Reason</th>
+<th class="p-3 md:p-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:table-cell">Timestamp</th>
+<th class="p-3 md:p-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<td class="p-3 md:p-4"><input class="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/></td>
+<td class="p-3 md:p-4 font-bold text-sm">#ST-9921</td>
+<td class="p-3 md:p-4 text-sm"><span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-[10px] font-bold rounded">-42 units</span></td>
+<td class="p-3 md:p-4 text-sm text-slate-500 hidden md:table-cell">Expired / Cold Chain Failure</td>
+<td class="p-3 md:p-4 text-xs font-medium text-slate-400 hidden lg:table-cell">2h ago</td>
+<td class="p-3 md:p-4 text-right"><span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors cursor-pointer">chevron_right</span></td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<td class="p-3 md:p-4"><input class="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/></td>
+<td class="p-3 md:p-4 font-bold text-sm">#BA-8829</td>
+<td class="p-3 md:p-4 text-sm"><span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-[10px] font-bold rounded">-24 units</span></td>
+<td class="p-3 md:p-4 text-sm text-slate-500 hidden md:table-cell">Damaged in transit</td>
+<td class="p-3 md:p-4 text-xs font-medium text-slate-400 hidden lg:table-cell">4h ago</td>
+<td class="p-3 md:p-4 text-right"><span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors cursor-pointer">chevron_right</span></td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<td class="p-3 md:p-4"><input class="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/></td>
+<td class="p-3 md:p-4 font-bold text-sm">#PX-4410</td>
+<td class="p-3 md:p-4 text-sm"><span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded">+10 units</span></td>
+<td class="p-3 md:p-4 text-sm text-slate-500 hidden md:table-cell">Cycle Count Correction</td>
+<td class="p-3 md:p-4 text-xs font-medium text-slate-400 hidden lg:table-cell">6h ago</td>
+<td class="p-3 md:p-4 text-right"><span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors cursor-pointer">chevron_right</span></td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+<td class="p-3 md:p-4"><input class="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" type="checkbox"/></td>
+<td class="p-3 md:p-4 font-bold text-sm">#ST-1102</td>
+<td class="p-3 md:p-4 text-sm"><span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-[10px] font-bold rounded">-5 units</span></td>
+<td class="p-3 md:p-4 text-sm text-slate-500 hidden md:table-cell">Inventory Sync Error</td>
+<td class="p-3 md:p-4 text-xs font-medium text-slate-400 hidden lg:table-cell">12h ago</td>
+<td class="p-3 md:p-4 text-right"><span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors cursor-pointer">chevron_right</span></td>
+</tr>
+</tbody>
+</table>
+<div class="p-3 md:p-4 flex flex-col md:flex-row items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800">
+<span class="text-[11px] font-bold text-slate-400">Showing 4 of 12 pending items</span>
+<div class="flex gap-2">
+<button class="p-1 border rounded bg-white dark:bg-slate-900 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors btn-click"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="p-1 border rounded bg-white dark:bg-slate-900 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors btn-click"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Right Sidebar -->
+<aside class="right-sidebar w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shrink-0 min-h-0">
+<div class="p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+<div class="mb-4">
+<span class="px-2 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 rounded text-[10px] font-bold uppercase tracking-wider">High Priority Risk</span>
+</div>
+<h3 class="text-lg md:text-xl font-bold leading-tight mb-2">Unverified Stock Adjustments</h3>
+<div class="space-y-2">
+<div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+<p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Gap Score</p>
+<p class="text-lg font-bold text-rose-600">-14.2%</p>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+<p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Timeline</p>
+<p class="text-lg font-bold text-slate-700 dark:text-slate-200">2d Left</p>
+</div>
+</div>
+</div>
+<div class="flex-1 p-4 md:p-6 overflow-y-auto min-h-0">
+<div class="mb-6">
+<div class="flex items-center justify-between mb-3">
+<h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Supporting Evidence</h4>
+<button class="text-primary text-[10px] font-bold hover:underline btn-click">View All</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div class="aspect-square rounded-lg bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors btn-click">
+<span class="material-symbols-outlined text-slate-400">add_a_photo</span>
+<span class="text-[9px] font-bold text-slate-500 mt-1 uppercase">Upload</span>
+</div>
+<div class="relative group aspect-square rounded-lg bg-cover bg-center border border-slate-200 dark:border-slate-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAOPXTWFpxgoZpSvpLYYLYExz5a_H9qdEmLU_Qs2HAHQCnHjhb7878i6WKJIEgWaRSBiy0QmMgz6wJ6Hy2BwhqjDjRGpqo6GVumBwuKVFshFfHzwWR6ivkVtEumd2_tZKgTMQu_Em32CfpLw-ZamyHTO8OLdangKpZ74k8-O3Eu9kfpOun63Qkiu6FPlpT7hbrr2L26Va24lTN2LWEHhaQThxZWcy8iLGm0hWy4qktFZeCZTf0h3U0RuHnpVwDrK_wdHhq5PP9bxyk')">
+<button class="absolute -top-1 -right-1 bg-rose-500 text-white rounded-full size-5 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity btn-click hover:bg-rose-600">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+<div class="relative group aspect-square rounded-lg bg-cover bg-center border border-slate-200 dark:border-slate-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuIn9_oU93tei_mz5T94806M1Souo3WRap4WrvnqLIbi3DhBgjLkjlfV9XnT4Nsf_8mr_eq3ODA64LZx2dDJTm3a-JB_r8cbL-0_X24gBuQjno4S796dRN_rXbE4ckni8aV6Qk2NAjJQeLxG_TdEQ-Ypa9cfbVCuE4RPA-A7cNW3VKiCvtP0tzNPElBNwqHBMTI5ZRBL4lxXxSCiUfEIIabUkxsXGSgckgtIh8tbtGem8o5JMsi3MZOOEpGhqNIZVNWt28lTrSCnNA')">
+<button class="absolute -top-1 -right-1 bg-rose-500 text-white rounded-full size-5 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity btn-click hover:bg-rose-600">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+</div>
+<p class="text-[10px] text-slate-400 mt-3 leading-tight italic">Attach physical ledger photos or shelf counts for verification.</p>
+</div>
+<div class="p-4 rounded-xl bg-primary/5 border border-primary/20">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">info</span>
+<p class="text-[11px] text-slate-600 dark:text-slate-300 leading-normal">
+<span class="font-bold">Pro-tip:</span> Use the mobile app to scan barcodes directly if physical ledgers are unavailable.
+</p>
+</div>
+</div>
+</div>
+<div class="p-4 md:p-6 border-t border-slate-100 dark:border-slate-800 shrink-0">
+<button class="w-full flex items-center justify-center gap-3 h-12 bg-slate-900 dark:bg-primary text-white dark:text-slate-900 font-bold rounded-lg shadow-lg hover:brightness-110 active:scale-[0.98] transition-all btn-click">
+<span class="material-symbols-outlined">sync_alt</span>
+<span class="hidden sm:inline">Sync to Audit Trail</span>
+</button>
+</div>
+</aside>
+</div>
+</main>
+</div>
+
+<!-- Mobile Bottom Navigation -->
+<nav class="bottom-nav">
+<div class="bottom-nav-content">
+<a href="#" class="bottom-nav-item active" data-nav="dashboard">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a href="#" class="bottom-nav-item" data-nav="inventory">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a href="#" class="bottom-nav-item" data-nav="orders">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span>Orders</span>
+</a>
+<a href="#" class="bottom-nav-item" data-nav="audits">
+<span class="material-symbols-outlined">verified_user</span>
+<span>Audits</span>
+</a>
+<a href="#" class="bottom-nav-item" data-nav="reports">
+<span class="material-symbols-outlined">description</span>
+<span>Reports</span>
+</a>
+</nav>
+
+<!-- JavaScript for Interactive Features -->
+<script>
+  // Bottom Navigation Click Handler
+  const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+  const desktopNavItems = document.querySelectorAll('aside.sidebar a[data-nav]');
+
+  function updateNavigation(navValue) {
+    // Update bottom nav
+    bottomNavItems.forEach(item => {
+      item.classList.remove('active');
+      if (item.dataset.nav === navValue) {
+        item.classList.add('active');
+      }
+    });
+
+    // Update desktop nav
+    desktopNavItems.forEach(item => {
+      item.classList.remove('active-nav');
+      if (item.dataset.nav === navValue) {
+        item.classList.add('active-nav');
+      }
+    });
+  }
+
+  bottomNavItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      updateNavigation(item.dataset.nav);
+      console.log('Navigation changed to:', item.dataset.nav);
+    });
+  });
+
+  desktopNavItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      updateNavigation(item.dataset.nav);
+      console.log('Navigation changed to:', item.dataset.nav);
+    });
+  });
+
+  // Button click feedback
+  const buttons = document.querySelectorAll('.btn-click');
+  buttons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      // Add visual feedback
+      this.style.opacity = '0.8';
+      setTimeout(() => {
+        this.style.opacity = '1';
+      }, 100);
+
+      // Log click for debugging
+      console.log('Button clicked:', this);
+    });
+  });
+
+  // Checkbox interactions
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      console.log('Checkbox state:', this.checked);
+    });
+  });
+
+  // Table row interactions
+  const tableRows = document.querySelectorAll('tbody tr');
+  tableRows.forEach(row => {
+    row.addEventListener('click', function() {
+      this.classList.toggle('bg-slate-100');
+      console.log('Row clicked:', this);
+    });
+  });
+
+  // Search input focus effect
+  const searchInput = document.querySelector('input[placeholder="Search batch or ID..."]');
+  if (searchInput) {
+    searchInput.addEventListener('focus', function() {
+      this.parentElement.classList.add('ring-2', 'ring-primary');
+    });
+    searchInput.addEventListener('blur', function() {
+      this.parentElement.classList.remove('ring-2', 'ring-primary');
+    });
+  }
+
+  // Responsive behavior on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      console.log('Window resized');
+    }, 250);
+  });
+
+  // Initialize on load
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Application loaded and ready');
+  });
+</script>
+</body></html>

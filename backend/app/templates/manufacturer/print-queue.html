@@ -1,0 +1,216 @@
+<!-- app/templates/manufacturer/print-queue.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Print Queue - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-3px); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    body { padding-bottom: 80px; }
+</style>
+</head>
+<body class="bg-gray-50">
+<!-- Top Navigation -->
+<nav class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="px-6 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">QR Print Queue</h1>
+            <p class="text-gray-500 text-sm">Manage and download QR labels for registered batches</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="print-all-btn" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">print</span>
+                Print All
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                    <span class="text-sm font-bold text-teal-600" id="user-initial">U</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="p-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Pending Labels</p><p id="pending-count" class="text-3xl font-bold text-amber-600 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-amber-600 text-3xl">pending</span>
+            </div>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Ready to Print</p><p id="ready-count" class="text-3xl font-bold text-green-600 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
+            </div>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Total Printed</p><p id="printed-count" class="text-3xl font-bold text-teal-600 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-teal-600 text-3xl">print</span>
+            </div>
+        </div>
+        <div class="stat-card bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex justify-between items-start">
+                <div><p class="text-gray-500 text-sm">Total Batches</p><p id="total-batches" class="text-3xl font-bold text-gray-800 mt-1">--</p></div>
+                <span class="material-symbols-outlined text-gray-600 text-3xl">inventory_2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Queue Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="font-bold text-gray-800">Label Generation Queue</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-6 py-4">Batch Number</th>
+                        <th class="px-6 py-4">Product Name</th>
+                        <th class="px-6 py-4">Quantity</th>
+                        <th class="px-6 py-4">Created Date</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="queue-table-body" class="divide-y divide-gray-100">
+                    <tr><td colspan="6" class="text-center py-8 text-gray-500">Loading print queue...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Printer Status -->
+    <div class="mt-6 bg-teal-50 rounded-xl p-4 border border-teal-200">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-teal-600">print</span>
+                </div>
+                <div>
+                    <p class="font-semibold text-teal-800">Printer Status</p>
+                    <p class="text-sm text-teal-600" id="printer-status">Connected</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-green-500 pulse"></div>
+                <span class="text-xs text-teal-700">Factory Line 04 - Thermal Jet</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Bottom Navigation -->
+{% include 'components/bottom_nav.html' %}
+
+<script>
+let printQueue = [];
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'pending': '<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700">Pending</span>',
+        'ready': '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Ready</span>',
+        'printed': '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Printed</span>'
+    };
+    return badges[status] || badges['pending'];
+}
+
+function loadPrintQueue() {
+    fetch('/api/print-queue')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('queue-table-body');
+            if (data.success && data.data && data.data.length > 0) {
+                printQueue = data.data;
+                const pending = data.data.filter(q => q.status === 'pending').length;
+                const ready = data.data.filter(q => q.status === 'ready').length;
+                const printed = data.data.filter(q => q.status === 'printed').length;
+                
+                document.getElementById('pending-count').textContent = pending;
+                document.getElementById('ready-count').textContent = ready;
+                document.getElementById('printed-count').textContent = printed;
+                document.getElementById('total-batches').textContent = data.data.length;
+                
+                tbody.innerHTML = data.data.map(item => `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4"><code class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">${item.batch_number}</code></td>
+                        <td class="px-6 py-4 font-medium text-gray-800">${item.product_name || 'N/A'}</td>
+                        <td class="px-6 py-4 text-gray-600">${item.quantity} units</td>
+                        <td class="px-6 py-4 text-gray-600">${formatDate(item.created_at)}</td>
+                        <td class="px-6 py-4">${getStatusBadge(item.status)}</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="downloadLabel(${item.id})" class="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 transition-colors flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">download</span>
+                                    Download
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No labels in queue. Register new batches to generate QR labels.</td></tr>';
+            }
+        });
+}
+
+function downloadLabel(queueId) {
+    fetch(`/api/print-queue/${queueId}/download`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Label download started. PDF will be generated.');
+                loadPrintQueue();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+}
+
+document.getElementById('print-all-btn').addEventListener('click', () => {
+    if (confirm('Print all pending labels?')) {
+        fetch('/api/print-queue/print-all', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('All labels queued for printing.');
+                    loadPrintQueue();
+                }
+            });
+    }
+});
+
+function loadUserProfile() {
+    fetch('/api/user-profile')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('user-initial').textContent = data.data.first_name.charAt(0);
+            }
+        });
+}
+
+loadUserProfile();
+loadPrintQueue();
+setInterval(loadPrintQueue, 30000);
+</script>
+</body>
+</html>

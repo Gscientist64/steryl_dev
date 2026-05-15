@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shipment Intake - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { opacity: 0.5; }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+<!-- Top Navigation -->
+<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <div class="h-8 w-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
+                    </div>
+                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-teal-500">Health</span></span>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:space-x-8">
+                    <a href="{{ url_for('main.dashboard') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
+                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
+                    <a href="{{ url_for('main.budget') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Budget</a>
+                    <a href="{{ url_for('main.shipment_intake') }}" class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 px-3 py-2 text-sm font-medium">Shipments</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
+                    <span class="text-sm font-bold text-teal-600 dark:text-teal-300">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header with Shipment Info -->
+    <div class="bg-gradient-to-r from-teal-600 to-teal-700 rounded-xl shadow-lg p-6 mb-8 text-white">
+        <div class="flex flex-wrap justify-between items-start">
+            <div>
+                <h1 id="shipment-title" class="text-2xl font-bold">Shipment #SH-99203</h1>
+                <div class="flex flex-wrap gap-6 mt-3">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-200">calendar_today</span>
+                        <span id="expected-date" class="text-teal-100">Expected: Loading...</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-200">local_shipping</span>
+                        <span id="supplier-name" class="text-teal-100">Supplier: Loading...</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-200">inventory_2</span>
+                        <span id="carrier-name" class="text-teal-100">Carrier: Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                <div class="flex justify-between items-end mb-2">
+                    <p class="text-xs font-bold uppercase tracking-wider">Intake Progress</p>
+                    <p id="progress-percent" class="text-sm font-extrabold">0%</p>
+                </div>
+                <div class="w-48 h-2 bg-white/20 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-white rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="received-count" class="text-xs mt-2 text-teal-200">0 of 0 items verified</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div class="relative flex-1 max-w-md">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                <input id="search-manifest" type="text" placeholder="Search manifest items..." 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500">
+            </div>
+            <div class="flex gap-3">
+                <button id="scan-mode-toggle" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">qr_code_scanner</span>
+                    Start Scanning
+                </button>
+                <button id="complete-receiving" class="hidden px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+                    Complete Receiving
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manifest Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <tr class="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-4">Item Details</th>
+                        <th class="px-6 py-4">Batch ID</th>
+                        <th class="px-6 py-4">Manufacturer</th>
+                        <th class="px-6 py-4 text-center">Expected</th>
+                        <th class="px-6 py-4 text-center">Received</th>
+                        <th class="px-6 py-4 text-right">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="manifest-body" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr><td colspan="6" class="text-center py-8 text-gray-500">Loading shipment data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentShipment = null;
+let shipmentItems = [];
+
+function updateProgress() {
+    if (!shipmentItems.length) return;
+    
+    const received = shipmentItems.filter(item => item.received_quantity > 0).length;
+    const percentage = (received / shipmentItems.length) * 100;
+    
+    document.getElementById('progress-bar').style.width = `${percentage}%`;
+    document.getElementById('progress-percent').textContent = `${Math.round(percentage)}%`;
+    document.getElementById('received-count').textContent = `${received} of ${shipmentItems.length} items verified`;
+    
+    const completeBtn = document.getElementById('complete-receiving');
+    if (percentage >= 100) {
+        completeBtn.classList.remove('hidden');
+    } else {
+        completeBtn.classList.add('hidden');
+    }
+}
+
+function updateQuantity(itemId, delta) {
+    const item = shipmentItems.find(i => i.id === itemId);
+    if (item) {
+        const newQuantity = item.received_quantity + delta;
+        if (newQuantity >= 0 && newQuantity <= item.expected_quantity) {
+            item.received_quantity = newQuantity;
+            item.status = newQuantity === item.expected_quantity ? 'verified' : (newQuantity > 0 ? 'partial' : 'pending');
+            
+            const input = document.getElementById(`qty-${itemId}`);
+            if (input) input.value = newQuantity;
+            
+            updateProgress();
+            renderManifest();
+        }
+    }
+}
+
+function updateQuantityFromInput(itemId, value) {
+    const item = shipmentItems.find(i => i.id === itemId);
+    if (item) {
+        let newQuantity = parseInt(value);
+        if (isNaN(newQuantity)) newQuantity = 0;
+        newQuantity = Math.min(Math.max(0, newQuantity), item.expected_quantity);
+        item.received_quantity = newQuantity;
+        item.status = newQuantity === item.expected_quantity ? 'verified' : (newQuantity > 0 ? 'partial' : 'pending');
+        updateProgress();
+        renderManifest();
+    }
+}
+
+function renderManifest() {
+    const tbody = document.getElementById('manifest-body');
+    const searchTerm = document.getElementById('search-manifest').value.toLowerCase();
+    
+    let filtered = [...shipmentItems];
+    if (searchTerm) {
+        filtered = filtered.filter(item => 
+            (item.product_name || '').toLowerCase().includes(searchTerm) ||
+            (item.batch_number || '').toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No items found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filtered.map(item => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${item.received_quantity === item.expected_quantity ? 'bg-green-50/30 dark:bg-green-900/10' : ''}">
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-500">medication</span>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-900 dark:text-white">${item.product_name || 'Unknown Product'}</p>
+                        <p class="text-xs text-gray-500">SKU: ${item.product_sku || 'N/A'}</p>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4">
+                <code class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded">${item.batch_number || 'New Batch'}</code>
+            </td>
+            <td class="px-6 py-4 text-gray-600 dark:text-gray-400">${item.manufacturer || 'Steryl Med Africa'}</td>
+            <td class="px-6 py-4 text-center font-bold text-gray-900 dark:text-white">${item.expected_quantity} units</td>
+            <td class="px-6 py-4">
+                <div class="flex items-center justify-center gap-2">
+                    <button onclick="updateQuantity(${item.id}, -1)" class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-teal-100 transition-colors">
+                        <span class="material-symbols-outlined text-sm">remove</span>
+                    </button>
+                    <input id="qty-${item.id}" type="number" value="${item.received_quantity}" min="0" max="${item.expected_quantity}" 
+                           class="w-16 text-center px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold"
+                           onchange="updateQuantityFromInput(${item.id}, this.value)">
+                    <button onclick="updateQuantity(${item.id}, 1)" class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-teal-100 transition-colors">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                    </button>
+                </div>
+            </td>
+            <td class="px-6 py-4 text-right">
+                <span class="px-2 py-1 text-xs rounded-full
+                    ${item.received_quantity === item.expected_quantity ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
+                      item.received_quantity > 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 
+                      'bg-gray-100 text-gray-500 dark:bg-gray-700'}"
+                >
+                    ${item.received_quantity === item.expected_quantity ? 'Verified' : 
+                      item.received_quantity > 0 ? 'Partial' : 'Pending'}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function loadShipment() {
+    fetch('/api/shipments/1')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentShipment = data.data;
+                shipmentItems = currentShipment.items || [];
+                
+                document.getElementById('shipment-title').textContent = `Shipment ${currentShipment.shipment_number}`;
+                document.getElementById('expected-date').textContent = `Expected: ${new Date(currentShipment.expected_date).toLocaleDateString()}`;
+                document.getElementById('supplier-name').textContent = `Supplier: ${currentShipment.supplier}`;
+                document.getElementById('carrier-name').textContent = `Carrier: ${currentShipment.carrier || 'Standard Shipping'}`;
+                
+                renderManifest();
+                updateProgress();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading shipment:', error);
+            document.getElementById('manifest-body').innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Error loading shipment data</td></tr>';
+        });
+}
+
+document.getElementById('search-manifest').addEventListener('input', () => renderManifest());
+document.getElementById('scan-mode-toggle').addEventListener('click', () => {
+    alert('Scanning mode activated. Please scan the first item barcode.');
+});
+
+document.getElementById('complete-receiving')?.addEventListener('click', () => {
+    if (confirm('Mark all items as received? This will update inventory.')) {
+        alert('Shipment completed! Inventory has been updated.');
+        window.location.href = "{{ url_for('main.dashboard') }}";
+    }
+});
+
+loadShipment();
+</script>
+</body>
+</html>

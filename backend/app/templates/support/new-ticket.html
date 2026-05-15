@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Support Tickets - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+    * { font-family: 'Inter', sans-serif; }
+    body { padding-bottom: 80px; }
+    .ticket-card { transition: all 0.3s ease; }
+    .ticket-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+</style>
+</head>
+<body class="bg-gray-50">
+<!-- Top Navigation -->
+<nav class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="px-6 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Support Center</h1>
+            <p class="text-gray-500 text-sm">Submit and track support tickets</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                    <span class="text-sm font-bold text-teal-600" id="user-initial">U</span>
+                </div>
+                <span class="text-sm font-medium text-gray-700 hidden md:block" id="user-name">Loading...</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto p-6">
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Left Column - New Ticket Form -->
+        <div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <h2 class="font-bold text-gray-800 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-600">add_circle</span>
+                        Submit New Ticket
+                    </h2>
+                </div>
+                
+                <form id="ticket-form" class="p-6 space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Subject *</label>
+                        <input type="text" id="subject" required placeholder="Summarize the issue" 
+                               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+                            <select id="category" required class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                <option value="">Select category...</option>
+                                <option value="labeling">Labeling Error</option>
+                                <option value="sync">Sync Issue</option>
+                                <option value="access">Account Access</option>
+                                <option value="regulatory">Regulatory Block</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="billing">Billing Question</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Priority *</label>
+                            <select id="priority" required class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                <option value="low">Low - General Inquiry</option>
+                                <option value="medium">Medium - Minor Disruption</option>
+                                <option value="high">High - Production Delay</option>
+                                <option value="critical">Critical - Compliance Violation</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                        <textarea id="description" rows="5" required placeholder="Provide a detailed description of the issue..." 
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"></textarea>
+                    </div>
+
+                    <div class="bg-teal-50 rounded-lg p-4 border border-teal-200">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-teal-600">verified_user</span>
+                            <div class="text-sm text-teal-800">
+                                <p class="font-semibold">Steryl Compliance Protection</p>
+                                <p class="text-teal-700 mt-1">A unique Tracking ID will be assigned. All communication is encrypted.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full px-6 py-3 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-all">
+                        Submit Ticket
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Column - Recent Tickets -->
+        <div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <h2 class="font-bold text-gray-800 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-600">history</span>
+                        Your Recent Tickets
+                    </h2>
+                </div>
+                <div id="recent-tickets" class="divide-y divide-gray-100">
+                    <div class="p-8 text-center text-gray-500">Loading your tickets...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Bottom Navigation -->
+{% include 'components/bottom_nav.html' %}
+
+<script>
+function getPriorityBadge(priority) {
+    const badges = {
+        'low': '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Low</span>',
+        'medium': '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">Medium</span>',
+        'high': '<span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700">High</span>',
+        'critical': '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">Critical</span>'
+    };
+    return badges[priority] || badges['medium'];
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'open': '<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700">Open</span>',
+        'in-progress': '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">In Progress</span>',
+        'resolved': '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Resolved</span>',
+        'closed': '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Closed</span>'
+    };
+    return badges[status] || badges['open'];
+}
+
+function loadRecentTickets() {
+    fetch('/api/support/tickets')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('recent-tickets');
+            if (data.success && data.data && data.data.length > 0) {
+                container.innerHTML = data.data.map(ticket => `
+                    <div class="ticket-card p-5 hover:bg-gray-50 transition-colors cursor-pointer" onclick="viewTicket('${ticket.ticket_number}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="font-semibold text-gray-800">#${ticket.ticket_number}</p>
+                                <p class="text-sm text-gray-600 mt-1">${ticket.subject}</p>
+                            </div>
+                            ${getPriorityBadge(ticket.priority)}
+                        </div>
+                        <div class="flex justify-between items-center mt-3">
+                            <div class="flex items-center gap-2">
+                                ${getStatusBadge(ticket.status)}
+                                <span class="text-xs text-gray-400">${new Date(ticket.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="p-8 text-center text-gray-500">No tickets yet. Create your first support ticket!</div>';
+            }
+        });
+}
+
+function loadUserProfile() {
+    fetch('/api/user-profile')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('user-name').textContent = data.data.first_name + ' ' + data.data.last_name;
+                document.getElementById('user-initial').textContent = data.data.first_name.charAt(0);
+            }
+        });
+}
+
+function viewTicket(ticketNumber) {
+    alert(`View details for ticket: ${ticketNumber}`);
+}
+
+document.getElementById('ticket-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Submitting...';
+    submitBtn.disabled = true;
+    
+    const formData = {
+        subject: document.getElementById('subject').value,
+        category: document.getElementById('category').value,
+        priority: document.getElementById('priority').value,
+        description: document.getElementById('description').value
+    };
+    
+    try {
+        const response = await fetch('/api/support/tickets/new', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Ticket submitted successfully! You will receive updates via email.');
+            document.getElementById('ticket-form').reset();
+            loadRecentTickets();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Failed to submit ticket');
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+loadUserProfile();
+loadRecentTickets();
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!-- app/templates/dashboard/_bottom_nav.html -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 shadow-lg">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4">
+        <div class="flex justify-around items-center h-16 sm:h-20">
+            <!-- Dashboard -->
+            <a href="{{ url_for('main.dashboard') }}" 
+               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.dashboard' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
+                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
+                    {% if request.endpoint == 'main.dashboard' %}dashboard{% else %}dashboard{% endif %}
+                </span>
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Home</span>
+            </a>
+
+            <!-- Orders -->
+            <a href="{{ url_for('main.order_cart') }}" 
+               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.order_cart' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
+                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
+                    shopping_cart
+                </span>
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Orders</span>
+            </a>
+
+            <!-- Approvals with Badge -->
+            <a href="{{ url_for('main.approvals') }}" 
+               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group relative
+                      {% if request.endpoint == 'main.approvals' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
+                <div class="relative">
+                    <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
+                        fact_check
+                    </span>
+                    <span id="approval-badge" class="absolute -top-1 -right-2 hidden min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full items-center justify-center px-1">0</span>
+                </div>
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Approvals</span>
+            </a>
+
+            <!-- Budget -->
+            <a href="{{ url_for('main.budget') }}" 
+               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.budget' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
+                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
+                    analytics
+                </span>
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Budget</span>
+            </a>
+
+            <!-- Settings (Only on dashboard) -->
+            {% if request.endpoint == 'main.dashboard' %}
+            <a href="{{ url_for('main.settings') }}" 
+               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
+                      {% if request.endpoint == 'main.settings' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
+                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
+                    settings
+                </span>
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Settings</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<script>
+// Fetch and update approval badge count
+function updateApprovalBadge() {
+    fetch('/api/approvals')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const pendingCount = data.data.filter(a => a.order.status === 'pending').length;
+                const badge = document.getElementById('approval-badge');
+                if (badge) {
+                    if (pendingCount > 0) {
+                        badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+                        badge.classList.remove('hidden');
+                        badge.classList.add('inline-flex');
+                    } else {
+                        badge.classList.add('hidden');
+                        badge.classList.remove('inline-flex');
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Error fetching approvals:', error));
+}
+
+// Update badge every 30 seconds
+if (document.getElementById('approval-badge')) {
+    updateApprovalBadge();
+    setInterval(updateApprovalBadge, 30000);
+}
+</script>
