@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Product Details - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="manufacturer-body">
+{% set manufacturer_page_title = 'Product Details' %}
+{% set manufacturer_primary_action_href = url_for('main.manufacturer_skus') %}
+{% set manufacturer_primary_action_label = 'Back to Catalog' %}
+{% set manufacturer_primary_action_icon = 'arrow_back' %}
+{% include 'components/manufacturer_workspace.html' %}
+
+<main class="manufacturer-shell space-y-8 py-8">
+    <section class="manufacturer-hero px-6 py-8 lg:px-8">
+        <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <div class="manufacturer-kicker mb-4">
+                    <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                    <span>Catalog Product Record</span>
+                </div>
+                <h2 id="detail-product-name" class="text-3xl font-bold tracking-tight lg:text-4xl">Loading product...</h2>
+                <p id="detail-product-description" class="mt-3 max-w-2xl text-sm text-teal-50/90 lg:text-base">Fetching full product details for this manufacturer record.</p>
+            </div>
+            <div class="manufacturer-panel rounded-[1.5rem] bg-white/12 px-5 py-4 text-white backdrop-blur">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">SKU Reference</p>
+                <p id="detail-product-sku" class="mt-2 text-lg font-bold">--</p>
+                <p id="detail-product-status" class="mt-2 text-sm text-white/80">--</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="manufacturer-metric-card">
+            <p class="text-sm text-slate-500">Unit Price</p>
+            <p id="detail-unit-price" class="mt-2 text-3xl font-bold text-teal-600">--</p>
+        </div>
+        <div class="manufacturer-metric-card">
+            <p class="text-sm text-slate-500">Current Stock</p>
+            <p id="detail-total-stock" class="mt-2 text-3xl font-bold text-slate-900">--</p>
+        </div>
+        <div class="manufacturer-metric-card">
+            <p class="text-sm text-slate-500">Active Batches</p>
+            <p id="detail-active-batches" class="mt-2 text-3xl font-bold text-emerald-600">--</p>
+        </div>
+        <div class="manufacturer-metric-card">
+            <p class="text-sm text-slate-500">Reorder Level</p>
+            <p id="detail-reorder-level" class="mt-2 text-3xl font-bold text-amber-600">--</p>
+        </div>
+    </section>
+
+    <section class="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
+        <div class="manufacturer-table-shell p-6">
+            <div class="border-b border-slate-100 pb-4">
+                <h3 class="text-lg font-bold text-slate-900">Product Information</h3>
+                <p class="mt-1 text-sm text-slate-500">This view shows the complete catalog record used during manufacturer batch registration.</p>
+            </div>
+            <dl class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Category</dt>
+                    <dd id="detail-category" class="mt-2 text-sm font-semibold text-slate-900">--</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Status</dt>
+                    <dd id="detail-status" class="mt-2 text-sm font-semibold text-slate-900">--</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Created</dt>
+                    <dd id="detail-created-at" class="mt-2 text-sm font-semibold text-slate-900">--</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Last Updated</dt>
+                    <dd id="detail-updated-at" class="mt-2 text-sm font-semibold text-slate-900">--</dd>
+                </div>
+                <div class="md:col-span-2">
+                    <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Description</dt>
+                    <dd id="detail-description" class="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-700">--</dd>
+                </div>
+            </dl>
+        </div>
+
+        <aside class="space-y-5">
+            <div class="manufacturer-panel rounded-[1.5rem] p-6">
+                <h3 class="text-lg font-bold text-slate-900">Batch Usage Snapshot</h3>
+                <div class="mt-5 space-y-4 text-sm text-slate-600">
+                    <div class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Total Batches</p>
+                        <p id="detail-total-batches" class="mt-2 text-2xl font-bold text-slate-900">--</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Latest Batch</p>
+                        <p id="detail-latest-batch" class="mt-2 text-base font-semibold text-slate-900">No batches yet</p>
+                        <p id="detail-latest-batch-date" class="mt-1 text-sm text-slate-500">--</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Operational Guidance</p>
+                        <p class="mt-2 text-sm leading-7 text-slate-600">Update the price from the catalog page when commercial terms change. All batch registration selections continue to use this product record.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </section>
+</main>
+
+<script>
+const productId = {{ product_id|int }};
+const MANUFACTURER_CURRENCY = '{{ manufacturer_currency|default("USD") }}';
+
+function formatCurrency(amount) {
+    try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: MANUFACTURER_CURRENCY }).format(amount || 0);
+    } catch (e) {
+        return MANUFACTURER_CURRENCY + ' ' + (parseFloat(amount) || 0).toFixed(2);
+    }
+}
+
+function formatDate(dateString) {
+    if (!dateString) {
+        return 'Not available';
+    }
+    return new Date(dateString).toLocaleString();
+}
+
+function fillText(id, value) {
+    document.getElementById(id).textContent = value;
+}
+
+function loadUserProfile() {
+    fetch('/api/user-profile')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('user-name').textContent = data.data.first_name + ' ' + data.data.last_name;
+                document.getElementById('user-initial').textContent = data.data.first_name.charAt(0);
+            }
+        });
+}
+
+async function loadProduct() {
+    try {
+        const response = await fetch(`/api/manufacturer/skus/${productId}`);
+        const result = await response.json();
+
+        if (!result.success || !result.data) {
+            window.showNotice?.('Product details could not be loaded.', 'error');
+            return;
+        }
+
+        const product = result.data;
+        fillText('detail-product-name', product.name || 'Unnamed product');
+        fillText('detail-product-description', product.description || 'No description has been provided for this product record.');
+        fillText('detail-product-sku', product.sku || '--');
+        fillText('detail-product-status', (product.status || 'unknown').toUpperCase());
+        fillText('detail-unit-price', formatCurrency(product.unit_price));
+        fillText('detail-total-stock', `${product.total_stock || 0} units`);
+        fillText('detail-active-batches', String(product.active_batch_count || 0));
+        fillText('detail-reorder-level', `${product.reorder_level || 0} units`);
+        fillText('detail-category', product.category || 'Uncategorized');
+        fillText('detail-status', product.status || 'Unknown');
+        fillText('detail-created-at', formatDate(product.created_at));
+        fillText('detail-updated-at', formatDate(product.updated_at));
+        fillText('detail-description', product.description || 'No description has been provided for this product record.');
+        fillText('detail-total-batches', String(product.total_batch_count || 0));
+        fillText('detail-latest-batch', product.latest_batch_number || 'No batches yet');
+        fillText('detail-latest-batch-date', formatDate(product.latest_batch_created_at));
+    } catch (error) {
+        window.showNotice?.('Product details could not be loaded.', 'error');
+    }
+}
+
+loadUserProfile();
+loadProduct();
+</script>
+{% include 'components/notice_system.html' %}
+</body>
+</html>

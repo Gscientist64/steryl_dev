@@ -1,286 +1,272 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 <head>
+<script>(function(){var t=localStorage.getItem('steryl-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark')})();</script>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Budget &amp; Spend Analysis - Steryl Health OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Budget — Steryl Health</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <style>
-    * {
-        font-family: 'Inter', sans-serif;
-    }
-    .gradient-bg {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .card-hover {
-        transition: all 0.3s ease;
-    }
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in {
-        animation: fadeIn 0.5s ease-out;
-    }
+  *{font-family:'Inter',sans-serif}
+  body{transition:background-color .2s,color .2s}
+  .stat-card{transition:all .22s}
+  .stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.08)}
+  .dark .stat-card:hover{box-shadow:0 12px 28px rgba(0,0,0,.3)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .fade-up{animation:fadeUp .35s ease-out both}
+  /* Progress bar shimmer for loading */
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+  .shimmer{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+  .dark .shimmer{background:linear-gradient(90deg,#374151 25%,#4b5563 50%,#374151 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
 </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900">
-<!-- Top Navigation Bar -->
-<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <div class="h-8 w-8 bg-teal-500 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
-                    </div>
-                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-teal-500">Health</span></span>
-                </div>
-                <div class="hidden md:ml-6 md:flex md:space-x-8">
-                    <a href="{{ url_for('main.dashboard') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
-                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
-                    <a href="{{ url_for('main.budget') }}" class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 px-3 py-2 text-sm font-medium">Budget</a>
-                    <a href="{{ url_for('main.shipment_intake') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Shipments</a>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-3">
-                    <div class="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
-                        <span class="text-sm font-bold text-teal-600 dark:text-teal-300">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">{{ current_user.first_name }} {{ current_user.last_name }}</span>
-                </div>
-            </div>
-        </div>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+{% include 'dashboard/_top_nav.html' %}
+
+<!-- Page header + period selector (sticky) -->
+<div class="sticky top-14 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-white">Budget &amp; Spend Analysis</h1>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Track spending and budget utilisation</p>
+      </div>
+      <!-- Period pills -->
+      <div class="flex gap-2">
+        <button onclick="loadBudgetData('month')" id="btn-month"
+                class="period-btn active px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all">This Month</button>
+        <button onclick="loadBudgetData('quarter')" id="btn-quarter"
+                class="period-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all">90 Days</button>
+        <button onclick="loadBudgetData('year')" id="btn-year"
+                class="period-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all">Year</button>
+      </div>
     </div>
-</nav>
-
-<!-- Main Content -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Page Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Budget & Spend Analysis</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-2">Track your department spending and budget utilization</p>
-    </div>
-
-    <!-- Date Range Selector -->
-    <div class="mb-6 flex flex-wrap gap-2">
-        <button onclick="loadBudgetData('month')" id="btn-month" class="px-4 py-2 rounded-lg bg-teal-600 text-white font-medium transition-all">This Month</button>
-        <button onclick="loadBudgetData('quarter')" id="btn-quarter" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-all">Last 90 Days</button>
-        <button onclick="loadBudgetData('year')" id="btn-year" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-all">Year to Date</button>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Budget -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Budget</p>
-                    <p id="total-budget" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">$0</p>
-                </div>
-                <div class="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">account_balance_wallet</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Spent So Far -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Spent So Far</p>
-                    <p id="total-spent" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">$0</p>
-                </div>
-                <div class="h-12 w-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">receipt</span>
-                </div>
-            </div>
-            <div class="mt-2">
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div id="spent-bar" class="bg-purple-600 h-2 rounded-full" style="width: 0%"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Remaining -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Remaining</p>
-                    <p id="total-remaining" class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">$0</p>
-                </div>
-                <div class="h-12 w-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-green-600 dark:text-green-400">savings</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Usage Percentage -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 card-hover">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Usage Percentage</p>
-                    <p id="percentage-used" class="text-2xl font-bold text-teal-600 dark:text-teal-400 mt-1">0%</p>
-                </div>
-                <div class="h-12 w-12 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-teal-600 dark:text-teal-400">pie_chart</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Spend by Category -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Spend by Category</h2>
-                <span class="material-symbols-outlined text-gray-400">bar_chart</span>
-            </div>
-            <div id="categories-container" class="space-y-4">
-                <div class="text-center py-8 text-gray-500">Loading categories...</div>
-            </div>
-        </div>
-
-        <!-- Top Departments -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Top Departments by Spend</h2>
-                <span class="material-symbols-outlined text-gray-400">business_center</span>
-            </div>
-            <div id="departments-container" class="space-y-3">
-                <div class="text-center py-8 text-gray-500">Loading departments...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Transactions -->
-    <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
-            <button class="text-teal-600 dark:text-teal-400 text-sm font-medium hover:underline">View All</button>
-        </div>
-        <div id="transactions-container" class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="border-b border-gray-200 dark:border-gray-700">
-                    <tr class="text-left text-gray-500 dark:text-gray-400 text-sm">
-                        <th class="pb-3">Order #</th>
-                        <th class="pb-3">Department</th>
-                        <th class="pb-3">Amount</th>
-                        <th class="pb-3">Date</th>
-                        <th class="pb-3">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="transactions-table-body">
-                    <tr><td colspan="5" class="text-center py-8 text-gray-500">Loading transactions...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+  </div>
 </div>
 
-<script>
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
-    }
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-28">
 
-function updateActiveButton(period) {
-    const buttons = ['month', 'quarter', 'year'];
-    buttons.forEach(p => {
-        const btn = document.getElementById(`btn-${p}`);
-        if (p === period) {
-            btn.className = 'px-4 py-2 rounded-lg bg-teal-600 text-white font-medium transition-all';
-        } else {
-            btn.className = 'px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-all';
-        }
-    });
+  <!-- Stats grid -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 fade-up">
+      <div class="flex items-start justify-between mb-2">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Allocated</p>
+        <div class="h-9 w-9 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+          <span class="material-symbols-outlined text-blue-600 dark:text-blue-400" style="font-size:18px">account_balance_wallet</span>
+        </div>
+      </div>
+      <p id="total-budget" class="text-2xl font-bold text-gray-900 dark:text-white">₦—</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Total budget</p>
+    </div>
+
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 fade-up" style="animation-delay:.06s">
+      <div class="flex items-start justify-between mb-2">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Spent</p>
+        <div class="h-9 w-9 bg-purple-50 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+          <span class="material-symbols-outlined text-purple-600 dark:text-purple-400" style="font-size:18px">receipt</span>
+        </div>
+      </div>
+      <p id="total-spent" class="text-2xl font-bold text-purple-700 dark:text-purple-400">₦—</p>
+      <div class="mt-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+        <div id="spent-bar" class="bg-purple-500 h-1.5 rounded-full transition-all duration-700" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 fade-up" style="animation-delay:.12s">
+      <div class="flex items-start justify-between mb-2">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Remaining</p>
+        <div class="h-9 w-9 bg-green-50 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+          <span class="material-symbols-outlined text-green-600 dark:text-green-400" style="font-size:18px">savings</span>
+        </div>
+      </div>
+      <p id="total-remaining" class="text-2xl font-bold text-green-700 dark:text-green-400">₦—</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Available to spend</p>
+    </div>
+
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 fade-up" style="animation-delay:.18s">
+      <div class="flex items-start justify-between mb-2">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Utilisation</p>
+        <div class="h-9 w-9 bg-teal-50 dark:bg-teal-900/30 rounded-xl flex items-center justify-center">
+          <span class="material-symbols-outlined text-teal-600 dark:text-teal-400" style="font-size:18px">pie_chart</span>
+        </div>
+      </div>
+      <p id="percentage-used" class="text-2xl font-bold text-teal-700 dark:text-teal-400">—%</p>
+      <p id="util-label" class="text-xs text-gray-500 dark:text-gray-400 mt-1">of budget used</p>
+    </div>
+  </div>
+
+  <!-- Content grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+
+    <!-- Spend by category -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white">Spend by Category</h2>
+        <span class="material-symbols-outlined text-gray-400" style="font-size:18px">bar_chart</span>
+      </div>
+      <div id="categories-container" class="p-5 space-y-4">
+        <div class="shimmer h-10 rounded-xl"></div>
+        <div class="shimmer h-10 rounded-xl"></div>
+        <div class="shimmer h-10 rounded-xl"></div>
+      </div>
+    </div>
+
+    <!-- Top departments -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white">Top Departments</h2>
+        <span class="material-symbols-outlined text-gray-400" style="font-size:18px">business_center</span>
+      </div>
+      <div id="departments-container" class="p-4 space-y-2">
+        <div class="shimmer h-14 rounded-xl"></div>
+        <div class="shimmer h-14 rounded-xl"></div>
+        <div class="shimmer h-14 rounded-xl"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent transactions -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+      <h2 class="font-semibold text-gray-900 dark:text-white">Recent Transactions</h2>
+      <a href="{{ url_for('main.approvals') }}" class="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline">View all →</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-[560px]">
+        <thead>
+          <tr class="border-b border-gray-100 dark:border-gray-700 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <th class="px-5 py-3 text-left">Order #</th>
+            <th class="px-5 py-3 text-left">Department</th>
+            <th class="px-5 py-3 text-right">Amount</th>
+            <th class="px-5 py-3 text-left">Date</th>
+            <th class="px-5 py-3 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody id="transactions-table-body">
+          <tr><td colspan="5" class="text-center py-10 text-gray-400 dark:text-gray-500 text-sm">Loading transactions…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+{% include 'dashboard/_bottom_nav.html' %}
+
+<style>
+.period-btn{border-color:#e5e7eb;color:#6b7280;background:transparent}
+.dark .period-btn{border-color:#374151;color:#9ca3af}
+.period-btn.active{background:#0d9488;color:#fff;border-color:#0d9488;box-shadow:0 2px 8px rgba(13,148,136,.2)}
+</style>
+
+<script>
+const fmt = v => new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(v||0);
+
+function setPeriodBtn(period) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-'+period).classList.add('active');
+}
+
+function barColor(pct) {
+  if (pct > 90) return 'bg-red-500';
+  if (pct > 70) return 'bg-amber-500';
+  return 'bg-teal-500';
 }
 
 function loadBudgetData(period = 'month') {
-    updateActiveButton(period);
-    
-    fetch(`/api/budget/stats?period=${period}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const stats = data.data;
-                
-                document.getElementById('total-budget').textContent = formatCurrency(stats.total_allocated);
-                document.getElementById('total-spent').textContent = formatCurrency(stats.total_spent);
-                document.getElementById('total-remaining').textContent = formatCurrency(stats.total_remaining);
-                document.getElementById('percentage-used').textContent = Math.round(stats.percentage_used) + '%';
-                
-                const spentPercent = (stats.total_spent / stats.total_allocated) * 100;
-                document.getElementById('spent-bar').style.width = spentPercent + '%';
-                
-                // Categories
-                const categoriesContainer = document.getElementById('categories-container');
-                if (stats.categories && stats.categories.length > 0) {
-                    categoriesContainer.innerHTML = stats.categories.map(cat => `
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-gray-700 dark:text-gray-300 font-medium">${cat.name}</span>
-                                <span class="text-gray-900 dark:text-white font-bold">${formatCurrency(cat.spent)}</span>
-                            </div>
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs text-gray-500">of ${formatCurrency(cat.allocated)}</span>
-                                <span class="text-xs text-gray-500">${Math.round(cat.percentage_used)}% used</span>
-                            </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                <div class="bg-teal-600 h-2 rounded-full" style="width: ${cat.percentage_used}%"></div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                // Departments
-                const departmentsContainer = document.getElementById('departments-container');
-                if (stats.top_departments && stats.top_departments.length > 0) {
-                    departmentsContainer.innerHTML = stats.top_departments.map((dept, idx) => `
-                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
-                                    <span class="text-sm font-bold text-teal-600 dark:text-teal-400">${idx + 1}</span>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-gray-900 dark:text-white">${dept.name}</p>
-                                    <p class="text-xs text-gray-500">${dept.order_count} orders</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold text-gray-900 dark:text-white">${formatCurrency(dept.spent)}</p>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                // Transactions
-                if (stats.recent_transactions && stats.recent_transactions.length > 0) {
-                    const tbody = document.getElementById('transactions-table-body');
-                    tbody.innerHTML = stats.recent_transactions.map(trans => `
-                        <tr class="border-b border-gray-100 dark:border-gray-700">
-                            <td class="py-3 text-gray-900 dark:text-white font-medium">${trans.order_number}</td>
-                            <td class="py-3 text-gray-600 dark:text-gray-400">${trans.department}</td>
-                            <td class="py-3 text-gray-900 dark:text-white font-bold">${formatCurrency(trans.amount)}</td>
-                            <td class="py-3 text-gray-500">${new Date(trans.date).toLocaleDateString()}</td>
-                            <td class="py-3">
-                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">${trans.status}</span>
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error loading budget data:', error);
-        });
+  setPeriodBtn(period);
+  fetch(`/api/budget/stats?period=${period}`).then(r=>r.json()).then(d=>{
+    if (!d.success) return;
+    const s = d.data;
+
+    document.getElementById('total-budget').textContent = fmt(s.total_allocated);
+    document.getElementById('total-spent').textContent = fmt(s.total_spent);
+    document.getElementById('total-remaining').textContent = fmt(s.total_remaining);
+    const pct = Math.round(s.percentage_used||0);
+    document.getElementById('percentage-used').textContent = pct+'%';
+    const spentBar = document.getElementById('spent-bar');
+    spentBar.style.width = Math.min(pct,100)+'%';
+    spentBar.className = `${barColor(pct)} h-1.5 rounded-full transition-all duration-700`;
+
+    const utilLabel = document.getElementById('util-label');
+    if (pct > 90) { utilLabel.textContent = 'Budget nearly exhausted!'; utilLabel.className='text-xs text-red-500 font-semibold mt-1'; }
+    else if (pct > 70) { utilLabel.textContent = 'Approaching budget limit'; utilLabel.className='text-xs text-amber-500 font-semibold mt-1'; }
+    else { utilLabel.textContent = 'of budget used'; utilLabel.className='text-xs text-gray-500 dark:text-gray-400 mt-1'; }
+
+    // Categories
+    const cats = document.getElementById('categories-container');
+    if (s.categories && s.categories.length > 0) {
+      cats.innerHTML = s.categories.map(c => {
+        const cp = Math.min(Math.round(c.percentage_used||0),100);
+        return `<div>
+          <div class="flex justify-between items-baseline mb-1.5">
+            <span class="text-sm font-medium text-gray-800 dark:text-gray-200">${c.name}</span>
+            <span class="text-sm font-bold text-gray-900 dark:text-white">${fmt(c.spent)}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+              <div class="${barColor(cp)} h-2 rounded-full transition-all duration-700" style="width:${cp}%"></div>
+            </div>
+            <span class="text-xs text-gray-500 dark:text-gray-400 w-10 text-right flex-shrink-0">${cp}%</span>
+          </div>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">of ${fmt(c.allocated)}</p>
+        </div>`;
+      }).join('');
+    } else {
+      cats.innerHTML = '<p class="text-center py-6 text-sm text-gray-400 dark:text-gray-500">No category data yet.</p>';
+    }
+
+    // Departments
+    const depts = document.getElementById('departments-container');
+    if (s.top_departments && s.top_departments.length > 0) {
+      const maxSpend = Math.max(...s.top_departments.map(d=>d.spent||0));
+      depts.innerHTML = s.top_departments.map((dept,i) => {
+        const w = maxSpend > 0 ? Math.round((dept.spent/maxSpend)*100) : 0;
+        return `<div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <div class="h-9 w-9 rounded-xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0">
+            <span class="text-sm font-bold text-teal-600 dark:text-teal-400">#${i+1}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-baseline justify-between mb-1">
+              <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">${dept.name}</p>
+              <p class="font-bold text-gray-900 dark:text-white text-sm flex-shrink-0 ml-2">${fmt(dept.spent)}</p>
+            </div>
+            <div class="bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+              <div class="bg-teal-500 h-1.5 rounded-full" style="width:${w}%"></div>
+            </div>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">${dept.order_count||0} orders</p>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      depts.innerHTML = '<p class="text-center py-6 text-sm text-gray-400 dark:text-gray-500">No department data yet.</p>';
+    }
+
+    // Transactions
+    const tbody = document.getElementById('transactions-table-body');
+    if (s.recent_transactions && s.recent_transactions.length > 0) {
+      const pillCls = {approved:'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+                       pending:'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+                       rejected:'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'};
+      tbody.innerHTML = s.recent_transactions.map(t => `
+        <tr class="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+          <td class="px-5 py-3.5 font-semibold text-gray-900 dark:text-white">${t.order_number||'—'}</td>
+          <td class="px-5 py-3.5 text-gray-600 dark:text-gray-400">${t.department||'—'}</td>
+          <td class="px-5 py-3.5 font-bold text-gray-900 dark:text-white text-right">${fmt(t.amount)}</td>
+          <td class="px-5 py-3.5 text-gray-500 dark:text-gray-400 text-xs">${new Date(t.date).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'})}</td>
+          <td class="px-5 py-3.5"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${pillCls[t.status]||pillCls.pending} capitalize">${t.status}</span></td>
+        </tr>`).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400 dark:text-gray-500 text-sm">No transactions yet.</td></tr>';
+    }
+  }).catch(()=>{
+    document.getElementById('categories-container').innerHTML='<p class="text-center py-6 text-sm text-red-400">Could not load budget data.</p>';
+  });
 }
 
 loadBudgetData('month');

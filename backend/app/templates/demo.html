@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Demo — Steryl Healthcare Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *{box-sizing:border-box} body{font-family:'Inter',sans-serif;overflow-x:hidden;background:#f8fafc;}
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity 0.55s ease,transform 0.55s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* Demo player */
+    .demo-player { background:#1e293b; border-radius:1.25rem; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.25); }
+    .player-bar { background:#0f172a; padding:10px 16px; display:flex; align-items:center; gap:8px; }
+    .dot{width:10px;height:10px;border-radius:50%}
+    .screen-wrap { position:relative; background:#f1f5f9; overflow:hidden; }
+
+    /* Step slides */
+    .demo-slide { position:absolute; inset:0; opacity:0; transition:opacity 0.5s ease; pointer-events:none; }
+    .demo-slide.active { opacity:1; pointer-events:auto; position:relative; }
+
+    /* Progress bar */
+    .progress-track { height:3px; background:#334155; position:relative; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,#0d9488,#06b6d4); width:0%; transition:width 0.1s linear; }
+
+    /* Cursor dot */
+    .cursor { width:18px;height:18px;border-radius:50%;background:rgba(13,148,136,0.85);border:2px solid white;position:absolute;pointer-events:none;z-index:50;transition:all 0.8s cubic-bezier(0.25,0.46,0.45,0.94);box-shadow:0 0 0 4px rgba(13,148,136,0.3); }
+    @keyframes clickPulse{0%{box-shadow:0 0 0 4px rgba(13,148,136,0.5)}50%{box-shadow:0 0 0 10px rgba(13,148,136,0)}100%{box-shadow:0 0 0 4px rgba(13,148,136,0.1)}}
+    .cursor.clicking{animation:clickPulse 0.5s ease}
+
+    /* Step label badge */
+    .step-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(13,148,136,0.15);border:1px solid rgba(13,148,136,0.3);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;color:#0d9488;letter-spacing:0.05em;text-transform:uppercase}
+
+    /* Type animation */
+    .typewriter{overflow:hidden;border-right:2px solid #0d9488;white-space:nowrap;animation:typing 1s steps(20,end),blink 0.7s step-end infinite}
+    @keyframes typing{from{width:0}to{width:100%}}
+    @keyframes blink{0%,100%{border-color:transparent}50%{border-color:#0d9488}}
+
+    /* Status pill */
+    .pill-pending{background:#fef3c7;color:#b45309;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+    .pill-approved{background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+    .pill-transit{background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+
+    /* Feature cards */
+    .feat-card{background:white;border:1.5px solid #e2e8f0;border-radius:1rem;padding:1.5rem;transition:all 0.2s}
+    .feat-card:hover{border-color:#0d9488;box-shadow:0 8px 24px rgba(13,148,136,0.12);transform:translateY(-2px)}
+
+    /* Nav */
+    .nav-link{transition:color 0.2s}.nav-link:hover{color:#0d9488}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-[100] bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5">
+      <img src="{{ url_for('static', filename='steryl_logo.jpeg') }}" alt="Steryl" class="h-9 w-9 rounded-xl object-cover shadow">
+      <span class="font-bold text-gray-900 text-lg tracking-tight">Steryl<span class="text-teal-500">Health</span></span>
+    </a>
+    <div class="hidden md:flex items-center gap-7">
+      <a href="/" class="nav-link text-sm font-medium text-gray-600">Home</a>
+      <a href="/demo" class="nav-link text-sm font-medium text-teal-600">Demo</a>
+      <a href="/invest" class="nav-link text-sm font-medium text-gray-600">Invest</a>
+    </div>
+    <a href="/invest" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-xl transition-colors">Invest Now →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="pt-28 pb-12 px-5 bg-gradient-to-b from-slate-900 to-slate-800">
+  <div class="max-w-4xl mx-auto text-center">
+    <div class="step-badge mb-5 mx-auto w-fit">Live Platform Demo</div>
+    <h1 class="text-3xl md:text-5xl font-black text-white mb-4 leading-tight">See Steryl in Action</h1>
+    <p class="text-slate-300 text-lg max-w-2xl mx-auto">Watch real workflows running on the live Steryl platform — not mockups, not slides. The actual system your organisation will use from day one.</p>
+  </div>
+</section>
+
+<!-- ══════ DEMO 1: Placing a Hospital Order ══════ -->
+<section class="py-16 px-5">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-8 reveal">
+      <div class="step-badge mb-3 mx-auto w-fit">Demo 1 of 3</div>
+      <h2 class="text-2xl md:text-3xl font-black text-gray-900 mb-2">Placing a Department Order</h2>
+      <p class="text-gray-500 text-sm max-w-lg mx-auto">A hospital nurse selects products, adds them to cart and submits for admin approval — entirely within the Steryl platform.</p>
+    </div>
+
+    <div class="demo-player reveal" id="player1">
+      <!-- Title bar -->
+      <div class="player-bar">
+        <div class="dot bg-red-500"></div><div class="dot bg-yellow-500"></div><div class="dot bg-green-500"></div>
+        <div class="flex-1 mx-3 bg-slate-700 rounded-md px-3 py-1 text-slate-400 text-xs">steryl.health/orders</div>
+        <button onclick="togglePlay(1)" id="playbtn1" class="text-slate-400 hover:text-white text-xs flex items-center gap-1.5 bg-slate-700 px-3 py-1 rounded-md transition-colors">
+          <i class="fas fa-pause" id="playicon1"></i><span id="playtext1">Pause</span>
+        </button>
+      </div>
+
+      <!-- Screen -->
+      <div class="screen-wrap" style="min-height:420px" id="screen1">
+        <div class="cursor" id="cursor1" style="top:50px;left:80px"></div>
+
+        <!-- Slide 1: Dashboard -->
+        <div class="demo-slide active" id="s1-1">
+          <div class="bg-white">
+            <!-- Top nav mock -->
+            <div class="bg-teal-700 px-5 py-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-2"><div class="h-5 w-5 bg-white/20 rounded flex items-center justify-center"><i class="fas fa-hospital text-white text-[9px]"></i></div><span class="text-white text-xs font-bold">Lagos General Hospital</span></div>
+              <div class="flex items-center gap-2"><span class="text-teal-200 text-[10px]">Dr. Amara Osei</span><div class="h-6 w-6 bg-teal-500 rounded-full flex items-center justify-center text-white text-[9px] font-bold">A</div></div>
+            </div>
+            <!-- Dashboard body -->
+            <div class="p-5">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Dashboard</p>
+              <div class="grid grid-cols-4 gap-3 mb-5">
+                <div class="bg-blue-50 rounded-xl p-3"><p class="text-xl font-black text-blue-600">4</p><p class="text-[9px] text-blue-500">Pending</p></div>
+                <div class="bg-teal-50 rounded-xl p-3"><p class="text-xl font-black text-teal-600">2</p><p class="text-[9px] text-teal-500">Departments</p></div>
+                <div class="bg-amber-50 rounded-xl p-3"><p class="text-xl font-black text-amber-600">1</p><p class="text-[9px] text-amber-500">Low Stock</p></div>
+                <div class="bg-green-50 rounded-xl p-3"><p class="text-xl font-black text-green-600">₦2.1M</p><p class="text-[9px] text-green-500">This Month</p></div>
+              </div>
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2">
+                <i class="fas fa-triangle-exclamation text-amber-500 text-sm"></i>
+                <p class="text-xs font-semibold text-amber-800">Stock alert: Surgical Gloves (Size M) running low — 12 boxes remaining</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Hospital dashboard — real-time stats and stock alerts</p></div>
+        </div>
+
+        <!-- Slide 2: Browse catalogue -->
+        <div class="demo-slide" id="s1-2">
+          <div class="bg-white">
+            <div class="bg-teal-700 px-5 py-2.5 flex items-center justify-between"><div class="flex items-center gap-2"><i class="fas fa-shopping-cart text-white text-xs"></i><span class="text-white text-xs font-bold">Browse Products</span></div><span class="text-teal-200 text-[10px]">Orders</span></div>
+            <div class="p-4">
+              <div class="flex gap-2 mb-4">
+                <div class="flex-1 bg-gray-50 border border-teal-400 rounded-xl px-3 py-2 flex items-center gap-2"><i class="fas fa-search text-teal-500 text-xs"></i><span class="text-xs text-gray-700 typewriter">Surgical Gloves</span></div>
+                <button class="px-3 py-2 bg-teal-600 text-white text-xs font-bold rounded-xl">Search</button>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 p-3 bg-teal-50 border-2 border-teal-400 rounded-xl">
+                  <div class="h-10 w-10 bg-teal-100 rounded-xl flex items-center justify-center"><i class="fas fa-hand-dots text-teal-600"></i></div>
+                  <div class="flex-1"><p class="text-sm font-bold text-gray-800">Surgical Gloves — Size M</p><p class="text-[10px] text-gray-500">PharmaGen Ltd · ₦4,500/box · In stock</p></div>
+                  <div class="flex items-center gap-2"><input class="w-12 border border-gray-300 rounded-lg text-center text-xs py-1" value="50" readonly><button class="bg-teal-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl">+ Add</button></div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl">
+                  <div class="h-10 w-10 bg-blue-50 rounded-xl flex items-center justify-center"><i class="fas fa-hand-dots text-blue-400"></i></div>
+                  <div class="flex-1"><p class="text-sm font-bold text-gray-800">Surgical Gloves — Size L</p><p class="text-[10px] text-gray-500">MediCore · ₦4,200/box · In stock</p></div>
+                  <button class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-xl">+ Add</button>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl">
+                  <div class="h-10 w-10 bg-violet-50 rounded-xl flex items-center justify-center"><i class="fas fa-syringe text-violet-400"></i></div>
+                  <div class="flex-1"><p class="text-sm font-bold text-gray-800">IV Cannula 18G</p><p class="text-[10px] text-gray-500">PharmaGen Ltd · ₦850/unit · In stock</p></div>
+                  <button class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-xl">+ Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Searching the verified product catalogue — only licensed manufacturers listed</p></div>
+        </div>
+
+        <!-- Slide 3: Cart & submit -->
+        <div class="demo-slide" id="s1-3">
+          <div class="bg-white">
+            <div class="bg-teal-700 px-5 py-2.5 flex items-center justify-between"><div class="flex items-center gap-2"><i class="fas fa-cart-shopping text-white text-xs"></i><span class="text-white text-xs font-bold">My Cart</span><span class="bg-white text-teal-700 text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center ml-1">2</span></div></div>
+            <div class="p-4">
+              <div class="space-y-3 mb-4">
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <div class="h-9 w-9 bg-teal-100 rounded-xl flex items-center justify-center"><i class="fas fa-hand-dots text-teal-500 text-sm"></i></div>
+                  <div class="flex-1"><p class="text-xs font-bold text-gray-800">Surgical Gloves — Size M</p><p class="text-[10px] text-gray-500">50 boxes · PharmaGen Ltd</p></div>
+                  <p class="text-xs font-black text-gray-800">₦225,000</p>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <div class="h-9 w-9 bg-violet-100 rounded-xl flex items-center justify-center"><i class="fas fa-syringe text-violet-500 text-sm"></i></div>
+                  <div class="flex-1"><p class="text-xs font-bold text-gray-800">IV Cannula 18G</p><p class="text-[10px] text-gray-500">200 units · PharmaGen Ltd</p></div>
+                  <p class="text-xs font-black text-gray-800">₦170,000</p>
+                </div>
+              </div>
+              <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-4">
+                <div class="flex justify-between text-xs font-semibold text-gray-700"><span>Subtotal</span><span>₦395,000</span></div>
+                <div class="flex justify-between text-sm font-black text-teal-700 mt-1"><span>Total</span><span>₦395,000</span></div>
+              </div>
+              <div class="mb-3"><label class="text-[10px] text-gray-500 font-semibold mb-1 block">Department</label><div class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 font-semibold">ICU / Critical Care</div></div>
+              <button class="w-full bg-gradient-to-r from-teal-600 to-teal-700 text-white font-black py-3 rounded-xl text-sm flex items-center justify-center gap-2"><i class="fas fa-paper-plane"></i>Submit Order Request</button>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Cart summary before submission — department tagged, total calculated</p></div>
+        </div>
+
+        <!-- Slide 4: Success + approval -->
+        <div class="demo-slide" id="s1-4">
+          <div class="bg-white">
+            <div class="bg-teal-700 px-5 py-2.5"><span class="text-white text-xs font-bold">Order Submitted</span></div>
+            <div class="p-5">
+              <div class="text-center mb-5">
+                <div class="h-16 w-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-circle-check text-green-500 text-3xl"></i></div>
+                <p class="font-black text-gray-900 text-lg">Order Submitted Successfully</p>
+                <p class="text-gray-500 text-xs mt-1">Reference: <span class="font-bold text-teal-600">ORD-2026-0127</span></p>
+              </div>
+              <div class="space-y-2 mb-4">
+                <div class="flex items-center gap-3 p-2.5 bg-green-50 rounded-xl"><div class="h-7 w-7 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-check text-green-500 text-xs"></i></div><p class="text-xs font-semibold text-gray-700">Order logged in Steryl platform</p></div>
+                <div class="flex items-center gap-3 p-2.5 bg-green-50 rounded-xl"><div class="h-7 w-7 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-check text-green-500 text-xs"></i></div><p class="text-xs font-semibold text-gray-700">Admin notified for approval</p></div>
+                <div class="flex items-center gap-3 p-2.5 bg-blue-50 rounded-xl"><div class="h-7 w-7 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-clock text-blue-500 text-xs"></i></div><p class="text-xs font-semibold text-gray-700">Awaiting admin consolidation</p></div>
+              </div>
+              <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 text-center">
+                <p class="text-teal-700 font-bold text-sm">Track live: <span class="text-teal-600">Pending Admin Review</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Order confirmed — admin receives instant notification to review and send to distributor</p></div>
+        </div>
+      </div>
+
+      <!-- Progress & controls -->
+      <div class="bg-slate-900 px-4 pt-2 pb-3">
+        <div class="progress-track mb-2 rounded-full"><div class="progress-fill rounded-full" id="progress1"></div></div>
+        <div class="flex items-center justify-between">
+          <div class="flex gap-2">
+            <button onclick="prevSlide(1)" class="h-7 w-7 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-300 text-xs transition-colors"><i class="fas fa-backward-step"></i></button>
+            <button onclick="nextSlide(1)" class="h-7 w-7 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-300 text-xs transition-colors"><i class="fas fa-forward-step"></i></button>
+          </div>
+          <p class="text-slate-500 text-[10px]" id="slidelabel1">Step 1 / 4 — Dashboard overview</p>
+          <div class="flex gap-1">
+            <div class="h-1.5 w-6 rounded-full bg-teal-500" id="dot1-1"></div>
+            <div class="h-1.5 w-6 rounded-full bg-slate-600" id="dot1-2"></div>
+            <div class="h-1.5 w-6 rounded-full bg-slate-600" id="dot1-3"></div>
+            <div class="h-1.5 w-6 rounded-full bg-slate-600" id="dot1-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ DEMO 2: Department Management ══════ -->
+<section class="py-16 px-5 bg-slate-900">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-8 reveal">
+      <div class="step-badge mb-3 mx-auto w-fit">Demo 2 of 3</div>
+      <h2 class="text-2xl md:text-3xl font-black text-white mb-2">Department Management</h2>
+      <p class="text-slate-400 text-sm max-w-lg mx-auto">An admin creates departments, assigns staff, and consolidates all department requests into a single order sent to the Steryl distributor.</p>
+    </div>
+
+    <div class="demo-player reveal" id="player2">
+      <div class="player-bar">
+        <div class="dot bg-red-500"></div><div class="dot bg-yellow-500"></div><div class="dot bg-green-500"></div>
+        <div class="flex-1 mx-3 bg-slate-700 rounded-md px-3 py-1 text-slate-400 text-xs">steryl.health/departments</div>
+        <button onclick="togglePlay(2)" id="playbtn2" class="text-slate-400 hover:text-white text-xs flex items-center gap-1.5 bg-slate-700 px-3 py-1 rounded-md transition-colors">
+          <i class="fas fa-pause" id="playicon2"></i><span id="playtext2">Pause</span>
+        </button>
+      </div>
+      <div class="screen-wrap" style="min-height:400px" id="screen2">
+        <div class="cursor" id="cursor2" style="top:50px;left:80px"></div>
+
+        <!-- Slide 1: Departments overview -->
+        <div class="demo-slide active" id="s2-1">
+          <div class="bg-white">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-5 py-8">
+              <div class="flex justify-between items-start">
+                <div><h2 class="text-white font-black text-lg">Departments</h2><p class="text-teal-100 text-xs">Manage Hospital departments & teams</p></div>
+                <button class="bg-white/20 border border-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5"><i class="fas fa-plus text-[9px]"></i>New</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 px-4 -mt-6 mb-4">
+              <div class="bg-teal-50 border border-teal-200 rounded-2xl p-3 text-center shadow-sm"><p class="text-2xl font-black text-teal-700">3</p><p class="text-[9px] font-semibold text-teal-600 uppercase">Depts</p></div>
+              <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-center shadow-sm"><p class="text-2xl font-black text-blue-700">11</p><p class="text-[9px] font-semibold text-blue-600 uppercase">Members</p></div>
+              <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-center shadow-sm"><p class="text-2xl font-black text-amber-700">5</p><p class="text-[9px] font-semibold text-amber-600 uppercase">Pending</p></div>
+            </div>
+            <div class="px-4 space-y-3 pb-4">
+              <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-3"><div class="h-11 w-11 bg-teal-50 rounded-xl flex items-center justify-center"><i class="fas fa-bed-pulse text-teal-600"></i></div><div><p class="font-bold text-gray-900 text-sm">ICU / Critical Care</p><p class="text-xs text-gray-400 flex items-center gap-1"><i class="fas fa-users text-[9px]"></i>4 members</p></div></div>
+                <div class="flex gap-1.5"><div class="h-8 w-8 bg-blue-50 rounded-xl flex items-center justify-center"><i class="fas fa-user-plus text-blue-500 text-xs"></i></div><div class="h-8 w-8 bg-red-50 rounded-xl flex items-center justify-center"><i class="fas fa-trash text-red-400 text-xs"></i></div></div>
+              </div>
+              <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-3"><div class="h-11 w-11 bg-blue-50 rounded-xl flex items-center justify-center"><i class="fas fa-heart-pulse text-blue-600"></i></div><div><p class="font-bold text-gray-900 text-sm">Emergency Ward</p><p class="text-xs text-gray-400 flex items-center gap-1"><i class="fas fa-users text-[9px]"></i>5 members</p></div></div>
+                <div class="flex gap-1.5"><div class="h-8 w-8 bg-blue-50 rounded-xl flex items-center justify-center"><i class="fas fa-user-plus text-blue-500 text-xs"></i></div><div class="h-8 w-8 bg-red-50 rounded-xl flex items-center justify-center"><i class="fas fa-trash text-red-400 text-xs"></i></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Admin view — all departments with member counts and pending order stats</p></div>
+        </div>
+
+        <!-- Slide 2: Dept orders with consolidation -->
+        <div class="demo-slide" id="s2-2">
+          <div class="bg-white">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-5 py-4"><span class="text-white font-black text-sm">Departments</span></div>
+            <div class="px-4 pt-3 pb-1">
+              <div class="bg-teal-50 border border-teal-300 rounded-xl p-3 mb-3 flex items-center gap-3">
+                <i class="fas fa-merge text-teal-600"></i>
+                <span class="text-sm font-bold text-teal-700 flex-1">3 orders selected</span>
+                <button class="bg-teal-600 text-white text-xs font-black px-4 py-1.5 rounded-lg">Send to Distributor</button>
+              </div>
+            </div>
+            <div class="px-4 space-y-2 pb-4">
+              <div class="bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
+                <div class="flex items-start gap-2">
+                  <input type="checkbox" checked class="mt-1 accent-teal-600">
+                  <div class="flex-1">
+                    <div class="flex justify-between mb-1"><p class="font-bold text-gray-800 text-xs">ORD-2026-0125</p><span class="pill-pending">DEPT PENDING</span></div>
+                    <p class="text-[10px] text-gray-500">ICU / Critical Care · 5 mins ago</p>
+                    <p class="text-xs font-bold text-gray-700 mt-1">₦225,000 · 2 items</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
+                <div class="flex items-start gap-2">
+                  <input type="checkbox" checked class="mt-1 accent-teal-600">
+                  <div class="flex-1">
+                    <div class="flex justify-between mb-1"><p class="font-bold text-gray-800 text-xs">ORD-2026-0124</p><span class="pill-pending">DEPT PENDING</span></div>
+                    <p class="text-[10px] text-gray-500">Emergency Ward · 22 mins ago</p>
+                    <p class="text-xs font-bold text-gray-700 mt-1">₦170,000 · 3 items</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
+                <div class="flex items-start gap-2">
+                  <input type="checkbox" checked class="mt-1 accent-teal-600">
+                  <div class="flex-1">
+                    <div class="flex justify-between mb-1"><p class="font-bold text-gray-800 text-xs">ORD-2026-0123</p><span class="pill-pending">DEPT PENDING</span></div>
+                    <p class="text-[10px] text-gray-500">Theatre · 1hr ago</p>
+                    <p class="text-xs font-bold text-gray-700 mt-1">₦310,000 · 4 items</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Admin selects all dept orders and consolidates into one bulk order to the distributor</p></div>
+        </div>
+
+        <!-- Slide 3: Consolidation sent -->
+        <div class="demo-slide" id="s2-3">
+          <div class="bg-white p-5">
+            <div class="text-center py-6">
+              <div class="h-16 w-16 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-truck-fast text-teal-600 text-2xl"></i></div>
+              <p class="font-black text-gray-900 text-xl mb-1">Consolidated Order Sent!</p>
+              <p class="text-gray-500 text-xs mb-5">Ref: <span class="font-bold text-teal-600">CONS-2026-0041</span> → Steryl Admin (Distributor)</p>
+              <div class="bg-gray-50 rounded-2xl p-4 text-left space-y-2 mb-4">
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Departments included</span><span class="font-bold text-gray-800">3 depts</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Total items</span><span class="font-bold text-gray-800">9 line items</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Order value</span><span class="font-bold text-teal-600">₦705,000</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Status</span><span class="font-bold text-amber-600">Awaiting Distributor Approval</span></div>
+              </div>
+              <p class="text-teal-600 font-bold text-sm">Steryl Admin will review and approve within 24 hours</p>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">3 dept orders consolidated into 1 bulk order and routed to the Steryl distributor automatically</p></div>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 px-4 pt-2 pb-3">
+        <div class="progress-track mb-2 rounded-full"><div class="progress-fill rounded-full" id="progress2"></div></div>
+        <div class="flex items-center justify-between">
+          <div class="flex gap-2">
+            <button onclick="prevSlide(2)" class="h-7 w-7 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-300 text-xs transition-colors"><i class="fas fa-backward-step"></i></button>
+            <button onclick="nextSlide(2)" class="h-7 w-7 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-300 text-xs transition-colors"><i class="fas fa-forward-step"></i></button>
+          </div>
+          <p class="text-slate-500 text-[10px]" id="slidelabel2">Step 1 / 3 — Departments overview</p>
+          <div class="flex gap-1">
+            <div class="h-1.5 w-6 rounded-full bg-teal-500" id="dot2-1"></div>
+            <div class="h-1.5 w-6 rounded-full bg-slate-600" id="dot2-2"></div>
+            <div class="h-1.5 w-6 rounded-full bg-slate-600" id="dot2-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ DEMO 3: Distributor & Manufacturer ══════ -->
+<section class="py-16 px-5">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-8 reveal">
+      <div class="step-badge mb-3 mx-auto w-fit">Demo 3 of 3</div>
+      <h2 class="text-2xl md:text-3xl font-black text-gray-900 mb-2">Distributor Approves · Manufacturer Tracks</h2>
+      <p class="text-gray-500 text-sm max-w-lg mx-auto">The Steryl distributor receives the order, approves it, and the manufacturer sees real-time demand — the entire chain is closed.</p>
+    </div>
+
+    <div class="demo-player reveal" id="player3">
+      <div class="player-bar">
+        <div class="dot bg-red-500"></div><div class="dot bg-yellow-500"></div><div class="dot bg-green-500"></div>
+        <div class="flex-1 mx-3 bg-slate-700 rounded-md px-3 py-1 text-slate-400 text-xs">steryl.health/distributor</div>
+        <button onclick="togglePlay(3)" id="playbtn3" class="text-slate-400 hover:text-white text-xs flex items-center gap-1.5 bg-slate-700 px-3 py-1 rounded-md transition-colors">
+          <i class="fas fa-pause" id="playicon3"></i><span id="playtext3">Pause</span>
+        </button>
+      </div>
+      <div class="screen-wrap" style="min-height:400px" id="screen3">
+        <div class="cursor" id="cursor3" style="top:50px;left:80px"></div>
+
+        <!-- Slide 1: Distributor marketplace -->
+        <div class="demo-slide active" id="s3-1">
+          <div class="bg-white">
+            <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5 flex items-center justify-between"><div class="flex items-center gap-2"><i class="fas fa-warehouse text-white text-sm"></i><span class="text-white text-xs font-bold">Steryl Admin — Distributor</span></div><div class="h-6 w-6 bg-white/20 rounded-full flex items-center justify-center text-white text-[10px] font-bold">S</div></div>
+            <div class="p-4">
+              <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="bg-amber-50 rounded-xl p-3 text-center"><p class="text-xl font-black text-amber-600">8</p><p class="text-[9px] text-amber-500 font-semibold">Pending</p></div>
+                <div class="bg-emerald-50 rounded-xl p-3 text-center"><p class="text-xl font-black text-emerald-600">₦7.4M</p><p class="text-[9px] text-emerald-500 font-semibold">This Week</p></div>
+                <div class="bg-blue-50 rounded-xl p-3 text-center"><p class="text-xl font-black text-blue-600">24</p><p class="text-[9px] text-blue-500 font-semibold">Orgs Served</p></div>
+              </div>
+              <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-2">Incoming Orders</p>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <div class="h-9 w-9 bg-amber-100 rounded-xl flex items-center justify-center font-black text-amber-700 text-sm">H</div>
+                  <div class="flex-1"><p class="text-xs font-bold text-gray-800">Lagos General Hospital</p><p class="text-[9px] text-gray-500">CONS-2026-0041 · 9 items · ₦705,000</p></div>
+                  <button class="bg-emerald-600 text-white text-[10px] font-black px-3 py-1.5 rounded-lg">Approve</button>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <div class="h-9 w-9 bg-blue-100 rounded-xl flex items-center justify-center font-black text-blue-700 text-sm">D</div>
+                  <div class="flex-1"><p class="text-xs font-bold text-gray-800">PathCare Diagnostics</p><p class="text-[9px] text-gray-500">ORD-2026-0126 · 4 items · ₦180,000</p></div>
+                  <button class="bg-emerald-600 text-white text-[10px] font-black px-3 py-1.5 rounded-lg">Approve</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Distributor sees all incoming orders from hospitals, labs and pharmacies in one queue</p></div>
+        </div>
+
+        <!-- Slide 2: Order approved & dispatched -->
+        <div class="demo-slide" id="s3-2">
+          <div class="bg-white">
+            <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5"><span class="text-white text-xs font-bold">Order Approved</span></div>
+            <div class="p-4">
+              <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-4">
+                <div class="flex items-center gap-3 mb-3"><div class="h-10 w-10 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fas fa-circle-check text-emerald-600 text-xl"></i></div><div><p class="font-black text-gray-900 text-sm">CONS-2026-0041 Approved</p><p class="text-[10px] text-gray-500">Lagos General Hospital · ₦705,000</p></div></div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="bg-white rounded-xl p-2"><p class="text-[9px] text-gray-500">Status</p><p class="text-xs font-bold text-emerald-600">Dispatched</p></div>
+                  <div class="bg-white rounded-xl p-2"><p class="text-[9px] text-gray-500">ETA</p><p class="text-xs font-bold text-gray-800">Tomorrow, 10 AM</p></div>
+                </div>
+              </div>
+              <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-2">Shipment Items</p>
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl"><i class="fas fa-hand-dots text-teal-500 text-sm w-5 text-center"></i><div class="flex-1"><p class="text-xs font-semibold text-gray-800">Surgical Gloves M</p><p class="text-[9px] text-gray-500">50 boxes</p></div><span class="pill-approved">PICKED</span></div>
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl"><i class="fas fa-syringe text-violet-500 text-sm w-5 text-center"></i><div class="flex-1"><p class="text-xs font-semibold text-gray-800">IV Cannula 18G</p><p class="text-[9px] text-gray-500">200 units</p></div><span class="pill-approved">PICKED</span></div>
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl"><i class="fas fa-capsules text-blue-500 text-sm w-5 text-center"></i><div class="flex-1"><p class="text-xs font-semibold text-gray-800">IV Drip Set</p><p class="text-[9px] text-gray-500">100 sets</p></div><span class="pill-transit">IN TRANSIT</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">One-click approval — order status updates in real time for the hospital</p></div>
+        </div>
+
+        <!-- Slide 3: Manufacturer dashboard -->
+        <div class="demo-slide" id="s3-3">
+          <div class="bg-white">
+            <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-5 py-2.5 flex items-center justify-between"><div class="flex items-center gap-2"><i class="fas fa-industry text-white text-sm"></i><span class="text-white text-xs font-bold">PharmaGen Ltd — Manufacturer</span></div></div>
+            <div class="p-4">
+              <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="bg-orange-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-orange-600">48</p><p class="text-[9px] text-orange-500">SKUs Listed</p></div>
+                <div class="bg-green-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-green-600">2.4K</p><p class="text-[9px] text-green-500">Units Shipped</p></div>
+                <div class="bg-blue-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-blue-600">12</p><p class="text-[9px] text-blue-500">Active Batches</p></div>
+              </div>
+              <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-2">Batch Tracking — Surgical Gloves M</p>
+              <div class="bg-gray-50 rounded-2xl p-3">
+                <div class="flex justify-between text-xs mb-2"><span class="font-bold text-gray-800">Batch B-2026-0041</span><span class="pill-approved">ACTIVE</span></div>
+                <div class="grid grid-cols-3 gap-2 text-center mb-3">
+                  <div><p class="font-black text-gray-800 text-sm">10,000</p><p class="text-[9px] text-gray-500">Produced</p></div>
+                  <div><p class="font-black text-teal-600 text-sm">50</p><p class="text-[9px] text-gray-500">Shipped Today</p></div>
+                  <div><p class="font-black text-gray-800 text-sm">9,750</p><p class="text-[9px] text-gray-500">Remaining</p></div>
+                </div>
+                <div class="bg-white rounded-xl p-2 text-[10px] text-gray-600 flex items-center gap-2"><i class="fas fa-barcode text-gray-400"></i>Batch traceable to Lagos General Hospital via Steryl platform</div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-800 px-5 py-2 text-center"><p class="text-slate-400 text-[11px]">Manufacturer sees exactly where every unit from every batch ended up — full traceability</p></div>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 px-4 pt-2 pb-3">
+        <div class="progress-track mb-2 rounded-full"><div class="progress-fill rounded-full" id="progress3"></div></div>
+        <div class="flex items-center justify-between">
+          <div class="flex gap-2">
+            <button onclick="prevSlide(3)" class="h-7 w-7 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-300 text-xs transition-colors"><i class="fas fa-backward-step"></i></button>
+            <button onclick="nextSlide(3)" class="h-7 w-7 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-300 text-xs transition-colors"><i class="fas fa-forward-step"></i></button>
+          </div>
+          <p class="text-slate-500 text-[10px]" id="slidelabel3">Step 1 / 3 — Distributor marketplace</p>
+          <div class="flex gap-1">
+            <div class="h-1.5 w-6 rounded-full bg-teal-500" id="dot3-1"></div>
+            <div class="h-1.5 w-6 rounded-full bg-slate-600" id="dot3-2"></div>
+            <div class="h-1.5 w-6 rounded-full bg-slate-600" id="dot3-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES GRID -->
+<section class="py-16 px-5 bg-gray-50">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-10 reveal"><h2 class="text-2xl md:text-3xl font-black text-gray-900 mb-3">Every feature, built for healthcare</h2><p class="text-gray-500 text-sm">No generic software — every screen is purpose-built for the African healthcare procurement context.</p></div>
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="feat-card reveal"><div class="h-10 w-10 bg-teal-50 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-sitemap text-teal-600"></i></div><h3 class="font-bold text-gray-900 mb-1 text-sm">Department Hierarchy</h3><p class="text-gray-500 text-xs">Create depts, assign staff, consolidate orders up to admin level.</p></div>
+      <div class="feat-card reveal" style="transition-delay:0.1s"><div class="h-10 w-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-barcode text-blue-600"></i></div><h3 class="font-bold text-gray-900 mb-1 text-sm">Batch Traceability</h3><p class="text-gray-500 text-xs">Every unit tracked from manufacturer batch to final facility.</p></div>
+      <div class="feat-card reveal" style="transition-delay:0.2s"><div class="h-10 w-10 bg-amber-50 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-bell text-amber-600"></i></div><h3 class="font-bold text-gray-900 mb-1 text-sm">Stock Alerts</h3><p class="text-gray-500 text-xs">Automated low-stock notifications per product, per department.</p></div>
+      <div class="feat-card reveal" style="transition-delay:0.1s"><div class="h-10 w-10 bg-violet-50 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-check-double text-violet-600"></i></div><h3 class="font-bold text-gray-900 mb-1 text-sm">Approval Workflow</h3><p class="text-gray-500 text-xs">Multi-level approval — dept member → admin → distributor.</p></div>
+      <div class="feat-card reveal" style="transition-delay:0.2s"><div class="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-chart-bar text-emerald-600"></i></div><h3 class="font-bold text-gray-900 mb-1 text-sm">Usage Analytics</h3><p class="text-gray-500 text-xs">Track product consumption per department over time.</p></div>
+      <div class="feat-card reveal" style="transition-delay:0.3s"><div class="h-10 w-10 bg-rose-50 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-shield-check text-rose-600"></i></div><h3 class="font-bold text-gray-900 mb-1 text-sm">Verified Catalogue</h3><p class="text-gray-500 text-xs">Only licensed manufacturers can list. No counterfeits.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-5 bg-gradient-to-br from-teal-700 to-teal-900">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <h2 class="text-2xl md:text-3xl font-black text-white mb-4">Ready to invest in what you just saw?</h2>
+    <p class="text-teal-100 mb-8">This is a live, working platform — not a concept. The founding share round is open now for a limited time.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="/invest" class="px-7 py-3.5 bg-white text-teal-700 font-black rounded-xl hover:bg-teal-50 transition-colors shadow-lg text-sm"><i class="fas fa-handshake mr-2"></i>View Investment Terms</a>
+      <a href="/register" class="px-7 py-3.5 border border-white/30 bg-white/10 hover:bg-white/20 text-white font-black rounded-xl transition-colors text-sm"><i class="fas fa-building mr-2"></i>Register Your Organisation</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 py-10 px-5">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2.5"><img src="{{ url_for('static', filename='steryl_logo.jpeg') }}" alt="Steryl" class="h-8 w-8 rounded-xl object-cover"><span class="font-bold text-white">Steryl<span class="text-teal-400">Health</span></span></div>
+    <div class="flex gap-6 text-sm">
+      <a href="/" class="text-gray-400 hover:text-teal-400 transition-colors">Home</a>
+      <a href="/invest" class="text-gray-400 hover:text-teal-400 transition-colors">Invest</a>
+      <a href="/login" class="text-gray-400 hover:text-teal-400 transition-colors">Sign In</a>
+    </div>
+    <p class="text-gray-600 text-xs">&copy; 2026 Steryl Health Ltd.</p>
+  </div>
+</footer>
+
+<script>
+// ── Demo player engine ──────────────────────────────────────────
+const DEMOS = {
+  1: { slides:4, labels:['Dashboard overview','Searching the catalogue','Cart & order summary','Order confirmed'], totalMs:20000, current:0, playing:true, timer:null, elapsed:0, stepMs:5000 },
+  2: { slides:3, labels:['Departments overview','Selecting & consolidating orders','Consolidation sent to distributor'], totalMs:15000, current:0, playing:true, timer:null, elapsed:0, stepMs:5000 },
+  3: { slides:3, labels:['Distributor marketplace','Order approved & dispatched','Manufacturer batch tracking'], totalMs:15000, current:0, playing:true, timer:null, elapsed:0, stepMs:5000 },
+};
+
+function showSlide(demo, idx) {
+  const d = DEMOS[demo];
+  d.current = idx;
+  const count = d.slides;
+  for(let i=1;i<=count;i++) {
+    const el = document.getElementById(`s${demo}-${i}`);
+    if(el) { el.classList.toggle('active', i===idx+1); }
+    const dot = document.getElementById(`dot${demo}-${i}`);
+    if(dot) { dot.classList.toggle('bg-teal-500', i===idx+1); dot.classList.toggle('bg-slate-600', i!==idx+1); }
+  }
+  const lbl = document.getElementById(`slidelabel${demo}`);
+  if(lbl) lbl.textContent = `Step ${idx+1} / ${count} — ${d.labels[idx]}`;
+}
+
+function updateProgress(demo) {
+  const d = DEMOS[demo];
+  const pct = ((d.current * d.stepMs + d.elapsed) / d.totalMs) * 100;
+  const el = document.getElementById(`progress${demo}`);
+  if(el) el.style.width = Math.min(pct,100) + '%';
+}
+
+function tick(demo) {
+  const d = DEMOS[demo];
+  if(!d.playing) return;
+  d.elapsed += 100;
+  updateProgress(demo);
+  if(d.elapsed >= d.stepMs) {
+    d.elapsed = 0;
+    const next = (d.current + 1) % d.slides;
+    showSlide(demo, next);
+  }
+}
+
+function togglePlay(demo) {
+  const d = DEMOS[demo];
+  d.playing = !d.playing;
+  const icon = document.getElementById(`playicon${demo}`);
+  const txt = document.getElementById(`playtext${demo}`);
+  icon.className = d.playing ? 'fas fa-pause' : 'fas fa-play';
+  txt.textContent = d.playing ? 'Pause' : 'Play';
+}
+
+function nextSlide(demo) {
+  const d = DEMOS[demo];
+  d.elapsed = 0;
+  showSlide(demo, (d.current + 1) % d.slides);
+}
+function prevSlide(demo) {
+  const d = DEMOS[demo];
+  d.elapsed = 0;
+  showSlide(demo, (d.current - 1 + d.slides) % d.slides);
+}
+
+// Start all timers
+[1,2,3].forEach(demo => {
+  DEMOS[demo].timer = setInterval(() => tick(demo), 100);
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

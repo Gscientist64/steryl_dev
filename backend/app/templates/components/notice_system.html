@@ -1,0 +1,258 @@
+<style>
+    .steryl-notice-host {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        width: min(26rem, calc(100vw - 2rem));
+        pointer-events: none;
+    }
+
+    .steryl-notice {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.875rem;
+        align-items: start;
+        padding: 1rem 1rem 1rem 0.95rem;
+        border-radius: 1.1rem;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(15, 23, 42, 0.9);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        color: #e2e8f0;
+        pointer-events: auto;
+        transform: translateY(-10px) scale(0.98);
+        opacity: 0;
+        transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .steryl-notice.is-visible {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .steryl-notice::before {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 4px;
+        background: linear-gradient(180deg, rgba(45, 212, 191, 0.95), rgba(20, 184, 166, 0.7));
+    }
+
+    .steryl-notice[data-variant='error']::before {
+        background: linear-gradient(180deg, rgba(251, 113, 133, 0.95), rgba(239, 68, 68, 0.72));
+    }
+
+    .steryl-notice[data-variant='warning']::before {
+        background: linear-gradient(180deg, rgba(251, 191, 36, 0.95), rgba(245, 158, 11, 0.72));
+    }
+
+    .steryl-notice[data-variant='info']::before {
+        background: linear-gradient(180deg, rgba(96, 165, 250, 0.95), rgba(59, 130, 246, 0.72));
+    }
+
+    .steryl-notice__icon {
+        margin-top: 0.1rem;
+        display: inline-flex;
+        height: 2.4rem;
+        width: 2.4rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.09);
+        color: #ccfbf1;
+        flex-shrink: 0;
+    }
+
+    .steryl-notice[data-variant='error'] .steryl-notice__icon {
+        color: #fecdd3;
+    }
+
+    .steryl-notice[data-variant='warning'] .steryl-notice__icon {
+        color: #fde68a;
+    }
+
+    .steryl-notice[data-variant='info'] .steryl-notice__icon {
+        color: #bfdbfe;
+    }
+
+    .steryl-notice__content {
+        min-width: 0;
+    }
+
+    .steryl-notice__title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: #f8fafc;
+    }
+
+    .steryl-notice__message {
+        margin: 0.3rem 0 0;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        color: rgba(226, 232, 240, 0.88);
+        white-space: pre-line;
+    }
+
+    .steryl-notice__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(226, 232, 240, 0.72);
+        cursor: pointer;
+        transition: background 140ms ease, color 140ms ease;
+    }
+
+    .steryl-notice__close:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: #f8fafc;
+    }
+
+    .steryl-notice__progress {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+    }
+
+    .steryl-notice__progress-bar {
+        width: 100%;
+        height: 100%;
+        transform-origin: left center;
+        animation: sterylNoticeCountdown linear forwards;
+        background: linear-gradient(90deg, rgba(45, 212, 191, 0.95), rgba(94, 234, 212, 0.65));
+    }
+
+    .steryl-notice[data-variant='error'] .steryl-notice__progress-bar {
+        background: linear-gradient(90deg, rgba(248, 113, 113, 0.95), rgba(253, 164, 175, 0.7));
+    }
+
+    .steryl-notice[data-variant='warning'] .steryl-notice__progress-bar {
+        background: linear-gradient(90deg, rgba(251, 191, 36, 0.95), rgba(253, 230, 138, 0.72));
+    }
+
+    .steryl-notice[data-variant='info'] .steryl-notice__progress-bar {
+        background: linear-gradient(90deg, rgba(96, 165, 250, 0.95), rgba(147, 197, 253, 0.72));
+    }
+
+    @keyframes sterylNoticeCountdown {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
+
+    @media (max-width: 640px) {
+        .steryl-notice-host {
+            top: 1rem;
+            right: 1rem;
+            left: 1rem;
+            width: auto;
+        }
+    }
+</style>
+
+<script>
+(() => {
+    if (window.__sterylNoticeInstalled) {
+        return;
+    }
+    window.__sterylNoticeInstalled = true;
+
+    const noticeHost = document.createElement('div');
+    noticeHost.className = 'steryl-notice-host';
+
+    const ensureHost = () => {
+        if (!document.body.contains(noticeHost)) {
+            document.body.appendChild(noticeHost);
+        }
+    };
+
+    const variantMeta = {
+        success: { title: 'Success', icon: 'check_circle' },
+        error: { title: 'Action Required', icon: 'error' },
+        warning: { title: 'Please Review', icon: 'warning' },
+        info: { title: 'Notice', icon: 'info' }
+    };
+
+    const inferVariant = (message) => {
+        const text = String(message || '').toLowerCase();
+        if (text.startsWith('error:') || text.includes('failed') || text.includes('invalid') || text.includes('unable') || text.includes('cannot')) {
+            return 'error';
+        }
+        if (text.includes('warning') || text.includes('please select') || text.includes('coming soon')) {
+            return 'warning';
+        }
+        if (text.includes('redirect') || text.includes('demo') || text.includes('instructions')) {
+            return 'info';
+        }
+        return 'success';
+    };
+
+    window.showNotice = (message, options = {}) => {
+        ensureHost();
+
+        const variant = options.variant || inferVariant(message);
+        const duration = options.duration || (variant === 'error' ? 6500 : 4200);
+        const meta = variantMeta[variant] || variantMeta.info;
+
+        const notice = document.createElement('section');
+        notice.className = 'steryl-notice';
+        notice.dataset.variant = variant;
+        notice.setAttribute('role', 'status');
+        notice.setAttribute('aria-live', 'polite');
+        notice.innerHTML = `
+            <div class="steryl-notice__icon">
+                <span class="material-symbols-outlined">${meta.icon}</span>
+            </div>
+            <div class="steryl-notice__content">
+                <p class="steryl-notice__title">${options.title || meta.title}</p>
+                <p class="steryl-notice__message"></p>
+            </div>
+            <button type="button" class="steryl-notice__close" aria-label="Dismiss notice">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div class="steryl-notice__progress">
+                <div class="steryl-notice__progress-bar" style="animation-duration:${duration}ms"></div>
+            </div>
+        `;
+
+        notice.querySelector('.steryl-notice__message').textContent = String(message || '');
+
+        const removeNotice = () => {
+            notice.classList.remove('is-visible');
+            window.setTimeout(() => notice.remove(), 180);
+        };
+
+        notice.querySelector('.steryl-notice__close').addEventListener('click', removeNotice);
+        noticeHost.appendChild(notice);
+
+        window.requestAnimationFrame(() => notice.classList.add('is-visible'));
+        window.setTimeout(removeNotice, duration);
+
+        return notice;
+    };
+
+    window.alert = (message) => window.showNotice(message);
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensureHost, { once: true });
+    } else {
+        ensureHost();
+    }
+})();
+</script>

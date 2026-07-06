@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Distributor Catalog - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+
+<!-- Cart Drawer Overlay -->
+<div id="cart-overlay" class="fixed inset-0 bg-black/30 z-40 hidden" onclick="toggleCart()"></div>
+
+<!-- Cart Drawer -->
+<div id="cart-drawer" class="fixed right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 flex flex-col translate-x-full transition-transform duration-300">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+    <div>
+      <h2 class="font-bold text-slate-900 text-lg">Request Cart</h2>
+      <p id="cart-manufacturer-label" class="text-xs text-slate-500 mt-0.5">No items yet</p>
+    </div>
+    <button onclick="toggleCart()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+  <div id="cart-items-list" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+    <p class="text-sm text-slate-400 text-center py-8">Your cart is empty.</p>
+  </div>
+  <div class="border-t border-slate-100 px-5 py-4 space-y-3">
+    <div class="flex justify-between items-center text-sm">
+      <span class="text-slate-500 font-medium">Items</span>
+      <span id="cart-item-count" class="font-bold text-slate-900">0</span>
+    </div>
+    <div class="flex justify-between items-center text-sm">
+      <span class="text-slate-500 font-medium">Est. Total</span>
+      <span id="cart-total" class="font-bold text-teal-700 text-lg">$0.00</span>
+    </div>
+    <div class="space-y-1">
+      <label class="text-xs font-semibold text-slate-600">Notes (optional)</label>
+      <textarea id="cart-notes" rows="2" placeholder="Add a note for the manufacturer..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+    </div>
+    <button onclick="submitRequest()" id="submit-btn" class="w-full rounded-xl bg-teal-600 text-white py-3 text-sm font-bold hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
+      Submit Request
+    </button>
+  </div>
+</div>
+
+<main class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <section class="rounded-3xl bg-gradient-to-r from-teal-700 to-teal-500 px-6 py-8 text-white shadow-lg">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-teal-100">Distributor Workspace</p>
+        <h1 class="mt-2 text-3xl font-bold">Manufacturer Catalog</h1>
+        <p class="mt-2 max-w-2xl text-sm text-teal-100">Add multiple products from the same manufacturer to your cart and submit as a single request.</p>
+      </div>
+      <div class="flex gap-2 flex-shrink-0 flex-wrap">
+        <a href="{{ url_for('main.distributor_requests_page') }}" class="rounded-xl bg-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/20">My Requests</a>
+        <a href="{{ url_for('main.distributor_demands') }}" class="rounded-xl bg-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/20">My Demands</a>
+        <a href="{{ url_for('main.distributor_inventory') }}" class="rounded-xl bg-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/20">My Inventory</a>
+        <button onclick="toggleCart()" class="relative rounded-xl bg-white text-teal-700 px-4 py-3 text-sm font-bold hover:bg-teal-50 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+          <span>Cart</span>
+          <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="flex flex-wrap gap-3 items-center">
+    <input id="search-input" type="text" placeholder="Search products, SKU or category..." class="flex-1 min-w-52 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" oninput="filterCatalog()"/>
+    <select id="manufacturer-filter" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" onchange="filterCatalog()">
+      <option value="">All Manufacturers</option>
+    </select>
+  </section>
+
+  <!-- Cart info banner (shown when items are in cart) -->
+  <div id="cart-info-banner" class="hidden rounded-2xl border border-teal-200 bg-teal-50 px-5 py-3 flex items-center gap-3">
+    <span class="material-symbols-outlined text-teal-600">shopping_cart</span>
+    <span class="text-sm text-teal-800 font-medium" id="cart-banner-text"></span>
+    <button onclick="toggleCart()" class="ml-auto text-xs font-bold text-teal-700 underline hover:no-underline">View Cart</button>
+  </div>
+
+  <!-- Catalog Table -->
+  <section class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[980px]">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-6 py-4">Manufacturer</th>
+            <th class="px-6 py-4">Product</th>
+            <th class="px-6 py-4">SKU</th>
+            <th class="px-6 py-4">Category</th>
+            <th class="px-6 py-4">Available</th>
+            <th class="px-6 py-4">Unit Price</th>
+            <th class="px-6 py-4 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody id="catalog-tbody" class="divide-y divide-slate-100">
+          <tr><td colspan="7" class="px-6 py-10 text-center text-slate-400">Loading catalog…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Quantity Input Modal -->
+<div id="qty-modal" class="fixed inset-0 bg-black/40 z-60 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+    <h3 class="font-bold text-slate-900 text-lg mb-1" id="modal-product-name"></h3>
+    <p class="text-xs text-slate-500 mb-4" id="modal-product-sku"></p>
+    <label class="text-sm font-semibold text-slate-700 block mb-2">Quantity <span class="text-slate-400 font-normal" id="modal-max-qty"></span></label>
+    <input id="modal-qty-input" type="number" min="1" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4"/>
+    <div class="flex gap-3">
+      <button onclick="closeModal()" class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold hover:bg-slate-50">Cancel</button>
+      <button onclick="confirmAddToCart()" class="flex-1 rounded-xl bg-teal-600 text-white py-2.5 text-sm font-bold hover:bg-teal-700">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allProducts = [];
+let cart = {}; // { productId: { product, qty } }
+let pendingProduct = null;
+
+function fmt(val) {
+  return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(val || 0);
+}
+
+async function loadCatalog() {
+  try {
+    const resp = await fetch('/api/distributor/catalog');
+    const result = await resp.json();
+    const data = result.data || {};
+    allProducts = (data.products || []);
+    buildManufacturerFilter(data.manufacturers || []);
+    renderCatalog(allProducts);
+  } catch (e) {
+    document.getElementById('catalog-tbody').innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-red-500">Failed to load catalog.</td></tr>';
+  }
+}
+
+function buildManufacturerFilter(manufacturers) {
+  const sel = document.getElementById('manufacturer-filter');
+  manufacturers.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    sel.appendChild(opt);
+  });
+}
+
+function filterCatalog() {
+  const search = document.getElementById('search-input').value.toLowerCase().trim();
+  const mfr = document.getElementById('manufacturer-filter').value;
+  const filtered = allProducts.filter(p => {
+    const matchSearch = !search || [p.name, p.sku, p.category, p.manufacturer_name].join(' ').toLowerCase().includes(search);
+    const matchMfr = !mfr || String(p.manufacturer_id) === mfr;
+    return matchSearch && matchMfr;
+  });
+  renderCatalog(filtered);
+}
+
+function renderCatalog(products) {
+  const tbody = document.getElementById('catalog-tbody');
+  if (!products.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-slate-400">No products found.</td></tr>';
+    return;
+  }
+  // Check if cart has a manufacturer locked in
+  const lockedMfrId = getCartManufacturerId();
+
+  tbody.innerHTML = products.map(p => {
+    const inCart = cart[p.id];
+    const locked = lockedMfrId && String(p.manufacturer_id) !== String(lockedMfrId);
+    const btnClass = inCart
+      ? 'rounded-xl border border-teal-600 text-teal-700 px-4 py-2 text-xs font-bold hover:bg-teal-50'
+      : (locked ? 'rounded-xl bg-slate-200 text-slate-400 px-4 py-2 text-xs font-bold cursor-not-allowed' : 'rounded-xl bg-teal-600 text-white px-4 py-2 text-xs font-bold hover:bg-teal-700');
+    const btnLabel = inCart ? `In Cart (${inCart.qty})` : (locked ? 'Diff. Manufacturer' : 'Add to Cart');
+    const btnOnclick = locked ? '' : `onclick="openModal(${p.id})"`;
+    return `<tr class="${locked ? 'opacity-50' : ''}">
+      <td class="px-6 py-4 font-semibold text-slate-900 text-sm">${p.manufacturer_name || 'N/A'}</td>
+      <td class="px-6 py-4"><p class="font-semibold text-slate-900 text-sm">${p.name}</p></td>
+      <td class="px-6 py-4"><code class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">${p.sku}</code></td>
+      <td class="px-6 py-4 text-xs text-slate-500">${p.category || '—'}</td>
+      <td class="px-6 py-4 text-sm font-medium text-slate-700">${(p.available_quantity||0).toLocaleString()}</td>
+      <td class="px-6 py-4 font-semibold text-teal-600 text-sm">${p.manufacturer_currency_symbol || '$'}${fmt(p.unit_price)}</td>
+      <td class="px-6 py-4 text-right"><button class="${btnClass}" ${btnOnclick} ${locked ? 'disabled' : ''}>${btnLabel}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function getCartManufacturerId() {
+  const keys = Object.keys(cart);
+  if (!keys.length) return null;
+  return cart[keys[0]].product.manufacturer_id;
+}
+
+function openModal(productId) {
+  const product = allProducts.find(p => p.id === productId);
+  if (!product) return;
+  pendingProduct = product;
+  document.getElementById('modal-product-name').textContent = product.name;
+  document.getElementById('modal-product-sku').textContent = `SKU: ${product.sku} · ${product.manufacturer_name}`;
+  document.getElementById('modal-max-qty').textContent = `(max ${product.available_quantity})`;
+  const input = document.getElementById('modal-qty-input');
+  input.max = product.available_quantity;
+  input.value = cart[product.id] ? cart[product.id].qty : 1;
+  document.getElementById('qty-modal').classList.remove('hidden');
+  setTimeout(() => input.focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('qty-modal').classList.add('hidden');
+  pendingProduct = null;
+}
+
+function confirmAddToCart() {
+  if (!pendingProduct) return;
+  const qty = parseInt(document.getElementById('modal-qty-input').value, 10);
+  if (!qty || qty <= 0) { alert('Enter a valid quantity.'); return; }
+  if (qty > pendingProduct.available_quantity) { alert(`Only ${pendingProduct.available_quantity} units available.`); return; }
+  cart[pendingProduct.id] = { product: pendingProduct, qty };
+  closeModal();
+  updateCartUI();
+  filterCatalog();
+}
+
+function removeFromCart(productId) {
+  delete cart[productId];
+  updateCartUI();
+  filterCatalog();
+}
+
+function updateCartQty(productId, delta) {
+  if (!cart[productId]) return;
+  const newQty = cart[productId].qty + delta;
+  if (newQty <= 0) { removeFromCart(productId); return; }
+  if (newQty > cart[productId].product.available_quantity) return;
+  cart[productId].qty = newQty;
+  updateCartUI();
+  filterCatalog();
+}
+
+function updateCartUI() {
+  const items = Object.values(cart);
+  const count = items.length;
+  const total = items.reduce((s, i) => s + i.qty * (i.product.unit_price || 0), 0);
+  const mfrName = count ? items[0].product.manufacturer_name : null;
+
+  // Badge
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = count;
+  count > 0 ? badge.classList.remove('hidden') : badge.classList.add('hidden');
+
+  // Submit button
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = count === 0;
+
+  // Manufacturer label
+  document.getElementById('cart-manufacturer-label').textContent = mfrName ? `Supplier: ${mfrName}` : 'No items yet';
+
+  // Cart items list
+  const listEl = document.getElementById('cart-items-list');
+  if (!count) {
+    listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">Your cart is empty.</p>';
+  } else {
+    listEl.innerHTML = items.map(i => `
+      <div class="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-slate-900 truncate">${i.product.name}</p>
+          <p class="text-xs text-slate-500">${i.product.sku}</p>
+          <p class="text-xs text-teal-700 font-semibold mt-1">${i.product.manufacturer_currency_symbol || '$'}${fmt(i.product.unit_price)} × ${i.qty} = ${i.product.manufacturer_currency_symbol || '$'}${fmt(i.product.unit_price * i.qty)}</p>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button onclick="updateCartQty(${i.product.id}, -1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-lg leading-none">−</button>
+          <span class="w-8 text-center text-sm font-bold">${i.qty}</span>
+          <button onclick="updateCartQty(${i.product.id}, 1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-lg leading-none">+</button>
+          <button onclick="removeFromCart(${i.product.id})" class="ml-1 w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Totals
+  document.getElementById('cart-item-count').textContent = count;
+  document.getElementById('cart-total').textContent = `$${fmt(total)}`;
+
+  // Banner
+  const banner = document.getElementById('cart-info-banner');
+  const bannerText = document.getElementById('cart-banner-text');
+  if (count > 0) {
+    banner.classList.remove('hidden');
+    bannerText.textContent = `${count} item${count !== 1 ? 's' : ''} from ${mfrName} — est. total $${fmt(total)}`;
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+function toggleCart() {
+  const drawer = document.getElementById('cart-drawer');
+  const overlay = document.getElementById('cart-overlay');
+  const isOpen = !drawer.classList.contains('translate-x-full');
+  if (isOpen) {
+    drawer.classList.add('translate-x-full');
+    overlay.classList.add('hidden');
+  } else {
+    drawer.classList.remove('translate-x-full');
+    overlay.classList.remove('hidden');
+  }
+}
+
+async function submitRequest() {
+  const items = Object.values(cart);
+  if (!items.length) return;
+  const notes = document.getElementById('cart-notes').value.trim();
+  const payload = {
+    items: items.map(i => ({ product_sku_id: i.product.id, requested_quantity: i.qty })),
+    notes: notes || null,
+  };
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    const resp = await fetch('/api/distributor/requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await resp.json();
+    if (result.success) {
+      cart = {};
+      updateCartUI();
+      toggleCart();
+      showToast(`Request ${result.data.request_number} submitted successfully!`, 'success');
+      loadCatalog();
+    } else {
+      showToast(result.message || 'Could not submit request.', 'error');
+    }
+  } catch (e) {
+    showToast('Network error. Please try again.', 'error');
+  } finally {
+    btn.disabled = Object.keys(cart).length === 0;
+    btn.textContent = 'Submit Request';
+  }
+}
+
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl text-sm font-semibold shadow-xl transition-all ${type === 'success' ? 'bg-teal-600 text-white' : 'bg-red-600 text-white'}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// Close modal on overlay click
+document.getElementById('qty-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.getElementById('modal-qty-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') confirmAddToCart();
+  if (e.key === 'Escape') closeModal();
+});
+
+loadCatalog();
+</script>
+</body>
+</html>

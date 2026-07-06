@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Order from Distributor — Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  .hero-gradient { background: linear-gradient(135deg, #0d9488 0%, #0891b2 50%, #0f766e 100%); }
+  .card-hover { transition: box-shadow 0.2s ease, transform 0.15s ease; }
+  .card-hover:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  #cart-drawer { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .drawer-open { transform: translateX(0) !important; }
+</style>
+</head>
+<body class="min-h-screen bg-slate-50/80 text-slate-900" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+
+<!-- Cart Drawer Overlay -->
+<div id="cart-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden transition-opacity" onclick="closeCart()"></div>
+
+<!-- Cart Drawer -->
+<div id="cart-drawer" class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col translate-x-full" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200">
+    <div>
+      <h2 class="font-bold text-slate-900 text-lg">Request Cart</h2>
+      <p id="cart-distributor-label" class="text-xs text-slate-500 mt-0.5">Select a distributor first</p>
+    </div>
+    <button onclick="closeCart()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <div id="cart-items-list" class="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <span class="material-symbols-outlined text-[56px] text-slate-200">shopping_cart</span>
+      <p class="mt-3 text-sm text-slate-400 font-medium">Your cart is empty</p>
+      <p class="text-xs text-slate-400 mt-1">Browse the catalog and add items</p>
+    </div>
+  </div>
+
+  <div class="border-t border-slate-200 px-6 py-5 space-y-4 bg-slate-50/50">
+    <div class="flex justify-between items-center text-sm">
+      <span class="text-slate-500 font-medium">Item Count</span>
+      <span id="cart-item-count" class="font-bold text-slate-900 text-lg">0</span>
+    </div>
+    <div class="flex justify-between items-center text-sm">
+      <span class="text-slate-500 font-medium">Estimated Total</span>
+      <span id="cart-total" class="font-extrabold text-teal-700 text-xl">$0.00</span>
+    </div>
+    <div class="space-y-2">
+      <label class="text-xs font-semibold text-slate-600">Notes (optional)</label>
+      <textarea id="cart-notes" rows="2" placeholder="Add a note for the distributor…" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder:text-slate-400"></textarea>
+    </div>
+    <button onclick="submitRequest()" id="submit-btn" class="w-full rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 text-white py-3.5 text-sm font-bold hover:from-teal-700 hover:to-teal-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-teal-500/20" disabled>
+      <span class="material-symbols-outlined text-[18px] align-middle">send</span>
+      <span class="align-middle ml-1.5">Submit Request</span>
+    </button>
+  </div>
+</div>
+
+<!-- Alert Toast -->
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-3.5 rounded-2xl text-sm font-semibold shadow-2xl hidden transition-all duration-300"></div>
+
+<main class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden rounded-3xl hero-gradient px-6 py-10 text-white shadow-xl">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+    <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+    <div class="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-2xl">
+        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-teal-100/90">Hospital Procurement</p>
+        <h1 class="mt-2.5 text-3xl font-extrabold tracking-tight">Order from Distributors</h1>
+        <p class="mt-2.5 text-sm text-teal-50/85 leading-relaxed">Select a distributor, browse their available inventory, add items to your cart, and submit as a single tracked request. Each request is recorded once with all its items embedded for full traceability.</p>
+      </div>
+      <div class="flex gap-3 shrink-0">
+        <a href="{{ url_for('main.hospital_requests_page') }}" class="rounded-xl bg-white/15 backdrop-blur px-5 py-3 text-sm font-semibold hover:bg-white/25 transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">receipt_long</span> My Requests
+        </a>
+        <button onclick="toggleCart()" class="relative rounded-xl bg-white text-teal-700 px-5 py-3 text-sm font-bold hover:bg-teal-50 transition-colors flex items-center gap-2 shadow-lg">
+          <span class="material-symbols-outlined text-[20px]">shopping_cart</span> Cart
+          <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Distributor Selection + Filters -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex-1 min-w-[240px]">
+        <label class="mb-1.5 block text-xs font-bold text-slate-600 uppercase tracking-wider">Select Distributor</label>
+        <select id="distributor-select" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" onchange="onDistributorChange()">
+          <option value="">— Choose a distributor —</option>
+          {% for dist in distributors %}
+          <option value="{{ dist.id }}" {% if selected_distributor_id == dist.id %}selected{% endif %}>{{ dist.first_name }} {{ dist.last_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex-1 min-w-[240px]">
+        <label class="mb-1.5 block text-xs font-bold text-slate-600 uppercase tracking-wider">Search Products</label>
+        <input id="search-input" type="text" placeholder="Search by name, SKU, or manufacturer…" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" oninput="filterCatalog()"/>
+      </div>
+      <button onclick="loadCatalog()" class="rounded-xl bg-teal-600 text-white px-5 py-2.5 text-sm font-bold hover:bg-teal-700 transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">refresh</span> Refresh
+      </button>
+    </div>
+  </section>
+
+  <!-- Cart Banner -->
+  <div id="cart-banner" class="hidden rounded-2xl border border-teal-200 bg-teal-50/80 backdrop-blur px-5 py-4 flex items-center gap-4">
+    <span class="material-symbols-outlined text-teal-600 text-[28px]">shopping_cart_checkout</span>
+    <div class="flex-1">
+      <p class="text-sm font-semibold text-teal-800" id="cart-banner-text"></p>
+      <p class="text-xs text-teal-600 mt-0.5">All items will be submitted as one request record</p>
+    </div>
+    <button onclick="toggleCart()" class="text-xs font-bold text-teal-700 underline hover:no-underline">View Cart</button>
+  </div>
+
+  <!-- Catalog -->
+  <section class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+      <div>
+        <h2 class="font-bold text-slate-900">Available Inventory</h2>
+        <p class="mt-0.5 text-sm text-slate-500" id="catalog-subtitle">Select a distributor to view their products</p>
+      </div>
+      <span id="catalog-count" class="text-sm text-slate-400 font-medium"></span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1000px]">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <th class="px-6 py-4">Product</th>
+            <th class="px-6 py-4">SKU</th>
+            <th class="px-6 py-4">Manufacturer</th>
+            <th class="px-6 py-4">Category</th>
+            <th class="px-6 py-4 text-right">Available</th>
+            <th class="px-6 py-4 text-right">Unit Price</th>
+            <th class="px-6 py-4 text-center w-36">Action</th>
+          </tr>
+        </thead>
+        <tbody id="catalog-tbody" class="divide-y divide-slate-100">
+          <tr><td colspan="7" class="px-6 py-16 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <span class="material-symbols-outlined text-[48px] text-slate-200">inventory_2</span>
+              <p class="font-semibold text-slate-400">No products to display</p>
+              <p class="text-sm text-slate-400">Select a distributor above to browse their catalog</p>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Quantity Input Modal -->
+<div id="qty-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-60 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+    <h3 class="font-bold text-slate-900 text-lg mb-1" id="modal-product-name"></h3>
+    <p class="text-xs text-slate-500 mb-4" id="modal-product-meta"></p>
+    <div class="mb-1 flex justify-between text-xs">
+      <label class="font-semibold text-slate-700">Quantity</label>
+      <span class="text-slate-400" id="modal-max-label"></span>
+    </div>
+    <input id="modal-qty-input" type="number" min="1" value="1" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 mb-5"/>
+    <div class="flex gap-3">
+      <button onclick="closeQtyModal()" class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
+      <button onclick="confirmAddToCart()" class="flex-1 rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 text-white py-2.5 text-sm font-bold hover:from-teal-700 hover:to-teal-800 transition-all shadow-md">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allProducts = [];
+let cart = {}; // { inventoryId: { product, qty } }
+let selectedDistributorId = null;
+let pendingProduct = null;
+const CURRENCY = '$';
+
+function fmt(v) { return new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(v||0); }
+
+async function loadDistributors() {
+  try {
+    const resp = await fetch('/api/hospital/distributors');
+    const result = await resp.json();
+    if (!result.success) return;
+    const sel = document.getElementById('distributor-select');
+    // Keep first option
+    while (sel.options.length > 1) sel.remove(1);
+    (result.data||[]).forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = d.name;
+      sel.appendChild(opt);
+    });
+    const preselected = '{{ selected_distributor_id }}';
+    if (preselected && preselected !== 'None') {
+      sel.value = preselected;
+      onDistributorChange();
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function onDistributorChange() {
+  const sel = document.getElementById('distributor-select');
+  selectedDistributorId = sel.value;
+  if (!selectedDistributorId) {
+    allProducts = [];
+    cart = {};
+    updateCartUI();
+    renderCatalog([]);
+    document.getElementById('catalog-subtitle').textContent = 'Select a distributor to view their products';
+    return;
+  }
+  clearCart();
+  await loadCatalog();
+}
+
+async function loadCatalog() {
+  if (!selectedDistributorId) return;
+  document.getElementById('catalog-tbody').innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center"><div class="flex items-center justify-center gap-3"><div class="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div><span class="text-slate-500 text-sm">Loading catalog…</span></div></td></tr>';
+  try {
+    const resp = await fetch(`/api/hospital/distributors/${selectedDistributorId}/catalog`);
+    const result = await resp.json();
+    allProducts = (result.data||[]);
+    document.getElementById('catalog-subtitle').textContent = `Products from distributor`;
+    filterCatalog();
+  } catch(e) {
+    document.getElementById('catalog-tbody').innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-red-500">Failed to load catalog.</td></tr>';
+  }
+}
+
+function filterCatalog() {
+  const search = document.getElementById('search-input').value.toLowerCase().trim();
+  const filtered = allProducts.filter(p => {
+    if (!search) return true;
+    const haystack = [p.product_name, p.sku, p.manufacturer_name, p.category].join(' ').toLowerCase();
+    return haystack.includes(search);
+  });
+  renderCatalog(filtered);
+}
+
+function renderCatalog(products) {
+  const tbody = document.getElementById('catalog-tbody');
+  document.getElementById('catalog-count').textContent = products.length ? `${products.length} product${products.length !== 1 ? 's' : ''}` : '';
+  if (!products.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-16 text-center"><div class="flex flex-col items-center gap-3"><span class="material-symbols-outlined text-[48px] text-slate-200">package_2</span><p class="font-semibold text-slate-400">No products found</p><p class="text-sm text-slate-400">' + (selectedDistributorId ? 'This distributor has no available inventory right now' : 'Select a distributor above to browse their catalog') + '</p></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = products.map(p => {
+    const inCart = cart[p.inventory_id];
+    const btnClass = inCart
+      ? 'rounded-xl border-2 border-teal-500 text-teal-700 px-4 py-2 text-xs font-bold hover:bg-teal-50 transition-colors'
+      : 'rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 text-white px-4 py-2 text-xs font-bold hover:from-teal-700 hover:to-teal-800 shadow-sm transition-all';
+    const btnLabel = inCart ? `In Cart (${inCart.qty})` : 'Add to Cart';
+    return `<tr class="hover:bg-slate-50/50 transition-colors">
+      <td class="px-6 py-4">
+        <p class="font-semibold text-slate-900">${escapeHtml(p.product_name)}</p>
+        ${p.description ? `<p class="text-xs text-slate-400 mt-0.5 truncate max-w-[240px]">${escapeHtml(p.description)}</p>` : ''}
+      </td>
+      <td class="px-6 py-4"><code class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">${escapeHtml(p.sku)}</code></td>
+      <td class="px-6 py-4 text-sm text-slate-600 font-medium">${escapeHtml(p.manufacturer_name || '—')}</td>
+      <td class="px-6 py-4"><span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">${escapeHtml(p.category || 'Uncategorized')}</span></td>
+      <td class="px-6 py-4 text-right font-semibold text-slate-700">${(p.available_quantity||0).toLocaleString()}</td>
+      <td class="px-6 py-4 text-right font-bold text-teal-700">${CURRENCY}${fmt(p.unit_price)}</td>
+      <td class="px-6 py-4 text-center">
+        <button class="${btnClass}" onclick="openQtyModal(${p.inventory_id})">
+          <span class="material-symbols-outlined text-[14px] align-middle">${inCart ? 'edit' : 'add_shopping_cart'}</span>
+          <span class="align-middle ml-1">${btnLabel}</span>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openQtyModal(inventoryId) {
+  const product = allProducts.find(p => p.inventory_id === inventoryId);
+  if (!product) return;
+  pendingProduct = product;
+  document.getElementById('modal-product-name').textContent = product.product_name;
+  document.getElementById('modal-product-meta').textContent = `SKU: ${product.sku} · ${product.manufacturer_name || 'N/A'} · Available: ${product.available_quantity}`;
+  document.getElementById('modal-max-label').textContent = `Max: ${product.available_quantity}`;
+  const input = document.getElementById('modal-qty-input');
+  input.max = product.available_quantity;
+  input.value = cart[inventoryId] ? cart[inventoryId].qty : 1;
+  document.getElementById('qty-modal').classList.remove('hidden');
+  setTimeout(() => input.focus(), 50);
+}
+
+function closeQtyModal() {
+  document.getElementById('qty-modal').classList.add('hidden');
+  pendingProduct = null;
+}
+
+function confirmAddToCart() {
+  if (!pendingProduct) return;
+  const qty = parseInt(document.getElementById('modal-qty-input').value, 10);
+  if (!qty || qty <= 0) { showToast('Enter a valid quantity greater than zero.', 'error'); return; }
+  if (qty > pendingProduct.available_quantity) { showToast(`Only ${pendingProduct.available_quantity} units available.`, 'error'); return; }
+  cart[pendingProduct.inventory_id] = { product: pendingProduct, qty };
+  closeQtyModal();
+  updateCartUI();
+  filterCatalog();
+}
+
+function removeFromCart(inventoryId) {
+  delete cart[inventoryId];
+  updateCartUI();
+  filterCatalog();
+}
+
+function updateCartQty(inventoryId, delta) {
+  if (!cart[inventoryId]) return;
+  const newQty = cart[inventoryId].qty + delta;
+  if (newQty <= 0) { removeFromCart(inventoryId); return; }
+  if (newQty > cart[inventoryId].product.available_quantity) return;
+  cart[inventoryId].qty = newQty;
+  updateCartUI();
+  filterCatalog();
+}
+
+function clearCart() {
+  cart = {};
+  updateCartUI();
+  filterCatalog();
+}
+
+function updateCartUI() {
+  const items = Object.values(cart);
+  const count = items.length;
+  const total = items.reduce((s, i) => s + i.qty * (i.product.unit_price || 0), 0);
+  const distName = count ? items[0].product.manufacturer_name || 'Distributor' : null;
+
+  // Badge
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = count;
+  count > 0 ? badge.classList.remove('hidden') : badge.classList.add('hidden');
+
+  // Submit button
+  document.getElementById('submit-btn').disabled = count === 0;
+  document.getElementById('cart-distributor-label').textContent = distName ? `To: ${distName}` : 'No items yet';
+
+  // Cart items
+  const listEl = document.getElementById('cart-items-list');
+  if (!count) {
+    listEl.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center"><span class="material-symbols-outlined text-[56px] text-slate-200">shopping_cart</span><p class="mt-3 text-sm text-slate-400 font-medium">Your cart is empty</p><p class="text-xs text-slate-400 mt-1">Browse the catalog and add items</p></div>`;
+  } else {
+    listEl.innerHTML = items.map(i => `
+      <div class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 card-hover">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-slate-900 truncate">${escapeHtml(i.product.product_name)}</p>
+          <p class="text-xs text-slate-500">${escapeHtml(i.product.sku)}</p>
+          <p class="text-xs text-teal-700 font-semibold mt-1.5">${CURRENCY}${fmt(i.product.unit_price)} × ${i.qty} = ${CURRENCY}${fmt(i.product.unit_price * i.qty)}</p>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="updateCartQty(${i.product.inventory_id}, -1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-base leading-none transition-colors">−</button>
+          <span class="w-7 text-center text-sm font-bold">${i.qty}</span>
+          <button onclick="updateCartQty(${i.product.inventory_id}, 1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-base leading-none transition-colors">+</button>
+          <button onclick="removeFromCart(${i.product.inventory_id})" class="ml-1 w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
+            <span class="material-symbols-outlined text-[16px]">delete</span>
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Totals
+  document.getElementById('cart-item-count').textContent = count;
+  document.getElementById('cart-total').textContent = `${CURRENCY}${fmt(total)}`;
+
+  // Banner
+  const banner = document.getElementById('cart-banner');
+  const bannerText = document.getElementById('cart-banner-text');
+  if (count > 0) {
+    banner.classList.remove('hidden');
+    bannerText.textContent = `${count} item${count !== 1 ? 's' : ''} for ${distName} — Estimated total: ${CURRENCY}${fmt(total)}`;
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+async function submitRequest() {
+  const items = Object.values(cart);
+  if (!items.length) return;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>';
+
+  const payload = {
+    distributor_id: parseInt(selectedDistributorId),
+    items: items.map(i => ({
+      product_sku_id: i.product.product_sku_id,
+      requested_quantity: i.qty,
+    })),
+    notes: document.getElementById('cart-notes').value.trim() || null,
+  };
+
+  try {
+    const resp = await fetch('/api/hospital/requests', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const result = await resp.json();
+    if (result.success) {
+      showToast(`Request ${result.data.request_number} submitted successfully!`, 'success');
+      clearCart();
+      setTimeout(() => { window.location.href = '{{ url_for("main.hospital_requests_page") }}'; }, 1500);
+    } else {
+      showToast(result.message || 'Failed to submit request.', 'error');
+    }
+  } catch(e) {
+    showToast('Network error. Please try again.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px] align-middle">send</span><span class="align-middle ml-1.5">Submit Request</span>';
+  }
+}
+
+function toggleCart() {
+  const overlay = document.getElementById('cart-overlay');
+  const drawer = document.getElementById('cart-drawer');
+  const isOpen = drawer.classList.contains('drawer-open');
+  if (isOpen) {
+    drawer.classList.remove('drawer-open');
+    overlay.classList.add('hidden');
+  } else {
+    drawer.classList.add('drawer-open');
+    overlay.classList.remove('hidden');
+  }
+}
+
+function closeCart() {
+  document.getElementById('cart-drawer').classList.remove('drawer-open');
+  document.getElementById('cart-overlay').classList.add('hidden');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-3.5 rounded-2xl text-sm font-semibold shadow-2xl ${type === 'success' ? 'bg-teal-600 text-white' : 'bg-red-600 text-white'}`;
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3500);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Init
+loadDistributors();
+{% if selected_distributor_id %}
+setTimeout(() => { if (document.getElementById('distributor-select').value) loadCatalog(); }, 300);
+{% endif %}
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@ from datetime import datetime
 import phonenumbers
 
 class UserRegisterSchema(Schema):
-    """Validation schema for user registration"""
+    """Validation schema for unified organization registration"""
     first_name = fields.Str(
         required=True,
         validate=validate.Length(min=2, max=120),
@@ -46,33 +46,42 @@ class UserRegisterSchema(Schema):
     account_type = fields.Str(
         required=True,
         validate=validate.OneOf(
-            ['hospital', 'lab', 'research', 'supplier', 'professional', 'student'],
-            error="Invalid account type"
+            ['hospital', 'laboratory', 'pharmacy', 'manufacturer'],
+            error="Invalid account type. Must be one of: hospital, laboratory, pharmacy, manufacturer"
         ),
         error_messages={"required": "Account type is required"}
     )
+    organization_name = fields.Str(
+        required=True,
+        validate=validate.Length(min=2, max=200),
+        error_messages={"required": "Organization name is required"}
+    )
+    license_number = fields.Str(required=False, allow_none=True, load_default=None)
+    business_address = fields.Str(required=False, allow_none=True, load_default=None)
     terms = fields.Bool(
         required=True,
         error_messages={"required": "You must agree to terms"}
     )
-    
+
     @validates_schema
     def validate_passwords_match(self, data, **kwargs):
-        """Ensure passwords match"""
         if data.get('password') != data.get('confirm_password'):
             raise ValidationError("Passwords do not match", field_name="confirm_password")
-    
+
+    @validates('terms')
+    def validate_terms(self, value, **kwargs):
+        if not value:
+            raise ValidationError("You must accept the terms and conditions")
+        return value
+
     @validates('phone')
     def validate_phone(self, value, **kwargs):
-        """Validate phone number format"""
         if value:
             try:
-                # Try to parse phone number (supports international format)
                 phone_obj = phonenumbers.parse(value, None)
                 if not phonenumbers.is_valid_number(phone_obj):
                     raise ValidationError("Invalid phone number format")
             except:
-                # Basic fallback validation
                 phone_pattern = r'^[\d\s\-\+\(\)]{7,}$'
                 if not re.match(phone_pattern, value):
                     raise ValidationError("Invalid phone number format")

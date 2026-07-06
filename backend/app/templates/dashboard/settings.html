@@ -1,653 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>(function(){var t=localStorage.getItem('steryl-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark')})();</script>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Settings - Steryl Health OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Settings — Steryl Health</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <style>
-    * { font-family: 'Inter', sans-serif; }
-    .setting-card { transition: all 0.3s ease; }
-    .setting-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-    .nav-btn.active {
-        background-color: rgba(20, 184, 166, 0.1);
-        color: #14b8a6;
-    }
-    .dark .nav-btn.active {
-        background-color: rgba(20, 184, 166, 0.2);
-        color: #2dd4bf;
-    }
-    .theme-option.active {
-        border-color: #14b8a6;
-        background-color: #14b8a6;
-        color: white;
-    }
-    .color-option.selected {
-        box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
-        transform: scale(1.1);
-    }
-    .font-option.active {
-        border-color: #14b8a6;
-        background-color: rgba(20, 184, 166, 0.1);
-    }
-    
-    /* Dark mode styles */
-    .dark {
-        background-color: #111827;
-        color: #f9fafb;
-    }
-    .dark .bg-white { background-color: #1f2937; }
-    .dark .border-gray-200 { border-color: #374151; }
-    .dark .text-gray-900 { color: #f9fafb; }
-    .dark .text-gray-700 { color: #d1d5db; }
-    .dark .text-gray-500 { color: #9ca3af; }
-    .dark .bg-gray-50 { background-color: #111827; }
-    .dark .bg-gray-100 { background-color: #374151; }
-    
-    /* Theme color variables */
-    :root {
-        --primary-500: #14b8a6;
-        --primary-600: #0d9488;
-        --primary-700: #0f766e;
-    }
-    [data-primary="teal"] { --primary-500: #14b8a6; --primary-600: #0d9488; --primary-700: #0f766e; }
-    [data-primary="blue"] { --primary-500: #3b82f6; --primary-600: #2563eb; --primary-700: #1d4ed8; }
-    [data-primary="purple"] { --primary-500: #8b5cf6; --primary-600: #7c3aed; --primary-700: #6d28d9; }
-    [data-primary="green"] { --primary-500: #10b981; --primary-600: #059669; --primary-700: #047857; }
-    [data-primary="orange"] { --primary-500: #f59e0b; --primary-600: #d97706; --primary-700: #b45309; }
-    [data-primary="red"] { --primary-500: #ef4444; --primary-600: #dc2626; --primary-700: #b91c1c; }
-    
-    .bg-primary { background-color: var(--primary-500); }
-    .bg-primary\\/10 { background-color: rgba(var(--primary-500), 0.1); }
-    .bg-primary\\/20 { background-color: rgba(var(--primary-500), 0.2); }
-    .text-primary { color: var(--primary-500); }
-    .border-primary { border-color: var(--primary-500); }
-    .hover\\:bg-primary:hover { background-color: var(--primary-600); }
-    .focus\\:ring-primary:focus { --tw-ring-color: var(--primary-500); }
-    .peer-checked\\:bg-primary:checked ~ .peer-checked\\:bg-primary { background-color: var(--primary-500); }
+  *{font-family:'Inter',sans-serif}
+  body{transition:background-color .2s,color .2s}
+
+  /* Tab bar */
+  .stab{padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;
+        transition:all .16s;background:transparent;color:#6b7280;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .dark .stab{color:#9ca3af}
+  .stab.active{background:#0d9488;color:#fff;box-shadow:0 2px 10px rgba(13,148,136,.25)}
+  .stab:hover:not(.active){background:#f3f4f6;color:#111827}
+  .dark .stab:hover:not(.active){background:#374151;color:#f9fafb}
+
+  /* Section panels */
+  .spane{display:none}
+  .spane.active{display:block}
+
+  /* Toggle switch */
+  .tog-track{width:42px;height:24px;border-radius:12px;background:#e5e7eb;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .dark .tog-track{background:#374151}
+  .tog-track.on{background:#0d9488}
+  .tog-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:left .2s}
+  .tog-track.on .tog-thumb{left:21px}
+
+  /* Input */
+  .field{width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;
+         color:#111827;font-size:14px;transition:border-color .15s,box-shadow .15s;outline:none}
+  .dark .field{border-color:#374151;background:#1f2937;color:#f9fafb}
+  .field:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+  .field:disabled{opacity:.5;cursor:not-allowed;background:#f9fafb}
+  .dark .field:disabled{background:#111827}
+
+  /* Theme card */
+  .theme-card{border:2px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center;cursor:pointer;
+              transition:all .15s;background:#fff}
+  .dark .theme-card{border-color:#374151;background:#1f2937;color:#f9fafb}
+  .theme-card:hover{border-color:#0d9488}
+  .theme-card.selected{border-color:#0d9488;background:#f0fdfa}
+  .dark .theme-card.selected{background:#0d2b28}
+
+  /* Color swatch */
+  .swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;transition:transform .15s,box-shadow .15s;border:3px solid transparent}
+  .swatch:hover{transform:scale(1.1)}
+  .swatch.selected{box-shadow:0 0 0 2px #fff,0 0 0 4px currentColor;transform:scale(1.1)}
+  .dark .swatch.selected{box-shadow:0 0 0 2px #1f2937,0 0 0 4px currentColor}
+
+  /* Toast */
+  #toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(8px);z-index:999;
+         padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;
+         opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fade-up{animation:fadeUp .3s ease-out both}
 </style>
 </head>
-<body data-primary="teal">
-<!-- Top Navigation -->
-<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <div class="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
-                    </div>
-                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-primary">Health</span></span>
-                </div>
-                <div class="hidden md:ml-6 md:flex md:space-x-8">
-                    <a href="{{ url_for('main.dashboard') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
-                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
-                    <a href="{{ url_for('main.approvals') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Approvals</a>
-                    <a href="{{ url_for('main.settings') }}" class="text-primary border-b-2 border-primary px-3 py-2 text-sm font-medium">Settings</a>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-3">
-                    <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span class="text-sm font-bold text-primary">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">{{ current_user.first_name }} {{ current_user.last_name }}</span>
-                </div>
-            </div>
-        </div>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+{% include 'dashboard/_top_nav.html' %}
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Sticky tab bar -->
+<div class="sticky top-14 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between pt-3 pb-2.5">
+      <h1 class="text-base font-bold text-gray-900 dark:text-white">Settings</h1>
     </div>
-</nav>
-
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-2">Manage your account preferences and application settings</p>
+    <div class="flex gap-1 pb-2.5 overflow-x-auto scrollbar-none">
+      <button class="stab active" onclick="showTab('profile')"       data-t="profile">
+        <span class="material-symbols-outlined" style="font-size:15px">person</span>Profile
+      </button>
+      <button class="stab"        onclick="showTab('appearance')"   data-t="appearance">
+        <span class="material-symbols-outlined" style="font-size:15px">palette</span>Appearance
+      </button>
+      <button class="stab"        onclick="showTab('notifications')" data-t="notifications">
+        <span class="material-symbols-outlined" style="font-size:15px">notifications</span>Notifications
+      </button>
+      <button class="stab"        onclick="showTab('account')"      data-t="account">
+        <span class="material-symbols-outlined" style="font-size:15px">manage_accounts</span>Account
+      </button>
     </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <!-- Sidebar Navigation -->
-        <div class="lg:col-span-1">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sticky top-24">
-                <nav class="space-y-1">
-                    <button onclick="showSection('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-primary/10">
-                        <span class="material-symbols-outlined">person</span>
-                        <span>Profile</span>
-                    </button>
-                    <button onclick="showSection('appearance')" id="nav-appearance" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-primary/10">
-                        <span class="material-symbols-outlined">palette</span>
-                        <span>Appearance</span>
-                    </button>
-                    <button onclick="showSection('notifications')" id="nav-notifications" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-primary/10">
-                        <span class="material-symbols-outlined">notifications</span>
-                        <span>Notifications</span>
-                    </button>
-                    <button onclick="showSection('account')" id="nav-account" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-primary/10">
-                        <span class="material-symbols-outlined">account_circle</span>
-                        <span>Account</span>
-                    </button>
-                    <button onclick="showSection('privacy')" id="nav-privacy" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-primary/10">
-                        <span class="material-symbols-outlined">privacy_tip</span>
-                        <span>Privacy</span>
-                    </button>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="lg:col-span-3">
-            <!-- Profile Section -->
-            <div id="profile-section" class="section">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Profile Information</h2>
-                    <form id="profile-form" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
-                                <input type="text" id="first-name" name="first_name" 
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       value="{{ current_user.first_name }}">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
-                                <input type="text" id="last-name" name="last_name" 
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       value="{{ current_user.last_name }}">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
-                            <input type="email" value="{{ current_user.email }}" disabled 
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed">
-                            <p class="text-xs text-gray-500 mt-1">Email cannot be changed. Contact support for assistance.</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
-                            <input type="tel" id="phone" name="phone" 
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   value="{{ current_user.phone or '' }}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department</label>
-                            <input type="text" id="department" name="department" 
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   value="{{ current_user.department or '' }}">
-                        </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                                Save Changes
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Appearance Section -->
-            <div id="appearance-section" class="section hidden">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Appearance Settings</h2>
-                    
-                    <div class="mb-8">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Theme Mode</label>
-                        <div class="grid grid-cols-3 gap-4">
-                            <button onclick="setTheme('light')" id="theme-light" class="theme-option p-4 border-2 rounded-lg text-center transition-all hover:border-primary">
-                                <span class="material-symbols-outlined text-2xl mb-2">light_mode</span>
-                                <p class="text-sm font-medium">Light</p>
-                            </button>
-                            <button onclick="setTheme('dark')" id="theme-dark" class="theme-option p-4 border-2 rounded-lg text-center transition-all hover:border-primary">
-                                <span class="material-symbols-outlined text-2xl mb-2">dark_mode</span>
-                                <p class="text-sm font-medium">Dark</p>
-                            </button>
-                            <button onclick="setTheme('system')" id="theme-system" class="theme-option p-4 border-2 rounded-lg text-center transition-all hover:border-primary">
-                                <span class="material-symbols-outlined text-2xl mb-2">computer</span>
-                                <p class="text-sm font-medium">System</p>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mb-8">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Primary Color</label>
-                        <div class="flex flex-wrap gap-4">
-                            <div onclick="setPrimaryColor('teal')" class="color-option w-10 h-10 rounded-full bg-teal-500 cursor-pointer transition-all" data-color="teal" style="background-color: #14b8a6;"></div>
-                            <div onclick="setPrimaryColor('blue')" class="color-option w-10 h-10 rounded-full bg-blue-500 cursor-pointer transition-all" data-color="blue" style="background-color: #3b82f6;"></div>
-                            <div onclick="setPrimaryColor('purple')" class="color-option w-10 h-10 rounded-full bg-purple-500 cursor-pointer transition-all" data-color="purple" style="background-color: #8b5cf6;"></div>
-                            <div onclick="setPrimaryColor('green')" class="color-option w-10 h-10 rounded-full bg-green-500 cursor-pointer transition-all" data-color="green" style="background-color: #10b981;"></div>
-                            <div onclick="setPrimaryColor('orange')" class="color-option w-10 h-10 rounded-full bg-orange-500 cursor-pointer transition-all" data-color="orange" style="background-color: #f59e0b;"></div>
-                            <div onclick="setPrimaryColor('red')" class="color-option w-10 h-10 rounded-full bg-red-500 cursor-pointer transition-all" data-color="red" style="background-color: #ef4444;"></div>
-                        </div>
-                    </div>
-
-                    <div class="mb-8">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Font Size</label>
-                        <div class="flex gap-4">
-                            <button onclick="setFontSize('small')" id="font-small" class="font-option px-4 py-2 border-2 rounded-lg text-sm transition-all hover:border-primary">Small</button>
-                            <button onclick="setFontSize('medium')" id="font-medium" class="font-option px-4 py-2 border-2 rounded-lg text-base transition-all hover:border-primary">Medium</button>
-                            <button onclick="setFontSize('large')" id="font-large" class="font-option px-4 py-2 border-2 rounded-lg text-lg transition-all hover:border-primary">Large</button>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-700">
-                        <div>
-                            <p class="font-medium text-gray-900 dark:text-white">Compact View</p>
-                            <p class="text-sm text-gray-500">Reduce spacing and show more content</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="compact-view" class="sr-only peer" onchange="saveCompactView(this.checked)">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                        </label>
-                    </div>
-
-                    <div class="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-700">
-                        <div>
-                            <p class="font-medium text-gray-900 dark:text-white">Reduced Motion</p>
-                            <p class="text-sm text-gray-500">Minimize animations and transitions</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="reduced-motion" class="sr-only peer" onchange="saveReducedMotion(this.checked)">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Notifications Section -->
-            <div id="notifications-section" class="section hidden">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Notification Preferences</h2>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between py-3">
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Email Notifications</p>
-                                <p class="text-sm text-gray-500">Receive updates via email</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="email-notifications" class="sr-only peer" onchange="saveNotificationSetting('email_notifications', this.checked)">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-700">
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Push Notifications</p>
-                                <p class="text-sm text-gray-500">Browser push notifications</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="push-notifications" class="sr-only peer" onchange="saveNotificationSetting('push_notifications', this.checked)">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-700">
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Low Stock Alerts</p>
-                                <p class="text-sm text-gray-500">Get notified when inventory is low</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="low-stock-alerts" class="sr-only peer" onchange="saveNotificationSetting('low_stock_alerts', this.checked)">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-700">
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Order Updates</p>
-                                <p class="text-sm text-gray-500">Order status changes</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="order-updates" class="sr-only peer" onchange="saveNotificationSetting('order_updates', this.checked)">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-700">
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Approval Reminders</p>
-                                <p class="text-sm text-gray-500">Reminders for pending approvals</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="approval-reminders" class="sr-only peer" onchange="saveNotificationSetting('approval_reminders', this.checked)">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Account Section -->
-            <div id="account-section" class="section hidden">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Account Settings</h2>
-                    
-                    <div class="mb-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Current Account Type</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white capitalize">{{ current_user.account_type }}</p>
-                    </div>
-
-                    <div class="mb-8">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Request Account Upgrade</h3>
-                        <form id="upgrade-form" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Requested Account Type</label>
-                                <select id="requested-type" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
-                                    <option value="">Select account type...</option>
-                                    <option value="hospital">Hospital</option>
-                                    <option value="lab">Laboratory</option>
-                                    <option value="research">Research Institution</option>
-                                    <option value="supplier">Supplier</option>
-                                    <option value="professional">Healthcare Professional</option>
-                                    <option value="student">Student</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason for Upgrade</label>
-                                <textarea id="upgrade-reason" rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Please explain why you need this upgrade..."></textarea>
-                            </div>
-                            <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                                Submit Upgrade Request
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="border-t border-red-200 dark:border-red-800 pt-6 mt-6">
-                        <h3 class="text-lg font-bold text-red-600 dark:text-red-400 mb-4">Danger Zone</h3>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Delete Account</p>
-                                <p class="text-sm text-gray-500">Permanently delete your account and all data</p>
-                            </div>
-                            <button onclick="deleteAccount()" class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
-                                Delete Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Privacy Section -->
-            <div id="privacy-section" class="section hidden">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Privacy & Data</h2>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between py-3">
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Share Anonymous Analytics</p>
-                                <p class="text-sm text-gray-500">Help improve Steryl by sharing usage data</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="share-analytics" class="sr-only peer" onchange="savePrivacySetting('share_analytics', this.checked)">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Data Export</h3>
-                        <p class="text-sm text-gray-500 mb-4">Download all your data in JSON format</p>
-                        <button onclick="exportData()" class="px-6 py-2 border border-primary text-primary rounded-lg font-medium hover:bg-primary/10 transition-colors">
-                            Export My Data
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
 
+<main class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-28">
+
+  <!-- ══ PROFILE ══════════════════════════════════════════ -->
+  <div class="spane active fade-up" id="pane-profile">
+
+    <!-- Avatar card -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 mb-4 flex items-center gap-4">
+      <div class="h-16 w-16 rounded-2xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center flex-shrink-0 ring-4 ring-teal-200 dark:ring-teal-800">
+        <span class="text-2xl font-bold text-teal-700 dark:text-teal-300">
+          {{ (current_user.first_name[0])|upper if current_user.first_name else 'U' }}
+        </span>
+      </div>
+      <div>
+        <p class="font-bold text-gray-900 dark:text-white text-base">{{ current_user.first_name }} {{ current_user.last_name }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ current_user.email }}</p>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300">
+            <span class="material-symbols-outlined" style="font-size:11px">verified</span>
+            {{ current_user.account_type|account_display }}
+          </span>
+          {% if current_user.organization_name %}
+          <span class="text-xs text-gray-400 dark:text-gray-500">· {{ current_user.organization_name }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile form -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Personal Information</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Update your name, phone and department</p>
+      </div>
+      <form id="profile-form" class="p-5 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">First Name</label>
+            <input class="field" type="text" id="first-name" value="{{ current_user.first_name }}" placeholder="First name"/>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">Last Name</label>
+            <input class="field" type="text" id="last-name" value="{{ current_user.last_name }}" placeholder="Last name"/>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">Email Address</label>
+          <input class="field" type="email" value="{{ current_user.email }}" disabled/>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed. Contact support if needed.</p>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">Phone Number</label>
+          <input class="field" type="tel" id="phone" value="{{ current_user.phone or '' }}" placeholder="+234 000 000 0000"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">Department</label>
+          <input class="field" type="text" id="department" value="{{ current_user.department or '' }}" placeholder="e.g. Pharmacy, Pathology"/>
+        </div>
+        <div class="pt-1">
+          <button type="submit" id="profile-save-btn"
+                  class="w-full sm:w-auto px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ APPEARANCE ════════════════════════════════════════ -->
+  <div class="spane" id="pane-appearance">
+
+    <!-- Theme mode -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden mb-4 fade-up">
+      <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Theme</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Choose your preferred display mode</p>
+      </div>
+      <div class="p-5">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="theme-card" id="theme-light" onclick="setTheme('light')">
+            <div class="h-10 rounded-lg bg-gray-100 border border-gray-200 mb-2 flex items-center justify-center">
+              <span class="material-symbols-outlined text-gray-500" style="font-size:18px">light_mode</span>
+            </div>
+            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Light</p>
+          </div>
+          <div class="theme-card" id="theme-dark" onclick="setTheme('dark')">
+            <div class="h-10 rounded-lg bg-gray-800 border border-gray-700 mb-2 flex items-center justify-center">
+              <span class="material-symbols-outlined text-gray-300" style="font-size:18px">dark_mode</span>
+            </div>
+            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Dark</p>
+          </div>
+          <div class="theme-card" id="theme-system" onclick="setTheme('system')">
+            <div class="h-10 rounded-lg bg-gradient-to-r from-gray-100 to-gray-800 border border-gray-300 mb-2 flex items-center justify-center">
+              <span class="material-symbols-outlined text-gray-600" style="font-size:18px">contrast</span>
+            </div>
+            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">System</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toggles -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden fade-up" style="animation-delay:.05s">
+      <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Display Options</h2>
+      </div>
+      <div class="divide-y divide-gray-50 dark:divide-gray-700/50">
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">Compact View</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Show more content with less spacing</p>
+          </div>
+          <div class="tog-track" id="tog-compact" onclick="toggleSetting('compact_view', 'tog-compact')">
+            <div class="tog-thumb"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">Reduced Motion</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Minimise animations and transitions</p>
+          </div>
+          <div class="tog-track" id="tog-motion" onclick="toggleSetting('reduced_motion', 'tog-motion')">
+            <div class="tog-thumb"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS ════════════════════════════════════ -->
+  <div class="spane" id="pane-notifications">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden fade-up">
+      <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Notification Preferences</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Choose how you want to be notified</p>
+      </div>
+      <div class="divide-y divide-gray-50 dark:divide-gray-700/50">
+        <div class="flex items-center justify-between px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-blue-500" style="font-size:16px">mail</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">Email Notifications</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Receive updates via email</p>
+            </div>
+          </div>
+          <div class="tog-track" id="tog-email" onclick="toggleSetting('email_notifications', 'tog-email')">
+            <div class="tog-thumb"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-purple-500" style="font-size:16px">notifications</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">Push Notifications</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Browser push notifications</p>
+            </div>
+          </div>
+          <div class="tog-track" id="tog-push" onclick="toggleSetting('push_notifications', 'tog-push')">
+            <div class="tog-thumb"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 bg-red-50 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-red-500" style="font-size:16px">inventory_2</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">Low Stock Alerts</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Notified when inventory is low</p>
+            </div>
+          </div>
+          <div class="tog-track" id="tog-stock" onclick="toggleSetting('low_stock_alerts', 'tog-stock')">
+            <div class="tog-thumb"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-teal-500" style="font-size:16px">shopping_bag</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">Order Updates</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Status changes on your orders</p>
+            </div>
+          </div>
+          <div class="tog-track" id="tog-orders" onclick="toggleSetting('order_updates', 'tog-orders')">
+            <div class="tog-thumb"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 bg-amber-50 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-amber-500" style="font-size:16px">fact_check</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">Approval Reminders</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Reminders for pending approvals</p>
+            </div>
+          </div>
+          <div class="tog-track" id="tog-approvals" onclick="toggleSetting('approval_reminders', 'tog-approvals')">
+            <div class="tog-thumb"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy toggle -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden mt-4 fade-up" style="animation-delay:.05s">
+      <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Privacy</h2>
+      </div>
+      <div class="flex items-center justify-between px-5 py-4">
+        <div class="flex items-center gap-3">
+          <div class="h-8 w-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-gray-500" style="font-size:16px">analytics</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">Share Anonymous Analytics</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Help improve Steryl by sharing usage data</p>
+          </div>
+        </div>
+        <div class="tog-track" id="tog-analytics" onclick="toggleSetting('share_analytics', 'tog-analytics')">
+          <div class="tog-thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ACCOUNT ════════════════════════════════════════════ -->
+  <div class="spane" id="pane-account">
+
+    <!-- Account info -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden mb-4 fade-up">
+      <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Account Details</h2>
+      </div>
+      <div class="p-5 space-y-3">
+        <div class="flex justify-between items-center py-2.5 border-b border-gray-50 dark:border-gray-700/50">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Account Type</span>
+          <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ current_user.account_type|account_display }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2.5 border-b border-gray-50 dark:border-gray-700/50">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Role</span>
+          <span class="text-sm font-semibold text-gray-900 dark:text-white capitalize">{{ current_user.role or 'Staff' }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2.5 border-b border-gray-50 dark:border-gray-700/50">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Status</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">{{ current_user.account_status|capitalize }}</span>
+        </div>
+        {% if current_user.organization_name %}
+        <div class="flex justify-between items-center py-2.5 border-b border-gray-50 dark:border-gray-700/50">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Organisation</span>
+          <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ current_user.organization_name }}</span>
+        </div>
+        {% endif %}
+        <div class="flex justify-between items-center py-2.5">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Member since</span>
+          <span class="text-sm font-semibold text-gray-900 dark:text-white">
+            {{ current_user.created_at.strftime('%b %Y') if current_user.created_at else '—' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password change -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden mb-4 fade-up" style="animation-delay:.04s">
+      <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Change Password</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Use a strong password of at least 8 characters</p>
+      </div>
+      <form id="password-form" class="p-5 space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">Current Password</label>
+          <input class="field" type="password" id="current-password" placeholder="••••••••"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">New Password</label>
+          <input class="field" type="password" id="new-password" placeholder="••••••••"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">Confirm New Password</label>
+          <input class="field" type="password" id="confirm-password" placeholder="••••••••"/>
+        </div>
+        <button type="submit"
+                class="w-full sm:w-auto px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors">
+          Update Password
+        </button>
+      </form>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-red-100 dark:border-red-900/40 overflow-hidden fade-up" style="animation-delay:.08s">
+      <div class="px-5 py-4 border-b border-red-100 dark:border-red-900/40">
+        <h2 class="font-semibold text-red-600 dark:text-red-400 text-sm flex items-center gap-1.5">
+          <span class="material-symbols-outlined" style="font-size:15px">warning</span>Danger Zone
+        </h2>
+      </div>
+      <div class="p-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">Sign out everywhere</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Log out of all devices and sessions</p>
+          </div>
+          <a href="{{ url_for('main.logout') }}"
+             class="px-4 py-2 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 text-xs font-semibold rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+            Sign Out
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+{% include 'dashboard/_bottom_nav.html' %}
+
 <script>
-// Section Navigation
-function showSection(section) {
-    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    document.getElementById(`${section}-section`).classList.remove('hidden');
-    
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`nav-${section}`).classList.add('active');
+// ── Toast ───────────────────────────────────────────────
+function toast(msg, ok=true) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${ok ? 'bg-gray-900 dark:bg-gray-700 text-white' : 'bg-red-600 text-white'}`;
+  setTimeout(()=>{ el.className = el.className.replace('show',''); }, 2800);
 }
 
-// Save settings to backend
-async function saveSettings(settings) {
-    try {
-        const response = await fetch('/api/user-settings', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(settings)
-        });
-        const data = await response.json();
-        if (!data.success) {
-            console.error('Failed to save settings:', data.message);
-        }
-        return data.success;
-    } catch (error) {
-        console.error('Error saving settings:', error);
-        return false;
-    }
+// ── Tab switching ───────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.spane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  document.querySelector(`[data-t="${id}"]`).classList.add('active');
 }
 
-// Theme functions
-function setTheme(theme) {
-    document.querySelectorAll('.theme-option').forEach(opt => {
-        opt.classList.remove('active', 'border-primary', 'bg-primary', 'text-white');
-        opt.classList.add('border-gray-200', 'dark:border-gray-600');
+// ── Toggle switch ───────────────────────────────────────
+const togState = {};
+function setTog(id, on) {
+  togState[id] = on;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('on', on);
+}
+function toggleSetting(key, togId) {
+  const newVal = !togState[togId];
+  setTog(togId, newVal);
+  saveSettings({[key]: newVal});
+}
+
+// ── Theme ───────────────────────────────────────────────
+let currentTheme = '';
+function setTheme(t) {
+  currentTheme = t;
+  document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('theme-'+t).classList.add('selected');
+
+  if (t === 'dark') {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('steryl-theme','dark');
+  } else if (t === 'light') {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('steryl-theme','light');
+  } else {
+    const sysDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+    document.documentElement.classList.toggle('dark', sysDark);
+    localStorage.setItem('steryl-theme', sysDark ? 'dark' : 'light');
+  }
+  saveSettings({theme: t});
+}
+
+// ── Save to backend ─────────────────────────────────────
+async function saveSettings(payload) {
+  try {
+    const r = await fetch('/api/user-settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d = await r.json();
+    if (!d.success) toast('Could not save setting', false);
+  } catch { toast('Network error', false); }
+}
+
+// ── Profile form ────────────────────────────────────────
+document.getElementById('profile-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('profile-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await fetch('/api/update-profile',{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        first_name: document.getElementById('first-name').value.trim(),
+        last_name:  document.getElementById('last-name').value.trim(),
+        phone:      document.getElementById('phone').value.trim(),
+        department: document.getElementById('department').value.trim()
+      })
     });
-    const themeBtn = document.getElementById(`theme-${theme}`);
-    themeBtn.classList.add('active', 'border-primary', 'bg-primary', 'text-white');
-    
-    if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-    } else if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
-    } else if (theme === 'system') {
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }
-    
-    saveSettings({ theme: theme });
-}
-
-function setPrimaryColor(color) {
-    document.body.setAttribute('data-primary', color);
-    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
-    document.querySelector(`[data-color="${color}"]`).classList.add('selected');
-    saveSettings({ primary_color: color });
-}
-
-function setFontSize(size) {
-    document.querySelectorAll('.font-option').forEach(opt => opt.classList.remove('active', 'border-primary', 'bg-primary/10'));
-    const fontBtn = document.getElementById(`font-${size}`);
-    fontBtn.classList.add('active', 'border-primary', 'bg-primary/10');
-    
-    const fontSize = size === 'small' ? '14px' : size === 'large' ? '18px' : '16px';
-    document.body.style.fontSize = fontSize;
-    saveSettings({ font_size: size });
-}
-
-function saveCompactView(value) {
-    if (value) {
-        document.body.classList.add('compact-view');
-    } else {
-        document.body.classList.remove('compact-view');
-    }
-    saveSettings({ compact_view: value });
-}
-
-function saveReducedMotion(value) {
-    if (value) {
-        document.body.classList.add('reduced-motion');
-    } else {
-        document.body.classList.remove('reduced-motion');
-    }
-    saveSettings({ reduced_motion: value });
-}
-
-function saveNotificationSetting(key, value) {
-    saveSettings({ [key]: value });
-}
-
-function savePrivacySetting(key, value) {
-    saveSettings({ [key]: value });
-}
-
-// Profile form submission
-document.getElementById('profile-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = 'Saving...';
-    submitBtn.disabled = true;
-    
-    const formData = {
-        first_name: document.getElementById('first-name').value,
-        last_name: document.getElementById('last-name').value,
-        phone: document.getElementById('phone').value,
-        department: document.getElementById('department').value
-    };
-    
-    try {
-        const response = await fetch('/api/update-profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Profile updated successfully!');
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        alert('Error updating profile');
-    } finally {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    }
+    const d = await r.json();
+    if (d.success) { toast('Profile updated successfully'); }
+    else { toast(d.message||'Failed to save', false); }
+  } catch { toast('Network error', false); }
+  finally { btn.disabled = false; btn.textContent = 'Save Changes'; }
 });
 
-// Upgrade request
-document.getElementById('upgrade-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const accountType = document.getElementById('requested-type').value;
-    const reason = document.getElementById('upgrade-reason').value;
-    
-    if (!accountType) {
-        alert('Please select an account type');
-        return;
-    }
-    
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = 'Submitting...';
-    submitBtn.disabled = true;
-    
-    try {
-        const response = await fetch('/api/request-upgrade', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ account_type: accountType, reason: reason })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Upgrade request submitted! Admin will review it.');
-            document.getElementById('upgrade-form').reset();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        alert('Error submitting request');
-    } finally {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    }
+// ── Password form ───────────────────────────────────────
+document.getElementById('password-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const cur = document.getElementById('current-password').value;
+  const nw  = document.getElementById('new-password').value;
+  const cnf = document.getElementById('confirm-password').value;
+  if (!cur || !nw) { toast('Please fill in all fields', false); return; }
+  if (nw !== cnf)  { toast('Passwords do not match', false); return; }
+  if (nw.length < 8){ toast('Password must be at least 8 characters', false); return; }
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Updating…';
+  try {
+    const r = await fetch('/api/update-profile',{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({current_password: cur, new_password: nw})
+    });
+    const d = await r.json();
+    if (d.success) { toast('Password updated'); e.target.reset(); }
+    else { toast(d.message||'Incorrect current password', false); }
+  } catch { toast('Network error', false); }
+  finally { btn.disabled = false; btn.textContent = 'Update Password'; }
 });
 
-// Load user settings from backend
-async function loadSettings() {
-    try {
-        const response = await fetch('/api/user-settings');
-        const data = await response.json();
-        
-        if (data.success) {
-            const settings = data.data;
-            
-            // Apply theme
-            if (settings.theme) {
-                const themeBtn = document.getElementById(`theme-${settings.theme}`);
-                if (themeBtn) themeBtn.click();
-            }
-            
-            // Apply primary color
-            if (settings.primary_color) {
-                const colorOption = document.querySelector(`[data-color="${settings.primary_color}"]`);
-                if (colorOption) colorOption.click();
-            }
-            
-            // Apply font size
-            if (settings.font_size) {
-                const fontBtn = document.getElementById(`font-${settings.font_size}`);
-                if (fontBtn) fontBtn.click();
-            }
-            
-            // Apply checkboxes
-            if (settings.compact_view !== undefined) {
-                document.getElementById('compact-view').checked = settings.compact_view;
-                if (settings.compact_view) document.body.classList.add('compact-view');
-            }
-            if (settings.reduced_motion !== undefined) {
-                document.getElementById('reduced-motion').checked = settings.reduced_motion;
-                if (settings.reduced_motion) document.body.classList.add('reduced-motion');
-            }
-            if (settings.email_notifications !== undefined) {
-                document.getElementById('email-notifications').checked = settings.email_notifications;
-            }
-            if (settings.push_notifications !== undefined) {
-                document.getElementById('push-notifications').checked = settings.push_notifications;
-            }
-            if (settings.low_stock_alerts !== undefined) {
-                document.getElementById('low-stock-alerts').checked = settings.low_stock_alerts;
-            }
-            if (settings.order_updates !== undefined) {
-                document.getElementById('order-updates').checked = settings.order_updates;
-            }
-            if (settings.approval_reminders !== undefined) {
-                document.getElementById('approval-reminders').checked = settings.approval_reminders;
-            }
-            if (settings.share_analytics !== undefined) {
-                document.getElementById('share-analytics').checked = settings.share_analytics;
-            }
-        }
-    } catch (error) {
-        console.error('Error loading settings:', error);
-    }
-}
+// ── Load settings from backend ──────────────────────────
+const TOG_MAP = {
+  email_notifications: 'tog-email',
+  push_notifications:  'tog-push',
+  low_stock_alerts:    'tog-stock',
+  order_updates:       'tog-orders',
+  approval_reminders:  'tog-approvals',
+  share_analytics:     'tog-analytics',
+  compact_view:        'tog-compact',
+  reduced_motion:      'tog-motion',
+};
 
-function deleteAccount() {
-    if (confirm('Are you absolutely sure? This action cannot be undone.')) {
-        alert('Account deletion feature coming soon. Please contact support.');
-    }
-}
+fetch('/api/user-settings').then(r=>r.json()).then(d=>{
+  if (!d.success) return;
+  const s = d.data;
+  // Toggles
+  Object.entries(TOG_MAP).forEach(([key, togId]) => {
+    if (s[key] !== undefined) setTog(togId, !!s[key]);
+  });
+  // Theme
+  const t = s.theme || (localStorage.getItem('steryl-theme')==='dark' ? 'dark' : 'light');
+  document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('selected'));
+  const tc = document.getElementById('theme-'+t);
+  if (tc) { tc.classList.add('selected'); currentTheme = t; }
+}).catch(()=>{});
 
-function exportData() {
-    alert('Data export feature coming soon.');
-}
-
-// Initialize
-showSection('profile');
-loadSettings();
-
-// Listen for system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    const themeSetting = document.getElementById('theme-system').classList.contains('active');
-    if (themeSetting) {
-        if (e.matches) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }
-});
+// Sync theme card with current DOM state on load
+const initTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+document.getElementById('theme-'+initTheme)?.classList.add('selected');
 </script>
 </body>
 </html>

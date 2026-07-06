@@ -1,352 +1,439 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 <head>
+<script>(function(){var t=localStorage.getItem('steryl-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark')})();</script>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Approvals - Steryl Health OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Approvals — Steryl Health</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <style>
-    * { font-family: 'Inter', sans-serif; }
-    .approval-card { transition: all 0.3s ease; }
-    .approval-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+  *{font-family:'Inter',sans-serif}
+  body{transition:background-color .2s,color .2s}
+
+  /* Filter tabs */
+  .ftab{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;
+        transition:all .15s;background:transparent;color:#6b7280;white-space:nowrap}
+  .dark .ftab{color:#9ca3af}
+  .ftab.active{background:#0d9488;color:#fff;box-shadow:0 2px 8px rgba(13,148,136,.25)}
+
+  /* Order rows */
+  .order-row{cursor:pointer;transition:background .15s}
+  .order-row:hover{background:rgba(13,148,136,.04)}
+  .dark .order-row:hover{background:rgba(45,212,191,.05)}
+  .order-row.expanded{background:rgba(13,148,136,.04)}
+  .dark .order-row.expanded{background:rgba(45,212,191,.04)}
+
+  /* Expand panel */
+  .expand-panel{max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .expand-panel.open{max-height:600px}
+
+  /* Chevron spin */
+  .chevron{transition:transform .22s}
+  .expanded .chevron{transform:rotate(180deg)}
+
+  /* Status dots */
+  .dot-pending{background:#f59e0b}
+  .dot-approved{background:#10b981}
+  .dot-rejected{background:#ef4444}
+  .dot-completed{background:#3b82f6}
+
+  /* Status pills */
+  .pill-pending{background:#fef3c7;color:#92400e}
+  .pill-approved{background:#d1fae5;color:#065f46}
+  .pill-rejected{background:#fee2e2;color:#991b1b}
+  .pill-completed{background:#dbeafe;color:#1e40af}
+  .dark .pill-pending{background:#3b1f00;color:#fcd34d}
+  .dark .pill-approved{background:#052e16;color:#6ee7b7}
+  .dark .pill-rejected{background:#450a0a;color:#fca5a5}
+  .dark .pill-completed{background:#172554;color:#93c5fd}
+
+  /* Track dots */
+  .track-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .track-line{flex:1;height:2px;margin:0 2px}
+
+  @keyframes fadeSlide{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+  .fade-in{animation:fadeSlide .2s ease-out}
 </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900">
-<!-- Top Navigation -->
-<nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <div class="h-8 w-8 bg-teal-500 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white text-sm">medical_services</span>
-                    </div>
-                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">Steryl<span class="text-teal-500">Health</span></span>
-                </div>
-                <div class="hidden md:ml-6 md:flex md:space-x-8">
-                    <a href="{{ url_for('main.dashboard') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Dashboard</a>
-                    <a href="{{ url_for('main.order_cart') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Orders</a>
-                    <a href="{{ url_for('main.approvals') }}" class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 px-3 py-2 text-sm font-medium">Approvals</a>
-                    <a href="{{ url_for('main.budget') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Budget</a>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-3">
-                    <div class="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
-                        <span class="text-sm font-bold text-teal-600 dark:text-teal-300">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">{{ current_user.first_name }} {{ current_user.last_name }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Approval Queue</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-2">Review and approve procurement requests</p>
+{% include 'dashboard/_top_nav.html' %}
+
+<!-- Header -->
+<div class="sticky top-14 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Title row -->
+    <div class="flex items-center justify-between pt-3 pb-2">
+      <div>
+        <h1 class="text-base font-bold text-gray-900 dark:text-white">Order Approvals</h1>
+        <p id="header-subtitle" class="text-xs text-gray-500 dark:text-gray-400">Loading…</p>
+      </div>
+      <a href="{{ url_for('main.orders') }}"
+         class="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition-colors">
+        <span class="material-symbols-outlined" style="font-size:14px">add</span>New Order
+      </a>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
-                    <p id="pending-count" class="text-2xl font-bold text-amber-600 mt-1">0</p>
-                </div>
-                <span class="material-symbols-outlined text-3xl text-amber-500">pending</span>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Approved</p>
-                    <p id="approved-count" class="text-2xl font-bold text-green-600 mt-1">0</p>
-                </div>
-                <span class="material-symbols-outlined text-3xl text-green-500">check_circle</span>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Rejected</p>
-                    <p id="rejected-count" class="text-2xl font-bold text-red-600 mt-1">0</p>
-                </div>
-                <span class="material-symbols-outlined text-3xl text-red-500">cancel</span>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Value</p>
-                    <p id="total-value" class="text-2xl font-bold text-teal-600 mt-1">₦0</p>
-                </div>
-                <span class="material-symbols-outlined text-3xl text-teal-500">payments</span>
-            </div>
-        </div>
+    <!-- Filter tabs -->
+    <div class="flex gap-1 pb-2.5 overflow-x-auto scrollbar-none">
+      <button class="ftab active" onclick="applyFilter('')"           data-f="">All <span class="ml-0.5 opacity-70" id="cnt-all">0</span></button>
+      <button class="ftab"        onclick="applyFilter('pending')"    data-f="pending">Pending <span class="ml-0.5 opacity-70" id="cnt-pending">0</span></button>
+      <button class="ftab"        onclick="applyFilter('approved')"   data-f="approved">Approved <span class="ml-0.5 opacity-70" id="cnt-approved">0</span></button>
+      <button class="ftab"        onclick="applyFilter('rejected')"   data-f="rejected">Rejected <span class="ml-0.5 opacity-70" id="cnt-rejected">0</span></button>
+      <button class="ftab"        onclick="applyFilter('completed')"  data-f="completed">Completed <span class="ml-0.5 opacity-70" id="cnt-completed">0</span></button>
     </div>
-
-    <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
-        <div class="flex flex-wrap gap-3">
-            <button id="filter-pending" class="filter-btn px-4 py-2 bg-teal-600 text-white rounded-lg font-medium transition-all">Pending</button>
-            <button id="filter-approved" class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all hover:bg-gray-300 dark:hover:bg-gray-600">Approved</button>
-            <button id="filter-rejected" class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all hover:bg-gray-300 dark:hover:bg-gray-600">Rejected</button>
-            <button id="filter-all" class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all hover:bg-gray-300 dark:hover:bg-gray-600">All</button>
-        </div>
-    </div>
-
-    <!-- Approvals List -->
-    <div id="approvals-container" class="space-y-4">
-        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
-            <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">hourglass_empty</span>
-            <p class="text-gray-500">Loading approvals...</p>
-        </div>
-    </div>
+  </div>
 </div>
 
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-28">
+
+  <!-- Summary strip -->
+  <div class="flex items-center gap-4 sm:gap-6 mb-4 px-1">
+    <div class="text-center">
+      <p id="strip-total" class="text-xl font-bold text-gray-900 dark:text-white">—</p>
+      <p class="text-[10px] text-gray-400 uppercase tracking-wide">Total</p>
+    </div>
+    <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
+    <div class="text-center">
+      <p id="strip-pending" class="text-xl font-bold text-amber-600 dark:text-amber-400">—</p>
+      <p class="text-[10px] text-gray-400 uppercase tracking-wide">Pending</p>
+    </div>
+    <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
+    <div class="text-center">
+      <p id="strip-approved" class="text-xl font-bold text-green-600 dark:text-green-400">—</p>
+      <p class="text-[10px] text-gray-400 uppercase tracking-wide">Approved</p>
+    </div>
+    <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
+    <div class="text-center">
+      <p id="strip-spend" class="text-lg font-bold text-teal-700 dark:text-teal-400">—</p>
+      <p class="text-[10px] text-gray-400 uppercase tracking-wide">Total value</p>
+    </div>
+  </div>
+
+  <!-- Orders list -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+
+    <!-- Table head (desktop) -->
+    <div class="hidden sm:grid grid-cols-[1fr_90px_90px_80px_24px] gap-3 px-4 py-2.5 border-b border-gray-100 dark:border-gray-700
+                text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+      <span>Order</span>
+      <span class="text-center">Items</span>
+      <span class="text-right">Amount</span>
+      <span class="text-center">Status</span>
+      <span></span>
+    </div>
+
+    <div id="orders-list" class="divide-y divide-gray-50 dark:divide-gray-700/50">
+      <div class="py-16 text-center text-gray-400 dark:text-gray-500 text-sm">
+        <span class="material-symbols-outlined text-3xl block mb-2">fact_check</span>Loading orders…
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Reject modal -->
+<div id="reject-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <div class="h-8 w-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-red-500" style="font-size:16px">cancel</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-900 dark:text-white text-sm">Reject Order</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Reason is optional but helpful</p>
+      </div>
+    </div>
+    <textarea id="reject-comments" rows="3" placeholder="Reason for rejection…"
+              class="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700
+                     text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:border-red-400
+                     resize-none mb-3 transition"></textarea>
+    <div class="flex gap-2">
+      <button onclick="closeReject()"
+              class="flex-1 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300
+                     text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+      <button onclick="confirmReject()"
+              class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors">Reject</button>
+    </div>
+  </div>
+</div>
+
+{% include 'dashboard/_bottom_nav.html' %}
+
 <script>
+const fmt = v => new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(v||0);
+const relDate = d => {
+  if (!d) return '—';
+  const diff = Math.floor((new Date()-new Date(d))/60000);
+  if (diff < 60)   return diff+'m ago';
+  if (diff < 1440) return Math.floor(diff/60)+'h ago';
+  return new Date(d).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'});
+};
+
 let allApprovals = [];
-let currentFilter = 'pending';
+let currentFilter = '';
+let rejectTargetId = null;
+let expandedId = null;
 
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+// ── Status helpers ──────────────────────────────────────
+const DOT = {pending:'dot-pending',approved:'dot-approved',rejected:'dot-rejected',completed:'dot-completed'};
+const PILL = {pending:'pill-pending',approved:'pill-approved',rejected:'pill-rejected',completed:'pill-completed'};
+const STEP_LABELS = ['Submitted','In Review','Decision','Delivered'];
+
+function trackHtml(status) {
+  const idx = {pending:1,approved:2,completed:3,delivered:3,rejected:2}[status] ?? 0;
+  const isRej = status==='rejected';
+  return STEP_LABELS.map((lbl,i)=>{
+    const done = i < idx;
+    const cur  = i === idx-1;
+    const rej  = isRej && i===1;
+    const dotCls = rej ? 'bg-red-500' : (done||cur ? 'bg-teal-500' : 'bg-gray-200 dark:bg-gray-600');
+    const lblCls = done||cur ? (rej?'text-red-500 dark:text-red-400':'text-teal-600 dark:text-teal-400') : 'text-gray-400 dark:text-gray-500';
+    const lineCls = done ? 'bg-teal-500' : 'bg-gray-200 dark:bg-gray-600';
+    return `<div class="flex flex-col items-center" style="flex:1">
+      <div class="track-dot ${dotCls}"></div>
+      <span class="text-[9px] mt-1 text-center leading-tight ${lblCls} font-medium">${rej?'Rejected':lbl}</span>
+    </div>${i<STEP_LABELS.length-1?`<div class="track-line ${lineCls} mt-[4px]"></div>`:''}`;
+  }).join('');
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-NG') + ' ' + date.toLocaleTimeString('en-NG');
+// ── Stats strip ─────────────────────────────────────────
+function updateStrip(all) {
+  const orders = all.map(a=>a.order||a);
+  const pend  = orders.filter(o=>o.status==='pending').length;
+  const appr  = orders.filter(o=>o.status==='approved').length;
+  const rej   = orders.filter(o=>o.status==='rejected').length;
+  const comp  = orders.filter(o=>o.status==='completed').length;
+  const total = orders.reduce((s,o)=>s+(o.total_amount||0),0);
+
+  document.getElementById('strip-total').textContent   = orders.length;
+  document.getElementById('strip-pending').textContent = pend;
+  document.getElementById('strip-approved').textContent= appr;
+  document.getElementById('strip-spend').textContent   = fmt(total);
+
+  document.getElementById('cnt-all').textContent       = orders.length;
+  document.getElementById('cnt-pending').textContent   = pend;
+  document.getElementById('cnt-approved').textContent  = appr;
+  document.getElementById('cnt-rejected').textContent  = rej;
+  document.getElementById('cnt-completed').textContent = comp;
+
+  const subtitle = document.getElementById('header-subtitle');
+  subtitle.textContent = pend > 0
+    ? `${pend} order${pend>1?'s':''} awaiting your action`
+    : 'All orders are up to date';
+  subtitle.className = `text-xs ${pend>0?'text-amber-600 dark:text-amber-400 font-medium':'text-gray-500 dark:text-gray-400'}`;
 }
 
-function getPriorityBadge(priority) {
-    const badges = {
-        'urgent': '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">Urgent</span>',
-        'high': '<span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700">High</span>',
-        'normal': '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">Normal</span>',
-        'low': '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">Low</span>'
-    };
-    return badges[priority] || badges['normal'];
+// ── Filter ──────────────────────────────────────────────
+function applyFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active', b.dataset.f===f));
+  const list = f ? allApprovals.filter(a=>(a.order||a).status===f) : allApprovals;
+  renderList(list);
 }
 
-function getStatusBadge(status) {
-    const badges = {
-        'pending': '<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-700">Pending</span>',
-        'approved': '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Approved</span>',
-        'rejected': '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">Rejected</span>'
-    };
-    return badges[status] || badges['pending'];
+// ── Expand / collapse ───────────────────────────────────
+function toggleRow(id) {
+  if (expandedId === id) {
+    collapseRow(id);
+    expandedId = null;
+  } else {
+    if (expandedId !== null) collapseRow(expandedId);
+    expandedId = id;
+    expandRow(id);
+  }
+}
+function expandRow(id) {
+  const row  = document.getElementById('row-'+id);
+  const pane = document.getElementById('pane-'+id);
+  if (row)  row.classList.add('expanded');
+  if (pane) { pane.classList.add('open'); pane.classList.add('fade-in'); }
+}
+function collapseRow(id) {
+  const row  = document.getElementById('row-'+id);
+  const pane = document.getElementById('pane-'+id);
+  if (row)  row.classList.remove('expanded');
+  if (pane) pane.classList.remove('open');
 }
 
-function renderApprovals() {
-    const container = document.getElementById('approvals-container');
-    let filtered = allApprovals;
-    
-    if (currentFilter !== 'all') {
-        filtered = allApprovals.filter(a => a.order.status === currentFilter);
-    }
-    
-    if (filtered.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
-                <span class="material-symbols-outlined text-4xl text-gray-400 mb-2">inbox</span>
-                <p class="text-gray-500">No ${currentFilter} approvals found</p>
+// ── Render ──────────────────────────────────────────────
+function renderList(data) {
+  const el = document.getElementById('orders-list');
+
+  if (!data.length) {
+    el.innerHTML = `<div class="py-16 text-center text-gray-400 dark:text-gray-500 text-sm">
+      <span class="material-symbols-outlined text-3xl block mb-2">inbox</span>
+      No orders${currentFilter ? ` with status "${currentFilter}"` : ''}.
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(a => {
+    const o      = a.order || a;
+    const sla    = a.sla_remaining_text || null;
+    const dot    = DOT[o.status]  || 'dot-pending';
+    const pill   = PILL[o.status] || 'pill-pending';
+    const items  = o.items || [];
+    const count  = items.length;
+    const canAct = o.status === 'pending';
+
+    // Priority label only if non-normal
+    const priBadge = (o.priority && o.priority !== 'normal')
+      ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 uppercase">${o.priority}</span>`
+      : '';
+
+    // Expanded detail pane
+    const itemsHtml = items.length
+      ? `<div class="flex flex-wrap gap-1.5 mt-1">${items.slice(0,6).map(it=>`
+            <span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
+              ${it.product_name||'Item'} ×${it.quantity}
+            </span>`).join('')}
+          ${items.length>6?`<span class="text-[10px] text-gray-400 self-center">+${items.length-6} more</span>`:''}
+        </div>` : '';
+
+    const notesHtml = o.notes
+      ? `<p class="text-xs text-gray-500 dark:text-gray-400 italic mt-2">"${o.notes}"</p>` : '';
+
+    const slaHtml = sla
+      ? `<p class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-3 flex items-center gap-1">
+           <span class="material-symbols-outlined" style="font-size:13px">timer</span>${sla} remaining
+         </p>` : '';
+
+    const actionsHtml = canAct ? `
+      <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+        <button onclick="event.stopPropagation();processOrder(${o.id},'approve')"
+                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-teal-600 hover:bg-teal-700
+                       text-white text-xs font-bold rounded-lg transition-colors">
+          <span class="material-symbols-outlined" style="font-size:14px">check_circle</span>Approve
+        </button>
+        <button onclick="event.stopPropagation();openReject(${o.id})"
+                class="flex items-center justify-center gap-1.5 px-4 py-2 border border-red-200 dark:border-red-700
+                       bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30
+                       text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-colors">
+          <span class="material-symbols-outlined" style="font-size:14px">close</span>Reject
+        </button>
+      </div>` : '';
+
+    return `
+      <!-- Row -->
+      <div id="row-${o.id}" class="order-row" onclick="toggleRow(${o.id})">
+        <div class="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_90px_90px_80px_24px] gap-3 items-center px-4 py-3.5">
+
+          <!-- Order info -->
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="track-dot ${dot} flex-shrink-0"></div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white">${o.order_number||('#'+o.id)}</span>
+                ${priBadge}
+              </div>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">${relDate(o.created_at)}</p>
             </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = filtered.map(item => {
-        const order = item.order;
-        const isUrgent = order.priority === 'urgent';
-        const borderClass = isUrgent ? 'border-l-4 border-l-red-500' : '';
-        
-        return `
-            <div class="approval-card bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden ${borderClass}">
-                <div class="p-6">
-                    <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
-                        <div>
-                            <div class="flex items-center gap-3 mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Order #${order.order_number}</h3>
-                                ${getPriorityBadge(order.priority)}
-                                ${getStatusBadge(order.status)}
-                            </div>
-                            <p class="text-gray-600 dark:text-gray-400">${order.notes || 'No description provided'}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">${formatCurrency(order.total_amount)}</p>
-                            <p class="text-xs text-gray-500">Requested: ${formatDate(order.created_at)}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Requester</p>
-                            <p class="font-medium text-gray-900 dark:text-white">${order.requester_name || 'Unknown'}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Department</p>
-                            <p class="font-medium text-gray-900 dark:text-white">${order.department || 'N/A'}</p>
-                        </div>
-                    </div>
-                    
-                    ${order.items && order.items.length > 0 ? `
-                        <div class="mb-4">
-                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Items:</p>
-                            <div class="space-y-2">
-                                ${order.items.slice(0, 3).map(item => `
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600 dark:text-gray-400">${item.product_name || 'Product'} x ${item.quantity}</span>
-                                        <span class="font-medium">${formatCurrency(item.subtotal)}</span>
-                                    </div>
-                                `).join('')}
-                                ${order.items.length > 3 ? `<p class="text-xs text-gray-500">+${order.items.length - 3} more items</p>` : ''}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    ${order.status === 'pending' ? `
-                        <div class="flex gap-3 mt-4">
-                            <button onclick="processApproval(${order.id}, 'approve')" 
-                                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
-                                Approve
-                            </button>
-                            <button onclick="processApproval(${order.id}, 'reject')" 
-                                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
-                                Reject
-                            </button>
-                        </div>
-                    ` : `
-                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <span class="inline-flex items-center gap-2 text-sm">
-                                <span class="material-symbols-outlined text-gray-400 text-sm">history</span>
-                                <span class="text-gray-500">Processed on ${formatDate(order.updated_at)}</span>
-                            </span>
-                        </div>
-                    `}
-                </div>
+          </div>
+
+          <!-- Items (desktop) -->
+          <div class="hidden sm:block text-center">
+            <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">${count}</span>
+            <p class="text-[10px] text-gray-400">${count===1?'item':'items'}</p>
+          </div>
+
+          <!-- Amount (desktop) -->
+          <div class="hidden sm:block text-right">
+            <span class="text-sm font-bold text-gray-900 dark:text-white">${fmt(o.total_amount)}</span>
+          </div>
+
+          <!-- Status (desktop) -->
+          <div class="hidden sm:flex justify-center">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${pill} capitalize">${o.status}</span>
+          </div>
+
+          <!-- Mobile: amount + status + chevron -->
+          <div class="sm:hidden flex items-center gap-2 flex-shrink-0">
+            <div class="text-right">
+              <span class="text-xs font-bold text-gray-900 dark:text-white">${fmt(o.total_amount)}</span>
+              <p class="text-[9px] capitalize ${dot==='dot-pending'?'text-amber-500':dot==='dot-approved'?'text-green-500':dot==='dot-rejected'?'text-red-500':'text-blue-500'}">${o.status}</p>
             </div>
-        `;
-    }).join('');
+          </div>
+
+          <!-- Chevron -->
+          <div class="flex items-center justify-center">
+            <span class="material-symbols-outlined chevron text-gray-400 dark:text-gray-500" style="font-size:18px">expand_more</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Expand pane -->
+      <div id="pane-${o.id}" class="expand-panel">
+        <div class="px-4 pb-4 pt-1 bg-gray-50/70 dark:bg-gray-800/60 border-t border-gray-100 dark:border-gray-700/60">
+
+          <!-- Track -->
+          <div class="mb-3">
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Progress</p>
+            <div class="flex items-center">${trackHtml(o.status)}</div>
+            ${slaHtml}
+          </div>
+
+          <!-- Items + notes -->
+          ${itemsHtml}
+          ${notesHtml}
+
+          <!-- Meta -->
+          <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-gray-500 dark:text-gray-400">
+            <span><span class="font-medium text-gray-700 dark:text-gray-300">Type:</span> ${o.order_type||'purchase'}</span>
+            <span><span class="font-medium text-gray-700 dark:text-gray-300">Priority:</span> ${o.priority||'normal'}</span>
+            <span><span class="font-medium text-gray-700 dark:text-gray-300">Value:</span> ${fmt(o.total_amount)}</span>
+          </div>
+
+          ${actionsHtml}
+        </div>
+      </div>`;
+  }).join('');
 }
 
-function processApproval(orderId, action) {
-    if (!confirm(`Are you sure you want to ${action} this order?`)) return;
-    
-    const btn = event.target;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = 'Processing...';
-    btn.disabled = true;
-    
-    fetch(`/api/approvals/${orderId}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comments: '' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            loadApprovals();
-        } else {
-            alert('Error: ' + data.message);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to process approval');
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+// ── Actions ─────────────────────────────────────────────
+async function processOrder(id, action, comments='') {
+  const btn = document.querySelector(`#pane-${id} button`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const r = await fetch(`/api/approvals/${id}/${action}`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({comments})
     });
+    const d = await r.json();
+    if (d.success) { loadApprovals(); }
+    else { alert(d.message||'Action failed'); if(btn){btn.disabled=false;} }
+  } catch { alert('Network error'); if(btn){btn.disabled=false;} }
 }
 
-function updateStats() {
-    const pending = allApprovals.filter(a => a.order.status === 'pending').length;
-    const approved = allApprovals.filter(a => a.order.status === 'approved').length;
-    const rejected = allApprovals.filter(a => a.order.status === 'rejected').length;
-    const totalValue = allApprovals.reduce((sum, a) => sum + (a.order.total_amount || 0), 0);
-    
-    document.getElementById('pending-count').textContent = pending;
-    document.getElementById('approved-count').textContent = approved;
-    document.getElementById('rejected-count').textContent = rejected;
-    document.getElementById('total-value').textContent = formatCurrency(totalValue);
+function openReject(id)  { rejectTargetId=id; document.getElementById('reject-modal').classList.remove('hidden'); }
+function closeReject()   { document.getElementById('reject-modal').classList.add('hidden'); rejectTargetId=null; }
+function confirmReject() {
+  if (!rejectTargetId) return;
+  processOrder(rejectTargetId,'reject',document.getElementById('reject-comments').value);
+  closeReject();
 }
+document.getElementById('reject-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeReject(); });
 
+// ── Load ────────────────────────────────────────────────
 function loadApprovals() {
-    fetch('/api/approvals')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                allApprovals = data.data;
-                updateStats();
-                renderApprovals();
-            } else {
-                console.error('Failed to fetch approvals:', data);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('approvals-container').innerHTML = `
-                <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
-                    <span class="material-symbols-outlined text-4xl text-red-400 mb-2">error</span>
-                    <p class="text-red-500">Error loading approvals</p>
-                </div>
-            `;
-        });
+  fetch('/api/approvals').then(r=>r.json()).then(d=>{
+    if (!d.success) {
+      document.getElementById('orders-list').innerHTML = '<p class="text-center py-10 text-sm text-gray-400">Could not load orders.</p>';
+      return;
+    }
+    allApprovals = d.data || [];
+    updateStrip(allApprovals);
+    applyFilter(currentFilter);
+  }).catch(()=>{
+    document.getElementById('orders-list').innerHTML = '<p class="text-center py-10 text-sm text-red-400">Failed to load.</p>';
+  });
 }
-
-// Filter buttons
-document.getElementById('filter-pending').addEventListener('click', () => {
-    currentFilter = 'pending';
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-teal-600', 'text-white');
-        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-    });
-    document.getElementById('filter-pending').classList.add('bg-teal-600', 'text-white');
-    renderApprovals();
-});
-
-document.getElementById('filter-approved').addEventListener('click', () => {
-    currentFilter = 'approved';
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-teal-600', 'text-white');
-        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-    });
-    document.getElementById('filter-approved').classList.add('bg-teal-600', 'text-white');
-    renderApprovals();
-});
-
-document.getElementById('filter-rejected').addEventListener('click', () => {
-    currentFilter = 'rejected';
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-teal-600', 'text-white');
-        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-    });
-    document.getElementById('filter-rejected').classList.add('bg-teal-600', 'text-white');
-    renderApprovals();
-});
-
-document.getElementById('filter-all').addEventListener('click', () => {
-    currentFilter = 'all';
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-teal-600', 'text-white');
-        btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-    });
-    document.getElementById('filter-all').classList.add('bg-teal-600', 'text-white');
-    renderApprovals();
-});
-
-// Load approvals on page load
 loadApprovals();
-
-// Auto-refresh every 30 seconds
-setInterval(loadApprovals, 30000);
 </script>
 </body>
 </html>

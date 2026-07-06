@@ -21,6 +21,7 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
     {% block content %}{% endblock %}
+    {% include 'components/notice_system.html' %}
     
     {% block scripts %}{% endblock %}
 </body>

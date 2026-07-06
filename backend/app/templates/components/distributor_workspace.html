@@ -1,0 +1,211 @@
+<style>
+    .distributor-body {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at top left, rgba(20, 184, 166, 0.18), transparent 32%),
+            radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 28%),
+            linear-gradient(180deg, #f7fbfb 0%, #eef7f7 100%);
+        color: #0f172a;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .distributor-shell {
+        width: min(1180px, calc(100% - 1.5rem));
+        margin: 0 auto;
+    }
+
+    .distributor-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 2rem;
+        background: linear-gradient(135deg, #0f766e 0%, #0f766e 35%, #155e75 100%);
+        color: white;
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.16);
+    }
+
+    .distributor-hero::after {
+        content: '';
+        position: absolute;
+        inset: auto -8% -35% auto;
+        width: 18rem;
+        height: 18rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        filter: blur(6px);
+    }
+
+    .distributor-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        padding: 0.55rem 0.95rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .distributor-panel,
+    .distributor-metric-card,
+    .distributor-table-shell {
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+        backdrop-filter: blur(12px);
+    }
+
+    .distributor-panel,
+    .distributor-metric-card {
+        border-radius: 1.5rem;
+    }
+
+    .distributor-metric-card {
+        padding: 1.4rem;
+    }
+
+    .distributor-table-shell {
+        border-radius: 1.75rem;
+        overflow: hidden;
+    }
+
+    .distributor-action-primary,
+    .distributor-action-secondary,
+    .distributor-nav-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        border-radius: 999px;
+        font-weight: 700;
+        transition: transform 160ms ease, background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+
+    .distributor-action-primary {
+        background: linear-gradient(135deg, #0f766e, #0ea5e9);
+        color: white;
+        box-shadow: 0 16px 34px rgba(15, 118, 110, 0.22);
+    }
+
+    .distributor-action-primary:hover,
+    .distributor-action-secondary:hover,
+    .distributor-nav-link:hover {
+        transform: translateY(-1px);
+    }
+
+    .distributor-action-secondary,
+    .distributor-nav-link {
+        border: 1px solid rgba(148, 163, 184, 0.26);
+        background: rgba(255, 255, 255, 0.8);
+        color: #0f172a;
+    }
+
+    .distributor-nav-link.is-active,
+    .distributor-bottom-nav a.is-active {
+        background: rgba(20, 184, 166, 0.14);
+        border-color: rgba(15, 118, 110, 0.2);
+        color: #0f766e;
+    }
+
+    .distributor-bottom-nav {
+        position: sticky;
+        bottom: 1rem;
+        z-index: 30;
+        width: min(1180px, calc(100% - 1.5rem));
+        margin: 1rem auto 0;
+    }
+
+    .distributor-bottom-nav > div {
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
+        border-radius: 1.25rem;
+        padding: 0.45rem;
+    }
+
+    .distributor-bottom-nav a {
+        display: flex;
+        min-height: 4rem;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        border-radius: 1rem;
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .distributor-shell {
+            width: min(100% - 1rem, 1180px);
+        }
+    }
+</style>
+
+<header class="pt-6">
+    <div class="distributor-shell">
+        <div class="distributor-panel rounded-[1.75rem] p-4 sm:p-5">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Steryl Health OS</p>
+                    <h1 class="mt-2 text-2xl font-bold text-slate-900">{{ distributor_page_title or 'Distributor Workspace' }}</h1>
+                    <p class="mt-1 text-sm text-slate-500">Browse manufacturer stock, raise demands, and track received inventory in one place.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    {% if distributor_primary_action_href and distributor_primary_action_label %}
+                    <a href="{{ distributor_primary_action_href }}" class="distributor-action-primary px-4 py-3 text-sm">
+                        {% if distributor_primary_action_icon %}<span class="material-symbols-outlined text-[18px]">{{ distributor_primary_action_icon }}</span>{% endif %}
+                        <span>{{ distributor_primary_action_label }}</span>
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('main.logout') }}" class="distributor-action-secondary px-4 py-3 text-sm">
+                        <span class="material-symbols-outlined text-[18px]">logout</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+            <nav class="mt-4 flex items-center gap-2 overflow-x-auto">
+                <a href="{{ url_for('main.distributor_marketplace') }}" class="distributor-nav-link px-4 py-3 text-sm {% if request.endpoint == 'main.distributor_marketplace' %}is-active{% endif %}">
+                    <span class="material-symbols-outlined text-[18px]">storefront</span>
+                    <span>Catalog</span>
+                </a>
+                <a href="{{ url_for('main.distributor_requests_page') }}" class="distributor-nav-link px-4 py-3 text-sm {% if request.endpoint in ['main.distributor_requests_page', 'main.distributor_request_detail'] %}is-active{% endif %}">
+                    <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                    <span>Requests</span>
+                </a>
+                <a href="{{ url_for('main.distributor_demands') }}" class="distributor-nav-link px-4 py-3 text-sm {% if request.endpoint in ['main.distributor_demands', 'main.distributor_create_demand', 'main.distributor_validate_payment'] %}is-active{% endif %}">
+                    <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                    <span>Demands</span>
+                </a>
+                <a href="{{ url_for('main.distributor_inventory') }}" class="distributor-nav-link px-4 py-3 text-sm {% if request.endpoint == 'main.distributor_inventory' %}is-active{% endif %}">
+                    <span class="material-symbols-outlined text-[18px]">inventory</span>
+                    <span>Inventory</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<nav class="distributor-bottom-nav">
+    <div class="grid grid-cols-4 gap-2">
+        <a href="{{ url_for('main.distributor_marketplace') }}" class="{% if request.endpoint == 'main.distributor_marketplace' %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">storefront</span>
+            <span>Catalog</span>
+        </a>
+        <a href="{{ url_for('main.distributor_requests_page') }}" class="{% if request.endpoint in ['main.distributor_requests_page'] %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+            <span>Requests</span>
+        </a>
+        <a href="{{ url_for('main.distributor_demands') }}" class="{% if request.endpoint in ['main.distributor_demands', 'main.distributor_create_demand', 'main.distributor_validate_payment'] %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+            <span>Demands</span>
+        </a>
+        <a href="{{ url_for('main.distributor_inventory') }}" class="{% if request.endpoint == 'main.distributor_inventory' %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">inventory</span>
+            <span>Inventory</span>
+        </a>
+    </div>
+</nav>

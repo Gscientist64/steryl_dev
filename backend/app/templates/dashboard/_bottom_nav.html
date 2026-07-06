@@ -1,92 +1,125 @@
-<!-- app/templates/dashboard/_bottom_nav.html -->
-<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 shadow-lg">
-    <div class="max-w-7xl mx-auto px-2 sm:px-4">
-        <div class="flex justify-around items-center h-16 sm:h-20">
-            <!-- Dashboard -->
-            <a href="{{ url_for('main.dashboard') }}" 
-               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
-                      {% if request.endpoint == 'main.dashboard' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
-                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
-                    {% if request.endpoint == 'main.dashboard' %}dashboard{% else %}dashboard{% endif %}
-                </span>
-                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Home</span>
-            </a>
+<!-- dashboard/_bottom_nav.html — 4-module bottom taskbar -->
+<nav class="fixed bottom-0 left-0 right-0 z-50
+            bg-white/96 dark:bg-gray-900/96 backdrop-blur-lg
+            border-t border-gray-200 dark:border-gray-700/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-stretch h-16 sm:h-[68px]">
 
-            <!-- Orders -->
-            <a href="{{ url_for('main.order_cart') }}" 
-               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
-                      {% if request.endpoint == 'main.order_cart' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
-                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
-                    shopping_cart
-                </span>
-                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Orders</span>
-            </a>
+      <!-- Home -->
+      <a href="{{ url_for('main.dashboard') }}"
+         class="nav-tab {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+        <span class="nav-icon material-symbols-outlined">home</span>
+        <span class="nav-label">Home</span>
+        {% if request.endpoint == 'main.dashboard' %}<span class="nav-pip"></span>{% endif %}
+      </a>
 
-            <!-- Approvals with Badge -->
-            <a href="{{ url_for('main.approvals') }}" 
-               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group relative
-                      {% if request.endpoint == 'main.approvals' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
-                <div class="relative">
-                    <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
-                        fact_check
-                    </span>
-                    <span id="approval-badge" class="absolute -top-1 -right-2 hidden min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full items-center justify-center px-1">0</span>
-                </div>
-                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Approvals</span>
-            </a>
+      <!-- Orders -->
+      <a href="{{ url_for('main.orders') }}"
+         class="nav-tab {% if request.endpoint in ('main.orders','main.order_cart') %}active{% endif %}">
+        <span class="nav-icon material-symbols-outlined">shopping_bag</span>
+        <span class="nav-label">Orders</span>
+        {% if request.endpoint in ('main.orders','main.order_cart') %}<span class="nav-pip"></span>{% endif %}
+      </a>
 
-            <!-- Budget -->
-            <a href="{{ url_for('main.budget') }}" 
-               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
-                      {% if request.endpoint == 'main.budget' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
-                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
-                    analytics
-                </span>
-                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Budget</span>
-            </a>
-
-            <!-- Settings (Only on dashboard) -->
-            {% if request.endpoint == 'main.dashboard' %}
-            <a href="{{ url_for('main.settings') }}" 
-               class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 group
-                      {% if request.endpoint == 'main.settings' %}text-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
-                <span class="material-symbols-outlined text-2xl sm:text-3xl transition-transform group-hover:scale-110">
-                    settings
-                </span>
-                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Settings</span>
-            </a>
-            {% endif %}
+      <!-- Approvals (with badge) -->
+      <a href="{{ url_for('main.approvals') }}"
+         class="nav-tab {% if request.endpoint == 'main.approvals' %}active{% endif %}">
+        <div class="relative">
+          <span class="nav-icon material-symbols-outlined">fact_check</span>
+          <span id="approval-badge"
+                class="hidden absolute -top-1.5 -right-2.5 min-w-[17px] h-[17px]
+                       bg-red-500 text-white text-[9px] font-bold rounded-full
+                       items-center justify-center px-1 shadow-sm">0</span>
         </div>
+        <span class="nav-label">Approvals</span>
+        {% if request.endpoint == 'main.approvals' %}<span class="nav-pip"></span>{% endif %}
+      </a>
+
+      <!-- Inventory -->
+      <a href="{{ url_for('main.inventory') }}"
+         class="nav-tab {% if request.endpoint == 'main.inventory' %}active{% endif %}">
+        <span class="nav-icon material-symbols-outlined">inventory_2</span>
+        <span class="nav-label">Inventory</span>
+        {% if request.endpoint == 'main.inventory' %}<span class="nav-pip"></span>{% endif %}
+      </a>
+
+      {% if current_user.is_authenticated and current_user.role in ('admin', 'super_admin') and current_user.account_type in ('hospital', 'laboratory') %}
+      <!-- Departments (org admins only) -->
+      <a href="{{ url_for('main.departments') }}"
+         class="nav-tab {% if request.endpoint == 'main.departments' %}active{% endif %}">
+        <span class="nav-icon material-symbols-outlined">domain</span>
+        <span class="nav-label">Depts</span>
+        {% if request.endpoint == 'main.departments' %}<span class="nav-pip"></span>{% endif %}
+      </a>
+      {% endif %}
+
     </div>
+  </div>
 </nav>
 
-<script>
-// Fetch and update approval badge count
-function updateApprovalBadge() {
-    fetch('/api/approvals')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const pendingCount = data.data.filter(a => a.order.status === 'pending').length;
-                const badge = document.getElementById('approval-badge');
-                if (badge) {
-                    if (pendingCount > 0) {
-                        badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
-                        badge.classList.remove('hidden');
-                        badge.classList.add('inline-flex');
-                    } else {
-                        badge.classList.add('hidden');
-                        badge.classList.remove('inline-flex');
-                    }
-                }
-            }
-        })
-        .catch(error => console.error('Error fetching approvals:', error));
+<style>
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  position: relative;
+  padding: 6px 4px 4px;
+  color: #9ca3af;
+  transition: color 0.18s, background 0.18s;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+.dark .nav-tab { color: #6b7280; }
+.nav-tab:hover { color: #14b8a6; background: rgba(20,184,166,0.05); }
+.dark .nav-tab:hover { color: #2dd4bf; }
+.nav-tab.active { color: #0d9488; }
+.dark .nav-tab.active { color: #2dd4bf; }
+.nav-icon { font-size: 24px; line-height: 1; transition: transform 0.18s; }
+@media (min-width: 640px) { .nav-icon { font-size: 26px; } }
+.nav-tab:hover .nav-icon { transform: translateY(-1px) scale(1.08); }
+.nav-tab.active .nav-icon { font-variation-settings: 'FILL' 1; }
+.nav-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+@media (min-width: 640px) { .nav-label { font-size: 10.5px; } }
+.nav-pip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: #0d9488;
+  border-radius: 0 0 3px 3px;
+}
+.dark .nav-pip { background: #2dd4bf; }
+</style>
 
-// Update badge every 30 seconds
-if (document.getElementById('approval-badge')) {
-    updateApprovalBadge();
-    setInterval(updateApprovalBadge, 30000);
-}
+<script>
+(function pollBadge() {
+  fetch('/api/approvals')
+    .then(r => r.json())
+    .then(d => {
+      const badge = document.getElementById('approval-badge');
+      if (!badge || !d.success) return;
+      const cnt = (d.data || []).filter(a => a.order && a.order.status === 'pending').length;
+      if (cnt > 0) {
+        badge.textContent = cnt > 99 ? '99+' : cnt;
+        badge.classList.remove('hidden');
+        badge.classList.add('inline-flex');
+      } else {
+        badge.classList.add('hidden');
+        badge.classList.remove('inline-flex');
+      }
+    }).catch(() => {});
+  setTimeout(pollBadge, 30000);
+})();
 </script>

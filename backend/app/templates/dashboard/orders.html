@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){var t=localStorage.getItem('steryl-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark')})();</script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orders — Steryl Health</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<style>
+  *{font-family:'Inter',sans-serif}
+  body{transition:background-color .2s,color .2s}
+  /* Tab system */
+  .tab-btn{padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .18s;outline:none;background:transparent;color:#6b7280;white-space:nowrap}
+  .dark .tab-btn{color:#9ca3af}
+  .tab-btn.active{background:#0d9488;color:#fff;box-shadow:0 2px 8px rgba(13,148,136,.25)}
+  .tab-pane{display:none}
+  .tab-pane.active{display:block}
+  /* Product card */
+  .product-card{transition:all .2s;border:1.5px solid transparent}
+  .product-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);border-color:#14b8a6}
+  .dark .product-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  /* Cart animation */
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+  .pop{animation:pop .2s ease}
+  /* Status pill */
+  .pill-pending{background:#fef3c7;color:#92400e}
+  .pill-approved{background:#d1fae5;color:#065f46}
+  .pill-rejected{background:#fee2e2;color:#991b1b}
+  .pill-completed{background:#dbeafe;color:#1e40af}
+  .dark .pill-pending{background:#451a03;color:#fcd34d}
+  .dark .pill-approved{background:#022c22;color:#6ee7b7}
+  .dark .pill-rejected{background:#450a0a;color:#fca5a5}
+  .dark .pill-completed{background:#1e3a5f;color:#93c5fd}
+  /* QR scan animation */
+  @keyframes scan{0%,100%{top:2px}50%{top:calc(100% - 4px)}}
+  .scan-line{animation:scan 2s ease-in-out infinite}
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+{% include 'dashboard/_top_nav.html' %}
+
+<!-- Sticky page header + tab bar -->
+<div class="sticky top-14 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Title row -->
+    <div class="flex items-center justify-between py-3">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-white">Orders</h1>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Browse catalog, manage cart &amp; track order history</p>
+      </div>
+      <!-- Cart badge shortcut -->
+      <button onclick="switchTab('cart')"
+              class="relative flex items-center gap-1.5 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-semibold transition-colors">
+        <span class="material-symbols-outlined" style="font-size:18px">shopping_cart</span>
+        Cart
+        <span id="cart-pill" class="hidden absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[17px] h-[17px] flex items-center justify-center px-1">0</span>
+      </button>
+    </div>
+    <!-- Tabs -->
+    <div class="flex gap-1.5 pb-3 overflow-x-auto scrollbar-none">
+      <button class="tab-btn active" onclick="switchTab('catalog')" id="tab-catalog">
+        <span class="material-symbols-outlined align-middle" style="font-size:15px">storefront</span> Catalog
+      </button>
+      <button class="tab-btn" onclick="switchTab('cart')" id="tab-cart">
+        <span class="material-symbols-outlined align-middle" style="font-size:15px">shopping_cart</span>
+        Cart <span id="cart-count-label" class="ml-1 bg-teal-100 dark:bg-teal-800 text-teal-700 dark:text-teal-300 text-[10px] font-bold px-1.5 rounded-full">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('history')" id="tab-history">
+        <span class="material-symbols-outlined align-middle" style="font-size:15px">history</span> History
+      </button>
+    </div>
+  </div>
+</div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-28">
+
+  <!-- ══════════════ CATALOG TAB ══════════════ -->
+  <div class="tab-pane active" id="pane-catalog">
+
+    <!-- Search + filter -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-5">
+      <div class="relative flex-1">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="font-size:18px">search</span>
+        <input id="product-search" type="text" placeholder="Search products, SKU, category…"
+               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 transition"
+               oninput="filterProducts()"/>
+      </div>
+      <select id="cat-filter" onchange="filterProducts()"
+              class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500 transition">
+        <option value="">All categories</option>
+      </select>
+      <select id="stock-filter" onchange="filterProducts()"
+              class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-teal-500 transition">
+        <option value="">All stock levels</option>
+        <option value="in_stock">In Stock</option>
+        <option value="low">Low Stock</option>
+        <option value="out_of_stock">Out of Stock</option>
+      </select>
+    </div>
+
+    <!-- Product grid -->
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div class="col-span-full text-center py-16 text-gray-400 dark:text-gray-500 text-sm">
+        <span class="material-symbols-outlined text-4xl block mb-2">storefront</span>
+        Loading catalog…
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ CART TAB ══════════════ -->
+  <div class="tab-pane" id="pane-cart">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+      <!-- Items -->
+      <div class="lg:col-span-2">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="font-semibold text-gray-900 dark:text-white">Cart Items (<span id="cart-total-items">0</span>)</h2>
+            <button onclick="clearCart()" class="text-xs text-red-500 hover:text-red-600 font-semibold flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined" style="font-size:15px">delete</span>Clear
+            </button>
+          </div>
+          <div id="cart-items" class="divide-y divide-gray-100 dark:divide-gray-700">
+            <div class="py-16 text-center text-gray-400 dark:text-gray-500 text-sm">
+              <span class="material-symbols-outlined text-3xl block mb-2">shopping_cart</span>
+              Your cart is empty
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 sticky top-36">
+          <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Order Summary</h2>
+
+          <div class="space-y-2.5 text-sm mb-4">
+            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>Subtotal</span><span id="summary-subtotal" class="font-medium">₦0</span>
+            </div>
+            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>Shipping</span><span class="text-green-600 dark:text-green-400 font-medium">Free</span>
+            </div>
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-2.5 flex justify-between font-bold text-gray-900 dark:text-white text-base">
+              <span>Total</span><span id="summary-total">₦0</span>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-5">
+            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 block">Notes (optional)</label>
+            <textarea id="order-notes" rows="2" placeholder="Delivery instructions, special requests…"
+                      class="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition resize-none"></textarea>
+          </div>
+
+          <button onclick="submitOrder()" id="submit-order-btn"
+                  class="w-full py-3 bg-teal-600 hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined" style="font-size:18px">send</span>
+            <span id="submit-btn-text">Submit Order</span>
+          </button>
+
+          <div id="order-success" class="hidden mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
+            <span class="material-symbols-outlined text-green-500 block text-3xl mb-1">check_circle</span>
+            <p class="text-sm font-semibold text-green-700 dark:text-green-400">Order placed!</p>
+            <p class="text-xs text-gray-500 mt-1">Pending approval review</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ HISTORY TAB ══════════════ -->
+  <div class="tab-pane" id="pane-history">
+
+    <!-- Status filter pills -->
+    <div class="flex gap-2 flex-wrap mb-5">
+      <button onclick="filterHistory('')" class="hist-filter active px-4 py-1.5 rounded-full text-xs font-semibold border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-teal-500 hover:text-teal-600 transition-colors" data-status="">All Orders</button>
+      <button onclick="filterHistory('pending')" class="hist-filter px-4 py-1.5 rounded-full text-xs font-semibold border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-teal-500 hover:text-teal-600 transition-colors" data-status="pending">Pending</button>
+      <button onclick="filterHistory('approved')" class="hist-filter px-4 py-1.5 rounded-full text-xs font-semibold border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-teal-500 hover:text-teal-600 transition-colors" data-status="approved">Approved</button>
+      <button onclick="filterHistory('rejected')" class="hist-filter px-4 py-1.5 rounded-full text-xs font-semibold border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-teal-500 hover:text-teal-600 transition-colors" data-status="rejected">Rejected</button>
+    </div>
+
+    <div id="history-list" class="space-y-3">
+      <div class="text-center py-16 text-gray-400 dark:text-gray-500 text-sm">Loading order history…</div>
+    </div>
+  </div>
+
+</main>
+
+{% include 'dashboard/_bottom_nav.html' %}
+
+<script>
+// ── State ──────────────────────────────────────────────
+let allProducts = [];
+let cart = JSON.parse(localStorage.getItem('steryl-cart') || '{}'); // {id: qty}
+let allOrders = [];
+let histFilter = '';
+
+const fmt = v => new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN', maximumFractionDigits:0}).format(v||0);
+const rel = d => {
+  const diff = Math.floor((new Date()-new Date(d))/60000);
+  if (diff < 60) return `${diff}m ago`;
+  if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
+  return new Date(d).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'});
+};
+
+// ── Tab switching ──────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if (id === 'cart') renderCart();
+  if (id === 'history') loadHistory();
+}
+
+// ── Cart helpers ───────────────────────────────────────
+function saveCart() { localStorage.setItem('steryl-cart', JSON.stringify(cart)); }
+
+function cartCount() { return Object.values(cart).reduce((s,q)=>s+q, 0); }
+
+function updateCartBadges() {
+  const cnt = cartCount();
+  const pill = document.getElementById('cart-pill');
+  const label = document.getElementById('cart-count-label');
+  const total = document.getElementById('cart-total-items');
+  if (pill) { pill.textContent = cnt; pill.classList.toggle('hidden', cnt === 0); }
+  if (label) label.textContent = cnt;
+  if (total) total.textContent = cnt;
+}
+
+function addToCart(id, name, price) {
+  cart[id] = (cart[id] || 0) + 1;
+  saveCart(); updateCartBadges();
+  // Animate the button
+  const btn = document.getElementById('add-btn-'+id);
+  if (btn) { btn.classList.add('pop'); setTimeout(()=>btn.classList.remove('pop'), 250); }
+  showToast(`${name} added to cart`);
+}
+
+function setQty(id, qty) {
+  if (qty <= 0) { delete cart[id]; }
+  else { cart[id] = qty; }
+  saveCart(); updateCartBadges(); renderCart();
+}
+
+function clearCart() { cart = {}; saveCart(); updateCartBadges(); renderCart(); }
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] bg-gray-900 dark:bg-gray-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-xl transition-all opacity-0';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.style.opacity='1', 10);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(), 300); }, 2200);
+}
+
+// ── Render cart ────────────────────────────────────────
+function renderCart() {
+  const el = document.getElementById('cart-items');
+  updateCartBadges();
+  const ids = Object.keys(cart);
+  if (ids.length === 0) {
+    el.innerHTML = `<div class="py-16 text-center text-gray-400 dark:text-gray-500 text-sm">
+      <span class="material-symbols-outlined text-3xl block mb-2">shopping_cart</span>Your cart is empty</div>`;
+    document.getElementById('summary-subtotal').textContent = '₦0';
+    document.getElementById('summary-total').textContent = '₦0';
+    document.getElementById('submit-order-btn').disabled = true;
+    return;
+  }
+  let subtotal = 0;
+  el.innerHTML = ids.map(id => {
+    const p = allProducts.find(x=>String(x.id)===id);
+    if (!p) return '';
+    const sub = (p.unit_price||0) * (cart[id]||0);
+    subtotal += sub;
+    return `<div class="flex items-center gap-3 px-5 py-4">
+      <div class="h-11 w-11 rounded-xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-teal-600 dark:text-teal-400" style="font-size:20px">medication</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">${p.name}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">${fmt(p.unit_price)} each · ${p.unit||'unit'}</p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button onclick="setQty(${id}, ${cart[id]-1})" class="h-7 w-7 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors text-lg font-bold">−</button>
+        <span class="text-sm font-bold text-gray-900 dark:text-white w-6 text-center">${cart[id]}</span>
+        <button onclick="setQty(${id}, ${cart[id]+1})" class="h-7 w-7 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors text-lg font-bold">+</button>
+      </div>
+      <div class="text-right flex-shrink-0 ml-2">
+        <p class="text-sm font-bold text-gray-900 dark:text-white">${fmt(sub)}</p>
+        <button onclick="setQty(${id},0)" class="text-xs text-red-400 hover:text-red-500 mt-0.5 transition-colors">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('summary-subtotal').textContent = fmt(subtotal);
+  document.getElementById('summary-total').textContent = fmt(subtotal);
+  document.getElementById('submit-order-btn').disabled = false;
+}
+
+// ── Submit order ───────────────────────────────────────
+async function submitOrder() {
+  const ids = Object.keys(cart);
+  if (ids.length === 0) return;
+  const btn = document.getElementById('submit-order-btn');
+  const txt = document.getElementById('submit-btn-text');
+  btn.disabled = true;
+  txt.textContent = 'Submitting…';
+
+  const items = ids.map(id => ({product_id: parseInt(id), quantity: cart[id]}));
+  try {
+    const res = await fetch('/api/orders', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        order_type:'purchase',
+        notes: document.getElementById('order-notes').value,
+        items
+      })
+    });
+    const d = await res.json();
+    if (res.ok && d.success) {
+      document.getElementById('order-success').classList.remove('hidden');
+      cart = {}; saveCart(); updateCartBadges(); renderCart();
+      document.getElementById('order-notes').value = '';
+      setTimeout(()=>document.getElementById('order-success').classList.add('hidden'), 4000);
+    } else {
+      showToast(d.message || 'Order failed. Please try again.');
+      btn.disabled = false; txt.textContent = 'Submit Order';
+    }
+  } catch {
+    showToast('Network error. Please retry.'); btn.disabled = false; txt.textContent = 'Submit Order';
+  }
+}
+
+// ── Load & render catalog ──────────────────────────────
+function stockBadge(s) {
+  const map = {in_stock:'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+               low:'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+               out_of_stock:'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'};
+  const lbl = {in_stock:'In Stock', low:'Low Stock', out_of_stock:'Out of Stock'};
+  return `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${map[s]||map.in_stock}">${lbl[s]||s}</span>`;
+}
+
+function renderProducts(products) {
+  const grid = document.getElementById('product-grid');
+  if (products.length === 0) {
+    grid.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400 dark:text-gray-500 text-sm">
+      <span class="material-symbols-outlined text-4xl block mb-2">search_off</span>No products match your search.</div>`;
+    return;
+  }
+  grid.innerHTML = products.map(p => {
+    const stock = p.total_stock || 0;
+    const oos = stock === 0;
+    const status = stock === 0 ? 'out_of_stock' : (stock <= (p.reorder_level||5) ? 'low' : 'in_stock');
+    return `<div class="product-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 flex flex-col">
+      <div class="h-28 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl mb-3 flex items-center justify-center">
+        <span class="material-symbols-outlined text-teal-400 dark:text-teal-500" style="font-size:40px">medication</span>
+      </div>
+      <div class="flex items-start justify-between gap-1 mb-1">
+        <p class="font-semibold text-gray-900 dark:text-white text-sm leading-tight line-clamp-2">${p.name}</p>
+        ${stockBadge(status)}
+      </div>
+      ${p.category_name ? `<p class="text-xs text-gray-400 dark:text-gray-500 mb-1">${p.category_name}</p>` : ''}
+      <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Stock: <span class="font-semibold">${stock}</span> ${p.unit||'units'}</p>
+      <div class="mt-auto flex items-center justify-between gap-2">
+        <span class="font-bold text-teal-700 dark:text-teal-400 text-sm">${fmt(p.unit_price)}</span>
+        <button id="add-btn-${p.id}" onclick="addToCart(${p.id},'${p.name.replace(/'/g,'\\\'')}',(${p.unit_price||0}))"
+                ${oos?'disabled':''}
+                class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${oos ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700 text-white'}">
+          <span class="material-symbols-outlined" style="font-size:14px">${oos?'block':'add'}</span>
+          ${oos ? 'Out of stock' : 'Add to cart'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterProducts() {
+  const q = (document.getElementById('product-search').value||'').toLowerCase();
+  const cat = document.getElementById('cat-filter').value;
+  const stockF = document.getElementById('stock-filter').value;
+  let list = allProducts;
+  if (q) list = list.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q)||(p.category_name||'').toLowerCase().includes(q));
+  if (cat) list = list.filter(p=>(p.category_id||'') == cat);
+  if (stockF) {
+    list = list.filter(p=>{
+      const s = (p.total_stock||0);
+      const rl = p.reorder_level||5;
+      if (stockF==='out_of_stock') return s===0;
+      if (stockF==='low') return s>0 && s<=rl;
+      if (stockF==='in_stock') return s>rl;
+      return true;
+    });
+  }
+  renderProducts(list);
+}
+
+// ── Load history ───────────────────────────────────────
+function statusPill(s) {
+  const cls = {pending:'pill-pending',approved:'pill-approved',rejected:'pill-rejected',completed:'pill-completed'};
+  return `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${cls[s]||cls.pending} capitalize">${s}</span>`;
+}
+
+function renderHistory(orders) {
+  const el = document.getElementById('history-list');
+  if (orders.length === 0) {
+    el.innerHTML = `<div class="text-center py-16 text-gray-400 dark:text-gray-500 text-sm bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+      <span class="material-symbols-outlined text-4xl block mb-2">receipt_long</span>No orders found.</div>`; return;
+  }
+  el.innerHTML = orders.map(o => {
+    const steps = ['Submitted','Processing','Approved','Delivered'];
+    const stepIdx = {pending:1, approved:2, completed:3, delivered:3, rejected:1}[o.status] ?? 0;
+    const stepsHtml = steps.map((s,i) => {
+      const done = i < stepIdx;
+      const active = i === stepIdx - 1;
+      const rej = o.status==='rejected' && i===1;
+      return `<div class="flex flex-col items-center flex-1">
+        <div class="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 ${rej ? 'bg-red-500 border-red-500 text-white' : done||active ? 'bg-teal-500 border-teal-500 text-white' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 text-gray-400'}">
+          ${rej ? '✕' : done||active ? '✓' : i+1}
+        </div>
+        <span class="text-[9px] text-center mt-1 ${done||active?'text-teal-600 dark:text-teal-400 font-semibold':'text-gray-400'}">${s}</span>
+      </div>${i<steps.length-1?`<div class="flex-1 h-0.5 mt-3 ${done?'bg-teal-500':'bg-gray-200 dark:bg-gray-600'}"></div>`:''}`;
+    }).join('');
+
+    return `<div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5">
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <p class="font-bold text-gray-900 dark:text-white text-sm">${o.order_number||'#'+o.id}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${rel(o.created_at)}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          ${statusPill(o.status)}
+        </div>
+      </div>
+      <div class="flex items-center flex-wrap gap-x-4 gap-y-1 mb-4 text-xs text-gray-600 dark:text-gray-400">
+        <span><span class="material-symbols-outlined align-middle text-teal-500" style="font-size:13px">shopping_bag</span> ${(o.items||[]).length || o.item_count||'—'} item(s)</span>
+        <span class="font-bold text-gray-900 dark:text-white">${fmt(o.total_amount)}</span>
+        ${o.notes?`<span class="italic text-gray-400">"${o.notes.slice(0,50)}"</span>`:''}
+      </div>
+      <!-- Progress track -->
+      <div class="flex items-start gap-0">
+        ${stepsHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterHistory(status) {
+  histFilter = status;
+  document.querySelectorAll('.hist-filter').forEach(b=>{
+    b.classList.toggle('active', b.dataset.status === status);
+    b.classList.toggle('!bg-teal-600', b.dataset.status === status);
+    b.classList.toggle('!text-white', b.dataset.status === status);
+    b.classList.toggle('!border-teal-600', b.dataset.status === status);
+  });
+  const list = status ? allOrders.filter(o=>o.status===status) : allOrders;
+  renderHistory(list);
+}
+
+function loadHistory() {
+  if (allOrders.length > 0) { filterHistory(histFilter); return; }
+  fetch('/api/orders').then(r=>r.json()).then(d=>{
+    allOrders = d.success ? d.data : [];
+    filterHistory(histFilter);
+  }).catch(()=>{ document.getElementById('history-list').innerHTML='<p class="text-center py-8 text-sm text-gray-400">Could not load orders.</p>'; });
+}
+
+// ── Init ───────────────────────────────────────────────
+fetch('/api/products').then(r=>r.json()).then(d=>{
+  if (!d.success) { document.getElementById('product-grid').innerHTML='<div class="col-span-full text-center py-16 text-red-400 text-sm">Could not load products.</div>'; return; }
+  allProducts = d.data || [];
+
+  // Populate category filter
+  const cats = [...new Set(allProducts.filter(p=>p.category_id && p.category_name).map(p=>JSON.stringify({id:p.category_id, name:p.category_name})))].map(s=>JSON.parse(s));
+  const sel = document.getElementById('cat-filter');
+  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
+
+  renderProducts(allProducts);
+  updateCartBadges();
+}).catch(()=>{ document.getElementById('product-grid').innerHTML='<div class="col-span-full text-center py-16 text-red-400 text-sm">Could not load products.</div>'; });
+
+// Init badges on load
+updateCartBadges();
+</script>
+</body>
+</html>

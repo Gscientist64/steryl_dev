@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){var t=localStorage.getItem('steryl-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark')})();</script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Inventory — Steryl Health</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<style>
+  *{font-family:'Inter',sans-serif}
+  body{transition:background-color .2s,color .2s}
+  .stat-card{transition:all .22s}
+  .stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.08)}
+  .dark .stat-card:hover{box-shadow:0 12px 28px rgba(0,0,0,.3)}
+  .inv-row{transition:background .15s}
+  .inv-row:hover{background:rgba(13,148,136,.04)}
+  .dark .inv-row:hover{background:rgba(45,212,191,.04)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fade-up{animation:fadeUp .3s ease-out both}
+  /* Stock bar */
+  .bar-in{background:#10b981}
+  .bar-low{background:#f59e0b}
+  .bar-out{background:#ef4444}
+  /* View toggle */
+  .view-btn{padding:6px;border-radius:8px;color:#9ca3af;border:none;background:transparent;cursor:pointer;transition:.15s}
+  .view-btn.active,.view-btn:hover{background:#f3f4f6;color:#111827}
+  .dark .view-btn.active,.dark .view-btn:hover{background:#374151;color:#f9fafb}
+  /* Card grid mode */
+  .inv-card{transition:all .2s;border:1.5px solid transparent}
+  .inv-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08);border-color:#14b8a6}
+  .dark .inv-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.3)}
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+{% include 'dashboard/_top_nav.html' %}
+
+<!-- Sticky header -->
+<div class="sticky top-14 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-white">Inventory</h1>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Your stock levels and product catalogue</p>
+      </div>
+      <!-- View toggles + order CTA -->
+      <div class="flex items-center gap-2">
+        <div class="flex gap-0.5 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+          <button class="view-btn active" id="view-list" onclick="setView('list')" title="List view">
+            <span class="material-symbols-outlined" style="font-size:18px">view_list</span>
+          </button>
+          <button class="view-btn" id="view-grid" onclick="setView('grid')" title="Grid view">
+            <span class="material-symbols-outlined" style="font-size:18px">grid_view</span>
+          </button>
+        </div>
+        <a href="{{ url_for('main.orders') }}"
+           class="flex items-center gap-1.5 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold transition-colors">
+          <span class="material-symbols-outlined" style="font-size:15px">add_shopping_cart</span>Order
+        </a>
+      </div>
+    </div>
+
+    <!-- Search + filters -->
+    <div class="flex flex-col sm:flex-row gap-2">
+      <div class="relative flex-1">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="font-size:16px">search</span>
+        <input id="inv-search" type="text" placeholder="Search products, SKU, category…"
+               class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
+               oninput="applyFilters()"/>
+      </div>
+      <select id="inv-status" onchange="applyFilters()"
+              class="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-teal-500 transition">
+        <option value="">All status</option>
+        <option value="in_stock">In Stock</option>
+        <option value="low">Low Stock</option>
+        <option value="out_of_stock">Out of Stock</option>
+      </select>
+      <select id="inv-sort" onchange="applyFilters()"
+              class="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-teal-500 transition">
+        <option value="name">Sort: Name</option>
+        <option value="stock_asc">Stock ↑</option>
+        <option value="stock_desc">Stock ↓</option>
+        <option value="ordered">Most Ordered</option>
+        <option value="value_desc">Value ↓</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-28">
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 fade-up">
+      <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">Total Items</p>
+      <p id="s-total" class="text-2xl font-bold text-gray-900 dark:text-white">—</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Products in catalogue</p>
+    </div>
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 fade-up" style="animation-delay:.05s">
+      <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">Low Stock</p>
+      <p id="s-low" class="text-2xl font-bold text-amber-600 dark:text-amber-400">—</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Need reordering</p>
+    </div>
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 fade-up" style="animation-delay:.1s">
+      <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">Out of Stock</p>
+      <p id="s-out" class="text-2xl font-bold text-red-600 dark:text-red-400">—</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Unavailable</p>
+    </div>
+    <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 fade-up" style="animation-delay:.15s">
+      <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">Est. Value</p>
+      <p id="s-value" class="text-2xl font-bold text-teal-700 dark:text-teal-400">—</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Total stock value</p>
+    </div>
+  </div>
+
+  <!-- Results count -->
+  <div class="flex items-center justify-between mb-3">
+    <p id="result-count" class="text-xs text-gray-500 dark:text-gray-400">Loading…</p>
+    <p id="low-stock-alert" class="hidden text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+      <span class="material-symbols-outlined" style="font-size:13px">warning</span>
+      <span id="alert-text"></span>
+    </p>
+  </div>
+
+  <!-- List view (default) -->
+  <div id="inv-list-view">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <table class="w-full text-sm min-w-[600px]">
+        <thead>
+          <tr class="border-b border-gray-100 dark:border-gray-700 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <th class="px-5 py-3 text-left">Product</th>
+            <th class="px-5 py-3 text-left hidden sm:table-cell">Category</th>
+            <th class="px-5 py-3 text-center">Stock</th>
+            <th class="px-5 py-3 text-left" style="min-width:120px">Level</th>
+            <th class="px-5 py-3 text-right hidden md:table-cell">Unit Price</th>
+            <th class="px-5 py-3 text-right hidden md:table-cell">Total Ordered</th>
+            <th class="px-5 py-3 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody id="inv-table-body">
+          <tr><td colspan="7" class="text-center py-16 text-gray-400 dark:text-gray-500 text-sm">
+            <span class="material-symbols-outlined text-4xl block mb-2">inventory_2</span>Loading inventory…
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Grid view (hidden) -->
+  <div id="inv-grid-view" class="hidden">
+    <div id="inv-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    </div>
+  </div>
+
+</main>
+
+{% include 'dashboard/_bottom_nav.html' %}
+
+<script>
+const fmt = v => new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(v||0);
+const rel = d => { if(!d) return '—'; const diff=Math.floor((new Date()-new Date(d))/60000); if(diff<60) return `${diff}m ago`; if(diff<1440) return `${Math.floor(diff/60)}h ago`; return new Date(d).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}); };
+
+let allItems = [];
+let currentView = 'list';
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('view-list').classList.toggle('active', v==='list');
+  document.getElementById('view-grid').classList.toggle('active', v==='grid');
+  document.getElementById('inv-list-view').classList.toggle('hidden', v!=='list');
+  document.getElementById('inv-grid-view').classList.toggle('hidden', v!=='grid');
+  applyFilters();
+}
+
+function statusInfo(s) {
+  const map = {
+    in_stock: {cls:'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400', bar:'bar-in', label:'In Stock'},
+    low:      {cls:'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400', bar:'bar-low', label:'Low Stock'},
+    out_of_stock:{cls:'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400', bar:'bar-out', label:'Out of Stock'},
+  };
+  return map[s] || map.in_stock;
+}
+
+function applyFilters() {
+  const q = (document.getElementById('inv-search').value||'').toLowerCase();
+  const sf = document.getElementById('inv-status').value;
+  const sort = document.getElementById('inv-sort').value;
+
+  let list = allItems;
+  if (q) list = list.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.sku||'').toLowerCase().includes(q)||(i.category_name||'').toLowerCase().includes(q));
+  if (sf) list = list.filter(i=>i.stock_status===sf);
+
+  list = [...list].sort((a,b)=>{
+    if (sort==='name') return (a.name||'').localeCompare(b.name||'');
+    if (sort==='stock_asc') return (a.current_stock||0)-(b.current_stock||0);
+    if (sort==='stock_desc') return (b.current_stock||0)-(a.current_stock||0);
+    if (sort==='ordered') return (b.total_ordered||0)-(a.total_ordered||0);
+    if (sort==='value_desc') return ((b.unit_price||0)*(b.current_stock||0))-((a.unit_price||0)*(a.current_stock||0));
+    return 0;
+  });
+
+  document.getElementById('result-count').textContent = `Showing ${list.length} of ${allItems.length} products`;
+
+  if (currentView==='list') renderTable(list);
+  else renderGrid(list);
+}
+
+function renderTable(items) {
+  const tbody = document.getElementById('inv-table-body');
+  if (items.length===0) {
+    tbody.innerHTML='<tr><td colspan="7" class="text-center py-16 text-gray-400 dark:text-gray-500 text-sm"><span class="material-symbols-outlined text-4xl block mb-2">search_off</span>No products match your filters.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = items.map(p => {
+    const si = statusInfo(p.stock_status);
+    const maxStock = Math.max(p.current_stock, (p.reorder_level||5)*3, 1);
+    const pct = Math.min(Math.round((p.current_stock/maxStock)*100), 100);
+    return `<tr class="inv-row border-b border-gray-50 dark:border-gray-700/50">
+      <td class="px-5 py-3.5">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-teal-500 dark:text-teal-400" style="font-size:18px">medication</span>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-900 dark:text-white leading-tight">${p.name}</p>
+            ${p.sku?`<p class="text-xs text-gray-400 dark:text-gray-500">SKU: ${p.sku}</p>`:''}
+          </div>
+        </div>
+      </td>
+      <td class="px-5 py-3.5 text-gray-500 dark:text-gray-400 text-xs hidden sm:table-cell">${p.category_name||'—'}</td>
+      <td class="px-5 py-3.5 text-center font-bold text-gray-900 dark:text-white">${p.current_stock} <span class="text-gray-400 dark:text-gray-500 font-normal text-xs">${p.unit||'u'}</span></td>
+      <td class="px-5 py-3.5">
+        <div class="flex items-center gap-2">
+          <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2 min-w-[60px]">
+            <div class="${si.bar} h-2 rounded-full transition-all duration-500" style="width:${pct}%"></div>
+          </div>
+          <span class="text-[10px] text-gray-400 w-8 text-right">${pct}%</span>
+        </div>
+        ${p.reorder_level?`<p class="text-[10px] text-gray-400 mt-0.5">Reorder at ${p.reorder_level}</p>`:''}
+      </td>
+      <td class="px-5 py-3.5 text-right font-medium text-gray-900 dark:text-white hidden md:table-cell">${fmt(p.unit_price)}</td>
+      <td class="px-5 py-3.5 text-right text-gray-600 dark:text-gray-400 hidden md:table-cell">
+        ${p.total_ordered||0}
+        ${p.last_ordered?`<p class="text-[10px] text-gray-400">${rel(p.last_ordered)}</p>`:''}
+      </td>
+      <td class="px-5 py-3.5 text-center">
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${si.cls}">${si.label}</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderGrid(items) {
+  const grid = document.getElementById('inv-grid');
+  if (items.length===0) {
+    grid.innerHTML='<div class="col-span-full text-center py-16 text-gray-400 dark:text-gray-500 text-sm"><span class="material-symbols-outlined text-4xl block mb-2">search_off</span>No products match your filters.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(p => {
+    const si = statusInfo(p.stock_status);
+    const maxStock = Math.max(p.current_stock,(p.reorder_level||5)*3,1);
+    const pct = Math.min(Math.round((p.current_stock/maxStock)*100),100);
+    const totalVal = (p.unit_price||0)*(p.current_stock||0);
+    return `<div class="inv-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
+      <div class="flex items-start justify-between mb-3">
+        <div class="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-teal-500 dark:text-teal-400" style="font-size:20px">medication</span>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${si.cls}">${si.label}</span>
+      </div>
+      <p class="font-semibold text-gray-900 dark:text-white text-sm leading-tight mb-0.5">${p.name}</p>
+      ${p.category_name?`<p class="text-xs text-gray-400 dark:text-gray-500 mb-3">${p.category_name}</p>`:'<div class="mb-3"></div>'}
+      <div class="flex items-center justify-between text-xs mb-1.5">
+        <span class="text-gray-500 dark:text-gray-400">Stock</span>
+        <span class="font-bold text-gray-900 dark:text-white">${p.current_stock} <span class="text-gray-400 font-normal">${p.unit||'units'}</span></span>
+      </div>
+      <div class="bg-gray-100 dark:bg-gray-700 rounded-full h-2 mb-3">
+        <div class="${si.bar} h-2 rounded-full" style="width:${pct}%"></div>
+      </div>
+      <div class="flex justify-between items-baseline border-t border-gray-100 dark:border-gray-700 pt-2.5 mt-2">
+        <span class="text-xs text-gray-500 dark:text-gray-400">Value</span>
+        <span class="font-bold text-teal-700 dark:text-teal-400 text-sm">${fmt(totalVal)}</span>
+      </div>
+      ${p.total_ordered?`<p class="text-xs text-gray-400 mt-1">${p.total_ordered} units ordered · ${rel(p.last_ordered)}</p>`:''}
+    </div>`;
+  }).join('');
+}
+
+function updateStats(items) {
+  document.getElementById('s-total').textContent = items.length;
+  document.getElementById('s-low').textContent = items.filter(i=>i.stock_status==='low').length;
+  document.getElementById('s-out').textContent = items.filter(i=>i.stock_status==='out_of_stock').length;
+  const totalVal = items.reduce((sum,i)=>(i.unit_price||0)*(i.current_stock||0)+sum, 0);
+  document.getElementById('s-value').textContent = fmt(totalVal);
+
+  const lowCnt = items.filter(i=>i.stock_status==='low'||i.stock_status==='out_of_stock').length;
+  if (lowCnt > 0) {
+    document.getElementById('alert-text').textContent = `${lowCnt} item(s) need attention`;
+    document.getElementById('low-stock-alert').classList.remove('hidden');
+    document.getElementById('low-stock-alert').classList.add('flex');
+  }
+}
+
+// Load data
+const EMPTY_INV_HTML = `<tr><td colspan="7" class="text-center py-16 text-gray-400 dark:text-gray-500 text-sm">
+  <span class="material-symbols-outlined text-5xl block mb-3" style="font-variation-settings:'FILL' 1">inventory_2</span>
+  <p class="font-semibold text-gray-500 dark:text-gray-400 mb-1">No inventory yet</p>
+  <p class="text-xs">Place your first order to start tracking stock levels.</p>
+  <a href="/orders" class="inline-block mt-3 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition-colors">Browse Products</a>
+</td></tr>`;
+fetch('/api/my-inventory').then(r=>r.json()).then(d=>{
+  if (!d.success) { document.getElementById('inv-table-body').innerHTML='<tr><td colspan="7" class="text-center py-10 text-red-400 text-sm">Could not load inventory.</td></tr>'; return; }
+  allItems = d.data || [];
+  if (allItems.length === 0) {
+    document.getElementById('result-count').textContent = '0 products';
+    document.getElementById('inv-table-body').innerHTML = EMPTY_INV_HTML;
+    document.getElementById('inv-grid').innerHTML = EMPTY_INV_HTML.replace('colspan="7"','');
+    return;
+  }
+  updateStats(allItems);
+  applyFilters();
+}).catch(()=>{ document.getElementById('inv-table-body').innerHTML='<tr><td colspan="7" class="text-center py-10 text-red-400 text-sm">Failed to load inventory.</td></tr>'; });
+</script>
+</body>
+</html>

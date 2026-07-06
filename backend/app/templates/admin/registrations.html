@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrations — Steryl Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Poppins', sans-serif; }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:50;display:none;align-items:center;justify-content:center; }
+    .modal-backdrop.open { display:flex; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+  <!-- Reject reason modal -->
+  <div class="modal-backdrop" id="reject-modal">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+      <h3 class="text-lg font-bold text-slate-800 mb-1">Reject Registration</h3>
+      <p class="text-sm text-slate-500 mb-4">Optionally provide a reason. The organization will see this message when they try to log in.</p>
+      <form id="reject-form" method="POST">
+        <input type="hidden" name="user_id" id="reject-user-id">
+        <textarea name="reason" id="reject-reason" rows="3"
+          class="w-full border-2 border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-red-400 resize-none"
+          placeholder="e.g. Incomplete license information, unable to verify organization…"></textarea>
+        <div class="flex gap-3 mt-5">
+          <button type="button" onclick="closeRejectModal()"
+            class="flex-1 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
+            Cancel
+          </button>
+          <button type="submit"
+            class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition">
+            <i class="fas fa-circle-xmark mr-1.5"></i>Reject
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-60 bg-slate-900 text-white flex flex-col shrink-0">
+      <div class="p-5 border-b border-slate-700">
+        <div class="flex items-center gap-2 font-bold text-lg">
+          <i class="fas fa-shield-halved text-teal-400"></i>
+          <span>Steryl Admin</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">Super Administrator</p>
+      </div>
+      <nav class="flex-1 p-4 space-y-1">
+        <a href="/admin/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white text-sm transition-colors">
+          <i class="fas fa-gauge-high w-4 text-center"></i> Dashboard
+        </a>
+        <a href="/admin/registrations" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-teal-600 text-white text-sm font-medium">
+          <i class="fas fa-user-clock w-4 text-center"></i> Registrations
+        </a>
+      </nav>
+      <div class="p-4 border-t border-slate-700">
+        <div class="text-xs text-slate-400 mb-2">Signed in as</div>
+        <div class="text-sm font-medium text-white truncate">{{ current_user.email }}</div>
+        <a href="/logout" class="mt-3 flex items-center gap-2 text-xs text-slate-400 hover:text-red-400 transition-colors">
+          <i class="fas fa-right-from-bracket"></i> Sign out
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="bg-white border-b border-slate-200 px-8 py-4">
+        <h1 class="text-xl font-bold text-slate-800">Organization Registrations</h1>
+        <p class="text-sm text-slate-400 mt-0.5">Review and approve or reject submitted registrations.</p>
+      </header>
+
+      <main class="flex-1 p-8">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for category, message in messages %}
+          <div class="px-4 py-3 rounded-xl text-sm font-medium
+            {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200
+            {% else %}bg-teal-50 text-teal-700 border border-teal-200{% endif %}">
+            <i class="fas {% if category == 'error' %}fa-circle-xmark{% else %}fa-circle-check{% endif %} mr-2"></i>
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Status filter tabs -->
+        <div class="flex items-center gap-2 mb-6 flex-wrap">
+          {% for tab, label, icon in [('pending','Pending','hourglass-half'),('approved','Approved','circle-check'),('rejected','Rejected','circle-xmark')] %}
+          <a href="?status={{ tab }}"
+             class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all
+             {% if status_filter == tab %}
+               {% if tab == 'pending' %}bg-amber-100 border-amber-300 text-amber-700
+               {% elif tab == 'approved' %}bg-emerald-100 border-emerald-300 text-emerald-700
+               {% else %}bg-red-100 border-red-300 text-red-700{% endif %}
+             {% else %}bg-white border-slate-200 text-slate-500 hover:border-slate-300{% endif %}">
+            <i class="fas fa-{{ icon }}"></i>
+            {{ label }}
+            <span class="rounded-full px-2 py-0.5 text-xs
+              {% if status_filter == tab %}
+                {% if tab == 'pending' %}bg-amber-200 text-amber-800
+                {% elif tab == 'approved' %}bg-emerald-200 text-emerald-800
+                {% else %}bg-red-200 text-red-800{% endif %}
+              {% else %}bg-slate-100 text-slate-500{% endif %}">
+              {{ counts[tab] }}
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+
+        <!-- Table -->
+        {% if users %}
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wide">
+                <tr>
+                  <th class="px-6 py-3 text-left">Organization</th>
+                  <th class="px-6 py-3 text-left">Type</th>
+                  <th class="px-6 py-3 text-left">Contact person</th>
+                  <th class="px-6 py-3 text-left">Country</th>
+                  <th class="px-6 py-3 text-left">Registered</th>
+                  {% if status_filter == 'pending' %}
+                  <th class="px-6 py-3 text-left">Actions</th>
+                  {% elif status_filter == 'approved' %}
+                  <th class="px-6 py-3 text-left">Approved</th>
+                  {% else %}
+                  <th class="px-6 py-3 text-left">Rejection reason</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {% for user in users %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <!-- Organization -->
+                  <td class="px-6 py-4">
+                    <p class="font-semibold text-slate-800">{{ user.organization_name or '(no name)' }}</p>
+                    <p class="text-xs text-slate-400">{{ user.email }}</p>
+                    {% if user.license_number %}
+                    <p class="text-xs text-slate-400 mt-0.5"><i class="fas fa-id-card mr-1"></i>{{ user.license_number }}</p>
+                    {% endif %}
+                    {% if user.business_address %}
+                    <p class="text-xs text-slate-400 mt-0.5 truncate max-w-xs"><i class="fas fa-location-dot mr-1"></i>{{ user.business_address }}</p>
+                    {% endif %}
+                  </td>
+
+                  <!-- Type badge -->
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
+                      {% if user.account_type == 'hospital' %}bg-blue-100 text-blue-700
+                      {% elif user.account_type == 'laboratory' %}bg-purple-100 text-purple-700
+                      {% elif user.account_type == 'pharmacy' %}bg-pink-100 text-pink-700
+                      {% else %}bg-orange-100 text-orange-700{% endif %}">
+                      {% if user.account_type == 'hospital' %}<i class="fas fa-hospital"></i>
+                      {% elif user.account_type == 'laboratory' %}<i class="fas fa-flask-vial"></i>
+                      {% elif user.account_type == 'pharmacy' %}<i class="fas fa-pills"></i>
+                      {% else %}<i class="fas fa-industry"></i>{% endif %}
+                      {% if user.account_type == 'laboratory' %}Diagnostic Centre{% else %}{{ user.account_type | capitalize }}{% endif %}
+                    </span>
+                  </td>
+
+                  <!-- Contact -->
+                  <td class="px-6 py-4">
+                    <p class="font-medium text-slate-700">{{ user.first_name }} {{ user.last_name }}</p>
+                    {% if user.phone %}
+                    <p class="text-xs text-slate-400"><i class="fas fa-phone mr-1"></i>{{ user.phone }}</p>
+                    {% endif %}
+                  </td>
+
+                  <!-- Country -->
+                  <td class="px-6 py-4 text-slate-600">{{ user.country or '—' }}</td>
+
+                  <!-- Date -->
+                  <td class="px-6 py-4 text-slate-400 text-xs whitespace-nowrap">
+                    {{ user.created_at.strftime('%b %d, %Y %H:%M') if user.created_at else '—' }}
+                  </td>
+
+                  <!-- Actions / info column -->
+                  <td class="px-6 py-4">
+                    {% if status_filter == 'pending' %}
+                    <div class="flex items-center gap-2">
+                      <!-- Approve -->
+                      <form method="POST" action="/admin/registrations/{{ user.id }}/approve">
+                        <button type="submit"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors"
+                          onclick="return confirm('Approve registration for {{ user.organization_name or user.email }}?')">
+                          <i class="fas fa-check"></i> Approve
+                        </button>
+                      </form>
+                      <!-- Reject -->
+                      <button type="button"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold transition-colors"
+                        onclick="openRejectModal({{ user.id }}, '/admin/registrations/{{ user.id }}/reject')">
+                        <i class="fas fa-xmark"></i> Reject
+                      </button>
+                    </div>
+                    {% elif status_filter == 'approved' %}
+                    <p class="text-xs text-slate-400">
+                      {{ user.reviewed_at.strftime('%b %d, %Y') if user.reviewed_at else '—' }}
+                    </p>
+                    <!-- Re-reject option -->
+                    <button type="button"
+                      class="mt-1 text-xs text-red-400 hover:text-red-600 hover:underline transition-colors"
+                      onclick="openRejectModal({{ user.id }}, '/admin/registrations/{{ user.id }}/reject')">
+                      Revoke
+                    </button>
+                    {% else %}
+                    <div>
+                      <p class="text-xs text-red-500 italic">{{ user.rejection_reason or 'No reason given' }}</p>
+                      <!-- Re-approve -->
+                      <form method="POST" action="/admin/registrations/{{ user.id }}/approve" class="mt-1">
+                        <button type="submit"
+                          class="text-xs text-emerald-600 hover:underline font-medium transition-colors"
+                          onclick="return confirm('Re-approve this registration?')">
+                          <i class="fas fa-rotate-right mr-1"></i>Re-approve
+                        </button>
+                      </form>
+                    </div>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {% else %}
+        <div class="bg-white rounded-2xl border border-slate-200 py-20 text-center text-slate-400">
+          <i class="fas fa-inbox text-4xl mb-4 block"></i>
+          <p class="font-medium">No {{ status_filter }} registrations</p>
+          <p class="text-sm mt-1">
+            {% if status_filter == 'pending' %}All registrations have been reviewed.
+            {% elif status_filter == 'approved' %}No organizations have been approved yet.
+            {% else %}No registrations have been rejected.{% endif %}
+          </p>
+        </div>
+        {% endif %}
+
+      </main>
+    </div>
+  </div>
+
+<script>
+  function openRejectModal(userId, actionUrl) {
+    document.getElementById('reject-form').action = actionUrl;
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('reject-modal').classList.add('open');
+  }
+  function closeRejectModal() {
+    document.getElementById('reject-modal').classList.remove('open');
+  }
+  // Close on backdrop click
+  document.getElementById('reject-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeRejectModal();
+  });
+</script>
+</body>
+</html>

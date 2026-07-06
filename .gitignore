@@ -68,3 +68,6 @@ media/
 
 # OS
 Thumbs.db
+
+# Claude Code internal files
+.claude/

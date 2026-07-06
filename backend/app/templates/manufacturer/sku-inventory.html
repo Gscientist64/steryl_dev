@@ -5,40 +5,100 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>SKU Inventory - Steryl Health OS</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
-    * { font-family: 'Inter', sans-serif; }
-    .stat-card { transition: all 0.3s ease; }
-    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-    .table-row:hover { background: rgba(13, 150, 139, 0.05); }
-    body { padding-bottom: 80px; }
+    .catalog-action-menu {
+        position: relative;
+    }
+
+    .catalog-action-menu.is-open {
+        z-index: 30;
+    }
+
+    .catalog-action-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: white;
+        padding: 0.65rem 0.95rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #0f172a;
+        transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .catalog-action-trigger:hover {
+        background: rgba(240, 253, 250, 1);
+        transform: translateY(-1px);
+    }
+
+    .catalog-action-dropdown {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.5rem);
+        z-index: 20;
+        display: none;
+        min-width: 11rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: white;
+        padding: 0.45rem;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.14);
+    }
+
+    .catalog-action-menu.is-open .catalog-action-dropdown {
+        display: block;
+    }
+
+    .catalog-action-option {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        gap: 0.65rem;
+        border-radius: 0.8rem;
+        padding: 0.75rem 0.85rem;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #0f172a;
+        text-align: left;
+        transition: background 160ms ease;
+    }
+
+    .catalog-action-option:hover {
+        background: #f0fdfa;
+    }
 </style>
 </head>
-<body class="bg-gray-50">
-<!-- Top Navigation Bar -->
-<nav class="bg-white shadow-sm sticky top-0 z-40">
-    <div class="px-6 py-4 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Product Catalog</h1>
-            <p class="text-gray-500 text-sm">Manage your verified SKU inventory</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
-                    <span class="text-sm font-bold text-teal-600" id="user-initial">U</span>
+<body class="manufacturer-body">
+{% set manufacturer_page_title = 'Product Catalog' %}
+{% set manufacturer_primary_action_href = url_for('main.manufacturer_batch_register') %}
+{% set manufacturer_primary_action_label = 'Register Batch' %}
+{% set manufacturer_primary_action_icon = 'add_circle' %}
+{% include 'components/manufacturer_workspace.html' %}
+
+<main class="manufacturer-shell space-y-8 py-8">
+    <section class="manufacturer-hero px-6 py-8 lg:px-8">
+        <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+                <div class="manufacturer-kicker mb-4">
+                    <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                    <span>Manufacturer Catalog</span>
                 </div>
-                <span class="text-sm font-medium text-gray-700 hidden md:block" id="user-name">Loading...</span>
+                <h2 class="text-3xl font-bold tracking-tight lg:text-4xl">Organize products once and reuse them confidently across every batch registration.</h2>
+                <p class="mt-3 max-w-xl text-sm text-teal-50/90 lg:text-base">This catalog is manufacturer-scoped, so only your own products, statuses, and stock metrics shape what appears during production registration.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/10 p-5 text-sm text-white/90 lg:max-w-sm">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Catalog Policy</p>
+                <p class="mt-3">Keep names, SKU identifiers, and categories clean here so production teams can select the right product quickly during batch setup.</p>
             </div>
         </div>
-    </div>
-</nav>
+    </section>
 
-<!-- Main Content -->
-<main class="p-6">
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+    <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="manufacturer-metric-card">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm">Total SKUs</p>
@@ -50,7 +110,7 @@
             </div>
             <p id="sku-growth" class="text-xs text-green-600 mt-2">--</p>
         </div>
-        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="manufacturer-metric-card">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm">Active Items</p>
@@ -62,7 +122,7 @@
             </div>
             <p id="active-percent" class="text-xs text-gray-500 mt-2">--% of total</p>
         </div>
-        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="manufacturer-metric-card">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-500 text-sm">Pending Review</p>
@@ -73,32 +133,196 @@
                 </div>
             </div>
         </div>
-        <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="manufacturer-metric-card">
             <div class="flex justify-between items-start">
-                <div>
+                <div class="min-w-0 flex-1 pr-3">
                     <p class="text-gray-500 text-sm">Total Value</p>
-                    <p id="total-value" class="text-3xl font-bold text-teal-600 mt-1">₦--</p>
+                       <p id="total-value" class="mt-1 whitespace-nowrap text-3xl font-bold leading-tight tracking-tight text-teal-600 transition-all duration-150">--</p>
                 </div>
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <span class="material-symbols-outlined text-purple-600">payments</span>
                 </div>
             </div>
         </div>
+    </section>
+
+    <div id="product-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 px-4">
+        <div class="manufacturer-panel w-full max-w-2xl rounded-[1.75rem] bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Create Manufacturer Product</h2>
+                    <p class="text-sm text-gray-500">Products created here stay scoped to your manufacturer account.</p>
+                </div>
+                <button id="close-product-modal" type="button" class="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="product-form" class="grid gap-4 px-6 py-6 md:grid-cols-2">
+                <div class="md:col-span-2">
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Product Name *</label>
+                    <input id="product-name" type="text" required class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Sterile Syringe 10ml">
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">SKU *</label>
+                    <input id="product-sku" type="text" required class="w-full rounded-lg border border-gray-200 px-4 py-3 uppercase focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="STERYL-SYR-10ML">
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Category</label>
+                    <input id="product-category" type="text" class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Consumables">
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Unit Price</label>
+                    <input id="product-unit-price" type="number" min="0" step="0.01" class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="0.00">
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Reorder Level</label>
+                    <input id="product-reorder-level" type="number" min="0" step="1" value="50" class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Status</label>
+                    <select id="product-status" class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="pending">Pending Review</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Description</label>
+                    <textarea id="product-description" rows="4" class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Brief product summary for batch registration and catalog review"></textarea>
+                </div>
+                <div class="md:col-span-2 flex items-center justify-between gap-3 pt-2">
+                    <p id="product-form-feedback" class="text-sm text-gray-500"></p>
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-product-modal" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                        <button type="submit" id="product-submit-btn" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">Save Product</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- Product Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h2 class="font-bold text-gray-800">Active Product Catalog</h2>
-            <div class="flex gap-2">
+    <div id="currency-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 px-4">
+        <div class="manufacturer-panel w-full max-w-sm rounded-[1.75rem] bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Currency Settings</h2>
+                    <p class="text-sm text-gray-500">Set the currency shown on all prices in your account.</p>
+                </div>
+                <button id="close-currency-modal" type="button" class="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="px-6 py-6 space-y-5">
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Currency</label>
+                    <select id="currency-select" class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="USD">USD — US Dollar ($)</option>
+                        <option value="EUR">EUR — Euro (€)</option>
+                        <option value="GBP">GBP — British Pound (£)</option>
+                        <option value="NGN">NGN — Nigerian Naira (₦)</option>
+                        <option value="KES">KES — Kenyan Shilling (KSh)</option>
+                        <option value="GHS">GHS — Ghanaian Cedi (GH₵)</option>
+                        <option value="ZAR">ZAR — South African Rand (R)</option>
+                        <option value="EGP">EGP — Egyptian Pound (£E)</option>
+                        <option value="INR">INR — Indian Rupee (₹)</option>
+                        <option value="JPY">JPY — Japanese Yen (¥)</option>
+                        <option value="CNY">CNY — Chinese Yuan (¥)</option>
+                        <option value="CAD">CAD — Canadian Dollar (CA$)</option>
+                        <option value="AUD">AUD — Australian Dollar (A$)</option>
+                        <option value="BRL">BRL — Brazilian Real (R$)</option>
+                        <option value="MXN">MXN — Mexican Peso (MX$)</option>
+                        <option value="CHF">CHF — Swiss Franc (Fr)</option>
+                        <option value="SGD">SGD — Singapore Dollar (S$)</option>
+                        <option value="MYR">MYR — Malaysian Ringgit (RM)</option>
+                        <option value="PHP">PHP — Philippine Peso (₱)</option>
+                        <option value="IDR">IDR — Indonesian Rupiah (Rp)</option>
+                        <option value="THB">THB — Thai Baht (฿)</option>
+                        <option value="AED">AED — UAE Dirham (AED)</option>
+                        <option value="SAR">SAR — Saudi Riyal (SR)</option>
+                        <option value="TZS">TZS — Tanzanian Shilling (TSh)</option>
+                        <option value="UGX">UGX — Ugandan Shilling (USh)</option>
+                        <option value="RWF">RWF — Rwandan Franc (RF)</option>
+                        <option value="ETB">ETB — Ethiopian Birr (Br)</option>
+                        <option value="ZMW">ZMW — Zambian Kwacha (ZK)</option>
+                        <option value="XOF">XOF — West African CFA (CFA)</option>
+                        <option value="XAF">XAF — Central African CFA (CFA)</option>
+                        <option value="MAD">MAD — Moroccan Dirham (MAD)</option>
+                    </select>
+                </div>
+                <p id="currency-feedback" class="text-sm"></p>
+                <div class="flex items-center justify-end gap-3">
+                    <button type="button" id="cancel-currency-modal" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="button" id="save-currency-btn" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">Save Currency</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="price-edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/40 px-4">
+        <div class="manufacturer-panel w-full max-w-lg rounded-[1.75rem] bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Edit Product</h2>
+                    <p class="text-sm text-gray-500">Update product availability and pricing from the catalog action menu.</p>
+                </div>
+                <button id="close-price-modal" type="button" class="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="price-edit-form" class="space-y-5 px-6 py-6">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Selected Product</p>
+                    <p id="price-edit-product-name" class="mt-2 text-lg font-semibold text-slate-900">-</p>
+                    <p id="price-edit-product-sku" class="mt-1 text-sm text-slate-500">-</p>
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Unit Price</label>
+                    <input id="price-edit-unit-price" type="number" min="0" step="0.01" required class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="0.00">
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Status</label>
+                    <select id="price-edit-status" class="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="pending">Pending Review</option>
+                    </select>
+                </div>
+                <p id="price-edit-feedback" class="text-sm text-gray-500"></p>
+                <div class="flex items-center justify-end gap-3">
+                    <button type="button" id="cancel-price-modal" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" id="price-edit-submit" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">Update Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <section class="manufacturer-table-shell">
+        <div class="flex flex-col gap-4 border-b border-gray-100 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <h2 class="font-bold text-gray-800">Product Catalog</h2>
+                <p class="mt-1 text-sm text-slate-500">Add new SKUs, review product health, and move directly into batch registration.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button id="register-batch-btn" class="manufacturer-action-secondary px-4 py-3 text-sm">
+                    Register Batch
+                </button>
+                <div class="inline-flex items-center rounded-xl border border-gray-200 bg-white p-1">
+                    <button type="button" class="catalog-filter-btn rounded-lg px-3 py-2 text-sm font-semibold text-slate-600" data-status-filter="all">All</button>
+                    <button type="button" class="catalog-filter-btn rounded-lg px-3 py-2 text-sm font-semibold text-slate-600" data-status-filter="active">Active</button>
+                    <button type="button" class="catalog-filter-btn rounded-lg px-3 py-2 text-sm font-semibold text-slate-600" data-status-filter="inactive">Inactive</button>
+                </div>
                 <input id="search-input" type="text" placeholder="Search products..." 
-                       class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                <button id="new-product-btn" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+                       class="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <button id="currency-settings-btn" class="manufacturer-action-secondary inline-flex items-center gap-2 px-4 py-3 text-sm" title="Currency Settings">
+                    <span class="material-symbols-outlined text-[16px]">currency_exchange</span>
+                    <span>Set Currency</span>
+                </button>
+                <button id="new-product-btn" class="manufacturer-action-primary px-4 py-3 text-sm">
                     Add Product
                 </button>
             </div>
         </div>
-        <div class="overflow-x-auto">
+        <div class="relative overflow-visible">
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -116,15 +340,144 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 </main>
 
-<!-- Include Bottom Navigation -->
-{% include 'components/bottom_nav.html' %}
-
 <script>
+const MANUFACTURER_CURRENCY = '{{ manufacturer_currency|default("USD") }}';
+let activeCurrency = MANUFACTURER_CURRENCY;
+let manufacturerProducts = [];
+let activeProductMenuId = null;
+let editingProductId = null;
+let activeStatusFilter = 'all';
+
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+    try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: activeCurrency }).format(amount || 0);
+    } catch (e) {
+        return activeCurrency + ' ' + (parseFloat(amount) || 0).toFixed(2);
+    }
+}
+
+function toggleProductModal(show) {
+    const modal = document.getElementById('product-modal');
+    modal.classList.toggle('hidden', !show);
+    modal.classList.toggle('flex', show);
+
+    if (!show) {
+        document.getElementById('product-form').reset();
+        document.getElementById('product-reorder-level').value = 50;
+        document.getElementById('product-form-feedback').textContent = '';
+    }
+}
+
+function togglePriceEditModal(show) {
+    const modal = document.getElementById('price-edit-modal');
+    modal.classList.toggle('hidden', !show);
+    modal.classList.toggle('flex', show);
+
+    if (!show) {
+        editingProductId = null;
+        document.getElementById('price-edit-form').reset();
+        document.getElementById('price-edit-status').value = 'active';
+        document.getElementById('price-edit-feedback').textContent = '';
+    }
+}
+
+function getFilteredProducts() {
+    const term = document.getElementById('search-input').value.trim().toLowerCase();
+    return manufacturerProducts.filter(product => {
+        const statusMatches = activeStatusFilter === 'all' || product.status === activeStatusFilter;
+        const searchMatches = !term || [
+            product.name,
+            product.sku,
+            product.category,
+            product.description,
+            product.status
+        ].filter(Boolean).some(value => String(value).toLowerCase().includes(term));
+        return statusMatches && searchMatches;
+    });
+}
+
+function updateFilterButtons() {
+    document.querySelectorAll('[data-status-filter]').forEach(button => {
+        const isActive = button.dataset.statusFilter === activeStatusFilter;
+        button.classList.toggle('bg-slate-900', isActive);
+        button.classList.toggle('text-white', isActive);
+        button.classList.toggle('text-slate-600', !isActive);
+    });
+}
+
+function setTotalValueMetric(amount) {
+    const totalValueElement = document.getElementById('total-value');
+    const formattedAmount = formatCurrency(Number(amount) || 0);
+    const sizeClasses = ['text-3xl', 'text-2xl', 'text-xl', 'text-lg'];
+
+    totalValueElement.textContent = formattedAmount;
+    totalValueElement.classList.remove(...sizeClasses);
+
+    if (formattedAmount.length >= 20) {
+        totalValueElement.classList.add('text-lg');
+    } else if (formattedAmount.length >= 17) {
+        totalValueElement.classList.add('text-xl');
+    } else if (formattedAmount.length >= 14) {
+        totalValueElement.classList.add('text-2xl');
+    } else {
+        totalValueElement.classList.add('text-3xl');
+    }
+}
+
+function renderProducts(products) {
+    const tbody = document.getElementById('products-table-body');
+
+    if (!products.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No products match the current search or filter.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = products.map(product => `
+        <tr class="transition-colors">
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-teal-600">medication</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">${product.name}</p>
+                        <p class="text-xs text-gray-500">${product.description || 'No description'}</p>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4"><code class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">${product.sku}</code></td>
+            <td class="px-6 py-4 text-gray-600">${product.category || 'Uncategorized'}</td>
+            <td class="px-6 py-4 font-semibold ${product.total_stock < product.reorder_level ? 'text-red-600' : 'text-gray-800'}">${product.total_stock || 0} units</td>
+            <td class="px-6 py-4 font-semibold text-teal-600">${formatCurrency(product.unit_price || 0)}</td>
+            <td class="px-6 py-4"><span class="manufacturer-tag ${product.status === 'active' ? 'bg-emerald-100 text-emerald-700' : product.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}">${product.status}</span></td>
+            <td class="px-6 py-4 text-right">
+                <div class="catalog-action-menu ${activeProductMenuId === product.id ? 'is-open' : ''}" data-product-menu="${product.id}">
+                    <button type="button" class="catalog-action-trigger" data-action-toggle="${product.id}">
+                        <span>Actions</span>
+                        <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                    </button>
+                    <div class="catalog-action-dropdown">
+                        <a href="/manufacturer/catalog/${product.id}" class="catalog-action-option">
+                            <span class="material-symbols-outlined text-[18px] text-teal-600">visibility</span>
+                            <span>View</span>
+                        </a>
+                        <button type="button" class="catalog-action-option" data-edit-price="${product.id}">
+                            <span class="material-symbols-outlined text-[18px] text-amber-600">edit</span>
+                            <span>Edit</span>
+                        </button>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function applyCatalogFilters() {
+    updateFilterButtons();
+    renderProducts(getFilteredProducts());
 }
 
 function loadProducts() {
@@ -134,45 +487,29 @@ function loadProducts() {
             const tbody = document.getElementById('products-table-body');
             if (data.success && data.data.length > 0) {
                 const products = data.data;
+                manufacturerProducts = products;
                 const total = products.length;
                 const active = products.filter(p => p.status === 'active').length;
                 const pending = products.filter(p => p.status === 'pending').length;
-                const totalValue = products.reduce((sum, p) => sum + (p.unit_price * (p.total_stock || 0)), 0);
+                const totalValue = products.reduce((sum, product) => sum + (Number(product.total_worth) || 0), 0);
                 
                 document.getElementById('total-skus').textContent = total;
                 document.getElementById('active-items').textContent = active;
                 document.getElementById('pending-items').textContent = pending;
-                document.getElementById('total-value').textContent = formatCurrency(totalValue);
+                setTotalValueMetric(totalValue);
                 document.getElementById('active-percent').textContent = Math.round((active/total)*100) + '% of total';
                 document.getElementById('sku-growth').innerHTML = `+${Math.floor(Math.random() * 10) + 1}% this month`;
-                
-                tbody.innerHTML = products.map(product => `
-                    <tr class="table-row hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-teal-600">medication</span>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-800">${product.name}</p>
-                                    <p class="text-xs text-gray-500">${product.description || 'No description'}</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4"><code class="px-2 py-1 bg-gray-100 rounded text-xs">${product.sku}</code></td>
-                        <td class="px-6 py-4 text-gray-600">${product.category || 'Uncategorized'}</td>
-                        <td class="px-6 py-4 font-semibold ${product.total_stock < product.reorder_level ? 'text-red-600' : 'text-gray-800'}">${product.total_stock || 0} units</td>
-                        <td class="px-6 py-4 font-semibold text-teal-600">${formatCurrency(product.unit_price)}</td>
-                        <td class="px-6 py-4"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">${product.status}</span></td>
-                        <td class="px-6 py-4 text-right">
-                            <button onclick="viewProduct(${product.id})" class="text-teal-600 hover:text-teal-700">
-                                <span class="material-symbols-outlined text-lg">visibility</span>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
+                applyCatalogFilters();
             } else {
+                manufacturerProducts = [];
+                document.getElementById('total-skus').textContent = '0';
+                document.getElementById('active-items').textContent = '0';
+                document.getElementById('pending-items').textContent = '0';
+                setTotalValueMetric(0);
+                document.getElementById('active-percent').textContent = '0% of total';
+                document.getElementById('sku-growth').textContent = 'Create your first SKU to begin';
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No products found. Click "Add Product" to get started.</td></tr>';
+                updateFilterButtons();
             }
         });
 }
@@ -188,25 +525,213 @@ function loadUserProfile() {
         });
 }
 
-function viewProduct(id) {
-    alert(`View product details for ID: ${id}`);
+function openPriceEditor(id) {
+    const product = manufacturerProducts.find(item => item.id === id);
+    if (!product) {
+        window.showNotice?.('Product not found', 'error');
+        return;
+    }
+
+    editingProductId = id;
+    document.getElementById('price-edit-product-name').textContent = product.name;
+    document.getElementById('price-edit-product-sku').textContent = product.sku;
+    document.getElementById('price-edit-unit-price').value = product.unit_price || 0;
+    document.getElementById('price-edit-status').value = product.status || 'active';
+    document.getElementById('price-edit-feedback').textContent = '';
+    togglePriceEditModal(true);
 }
 
 document.getElementById('new-product-btn').addEventListener('click', () => {
+    toggleProductModal(true);
+});
+
+document.getElementById('register-batch-btn').addEventListener('click', () => {
     window.location.href = "{{ url_for('main.manufacturer_batch_register') }}";
 });
 
+document.getElementById('close-product-modal').addEventListener('click', () => toggleProductModal(false));
+document.getElementById('cancel-product-modal').addEventListener('click', () => toggleProductModal(false));
+document.getElementById('close-price-modal').addEventListener('click', () => togglePriceEditModal(false));
+document.getElementById('cancel-price-modal').addEventListener('click', () => togglePriceEditModal(false));
+
+document.getElementById('product-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const submitButton = document.getElementById('product-submit-btn');
+    const feedback = document.getElementById('product-form-feedback');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Saving...';
+    feedback.textContent = '';
+
+    const payload = {
+        name: document.getElementById('product-name').value.trim(),
+        sku: document.getElementById('product-sku').value.trim(),
+        category: document.getElementById('product-category').value.trim(),
+        unit_price: document.getElementById('product-unit-price').value,
+        reorder_level: document.getElementById('product-reorder-level').value,
+        status: document.getElementById('product-status').value,
+        description: document.getElementById('product-description').value.trim()
+    };
+
+    try {
+        const response = await fetch('/api/manufacturer/skus', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (!result.success) {
+            feedback.textContent = result.message || 'Could not save product';
+            feedback.className = 'text-sm text-red-600';
+            return;
+        }
+
+        feedback.textContent = 'Product saved. It is now available during batch registration.';
+        feedback.className = 'text-sm text-green-600';
+        loadProducts();
+        setTimeout(() => toggleProductModal(false), 500);
+    } catch (error) {
+        feedback.textContent = 'Network error while saving product';
+        feedback.className = 'text-sm text-red-600';
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Save Product';
+    }
+});
+
 document.getElementById('search-input').addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('#products-table-body tr');
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(term) ? '' : 'none';
+    applyCatalogFilters();
+});
+
+document.querySelectorAll('[data-status-filter]').forEach(button => {
+    button.addEventListener('click', () => {
+        activeStatusFilter = button.dataset.statusFilter;
+        activeProductMenuId = null;
+        applyCatalogFilters();
     });
+});
+
+document.getElementById('products-table-body').addEventListener('click', (event) => {
+    const toggle = event.target.closest('[data-action-toggle]');
+    if (toggle) {
+        const productId = Number(toggle.dataset.actionToggle);
+        activeProductMenuId = activeProductMenuId === productId ? null : productId;
+        applyCatalogFilters();
+        return;
+    }
+
+    const editButton = event.target.closest('[data-edit-price]');
+    if (editButton) {
+        activeProductMenuId = null;
+        applyCatalogFilters();
+        openPriceEditor(Number(editButton.dataset.editPrice));
+    }
+});
+
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('.catalog-action-menu') && activeProductMenuId !== null) {
+        activeProductMenuId = null;
+        applyCatalogFilters();
+    }
+});
+
+document.getElementById('price-edit-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!editingProductId) {
+        return;
+    }
+
+    const submitButton = document.getElementById('price-edit-submit');
+    const feedback = document.getElementById('price-edit-feedback');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Updating...';
+    feedback.textContent = '';
+
+    try {
+        const response = await fetch(`/api/manufacturer/skus/${editingProductId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                unit_price: document.getElementById('price-edit-unit-price').value,
+                status: document.getElementById('price-edit-status').value
+            })
+        });
+        const result = await response.json();
+
+        if (!result.success) {
+            feedback.textContent = result.message || 'Could not update product';
+            feedback.className = 'text-sm text-red-600';
+            return;
+        }
+
+        feedback.textContent = 'Product updated successfully.';
+        feedback.className = 'text-sm text-green-600';
+        await loadProducts();
+        setTimeout(() => togglePriceEditModal(false), 400);
+    } catch (error) {
+        feedback.textContent = 'Network error while updating product';
+        feedback.className = 'text-sm text-red-600';
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Update Product';
+    }
+});
+
+// Currency settings modal
+document.getElementById('currency-settings-btn').addEventListener('click', () => {
+    document.getElementById('currency-select').value = activeCurrency;
+    document.getElementById('currency-feedback').textContent = '';
+    const modal = document.getElementById('currency-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+});
+
+function closeCurrencyModal() {
+    const modal = document.getElementById('currency-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+document.getElementById('close-currency-modal').addEventListener('click', closeCurrencyModal);
+document.getElementById('cancel-currency-modal').addEventListener('click', closeCurrencyModal);
+
+document.getElementById('save-currency-btn').addEventListener('click', async () => {
+    const newCurrency = document.getElementById('currency-select').value;
+    const feedback = document.getElementById('currency-feedback');
+    const btn = document.getElementById('save-currency-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    feedback.textContent = '';
+    try {
+        const response = await fetch('/api/manufacturer/currency', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currency: newCurrency })
+        });
+        const result = await response.json();
+        if (!result.success) {
+            feedback.textContent = result.message || 'Could not update currency';
+            feedback.className = 'text-sm text-red-600';
+            return;
+        }
+        activeCurrency = newCurrency;
+        feedback.textContent = 'Currency updated!';
+        feedback.className = 'text-sm text-green-600';
+        await loadProducts();
+        setTimeout(() => closeCurrencyModal(), 600);
+    } catch (e) {
+        feedback.textContent = 'Network error while saving currency';
+        feedback.className = 'text-sm text-red-600';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Currency';
+    }
 });
 
 loadUserProfile();
 loadProducts();
 </script>
+{% include 'components/notice_system.html' %}
 </body>
 </html>

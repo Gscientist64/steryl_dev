@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Distributor Catalog - Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="distributor-body">
+{% set distributor_page_title = 'Distributor Catalog' %}
+{% set distributor_primary_action_href = url_for('main.distributor_demands') %}
+{% set distributor_primary_action_label = 'Review Demands' %}
+{% set distributor_primary_action_icon = 'visibility' %}
+{% include 'components/distributor_workspace.html' %}
+
+<main class="distributor-shell space-y-8 py-8">
+    <section class="distributor-hero px-6 py-8 lg:px-8">
+        <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <div class="distributor-kicker mb-4">
+                    <span class="material-symbols-outlined text-[18px]">storefront</span>
+                    <span>Manufacturer Catalog</span>
+                </div>
+                <h2 class="text-3xl font-bold tracking-tight lg:text-4xl">Browse manufacturer products and submit multi-item requests.</h2>
+            </div>
+        </div>
+    </section>
+
+    <section class="distributor-table-shell">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[1100px]">
+                <thead class="bg-slate-50">
+                    <tr class="text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th class="px-6 py-4">Product</th>
+                        <th class="px-6 py-4">Manufacturer</th>
+                        <th class="px-6 py-4">SKU</th>
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4">Available</th>
+                        <th class="px-6 py-4">Unit Price</th>
+                        <th class="px-6 py-4">Raise Demand</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="mkt-table-body">
+                    <tr><td colspan="7" class="px-6 py-10 text-center text-slate-500">Loading catalog...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<script>
+async function loadMktCatalog() {
+    const resp = await fetch('/api/distributor/catalog');
+    const result = await resp.json();
+    const tbody = document.getElementById('mkt-table-body');
+    const items = (result.data && result.data.products) || result.data || [];
+    if (!items.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-slate-500">No products found.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = items.map(item => `
+        <tr>
+            <td class="px-6 py-5"><p class="font-semibold text-slate-900">${item.name}</p></td>
+            <td class="px-6 py-5 font-medium text-slate-800">${item.manufacturer_name || '—'}</td>
+            <td class="px-6 py-5"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">${item.sku}</span></td>
+            <td class="px-6 py-5 text-slate-600">${item.category || '—'}</td>
+            <td class="px-6 py-5 font-semibold">${(item.available_quantity||0).toLocaleString()}</td>
+            <td class="px-6 py-5 font-semibold text-teal-700">${item.manufacturer_currency_symbol||'$'}${(item.unit_price||0).toFixed(2)}</td>
+            <td class="px-6 py-5">
+                <form method="post" action="/distributor/demands/create" class="flex gap-2 items-center">
+                    <input type="hidden" name="product_id" value="${item.id}"/>
+                    <input type="number" name="quantity" min="1" placeholder="Qty" class="w-20 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" required/>
+                    <button class="distributor-action-primary px-4 py-2 text-xs"><span class="material-symbols-outlined text-[16px]">send</span> Request</button>
+                </form>
+            </td>
+        </tr>`).join('');
+}
+loadMktCatalog();
+</script>
+</body>
+</html>

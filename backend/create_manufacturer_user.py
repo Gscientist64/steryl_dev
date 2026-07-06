@@ -19,19 +19,16 @@ with app.app_context():
     if existing_user:
         print(f"User already exists: {email}")
         # Update password if needed
-        existing_user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+        existing_user.set_password(password)
         existing_user.account_type = 'manufacturer'
         db.session.commit()
         print(f"✅ Updated account for: {email}")
     else:
-        # Create new manufacturer user (without 'role' parameter)
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        
         user = User(
             first_name='Manufacturer',
             last_name='Admin',
             email=email,
-            password=hashed_password,
+            password=password,
             phone='+1234567890',
             country='Nigeria',
             account_type='manufacturer'

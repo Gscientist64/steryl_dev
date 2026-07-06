@@ -1,0 +1,686 @@
+<!--- dashboard/departments.html — Department management for org admins -->
+<script>(function(){var t=localStorage.getItem('steryl-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark')})();</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .ms-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* Tab indicator underline */
+  .tab-btn { position: relative; }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 12%; right: 12%;
+    height: 2.5px;
+    background: #0d9488;
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Dept card hover lift */
+  .dept-card { transition: box-shadow 0.18s, transform 0.18s; }
+  .dept-card:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+  /* Stat card gradient backgrounds */
+  .stat-teal { background: linear-gradient(135deg,#f0fdfa,#e6fffa); border-color: #99f6e4; }
+  .stat-blue { background: linear-gradient(135deg,#eff6ff,#e0f2fe); border-color: #93c5fd; }
+  .stat-amber { background: linear-gradient(135deg,#fffbeb,#fef9c3); border-color: #fcd34d; }
+  .dark .stat-teal { background: rgba(13,148,136,0.12); border-color: rgba(13,148,136,0.3); }
+  .dark .stat-blue { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); }
+  .dark .stat-amber { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); }
+</style>
+
+{% include 'dashboard/_top_nav.html' %}
+
+<main class="pb-28 pt-0 bg-gray-50 dark:bg-gray-950 min-h-screen">
+
+  <!-- ══ Page header banner ══ -->
+  <div class="bg-gradient-to-r from-teal-600 to-teal-700 dark:from-teal-800 dark:to-teal-900 px-5 pt-5 pb-14">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-bold text-white">Departments</h1>
+        <p class="text-teal-100 text-xs mt-0.5">Manage {{ current_user.account_type | account_display }} departments & teams</p>
+      </div>
+      {% if current_user.role in ('admin', 'super_admin') %}
+      <button onclick="showModal('add-dept-modal')"
+              class="flex items-center gap-1.5 px-3.5 py-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white text-sm font-semibold rounded-xl transition-colors backdrop-blur-sm">
+        <span class="material-symbols-outlined" style="font-size:17px">add</span>
+        New
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ Stat cards (float over banner) ══ -->
+  <div class="px-4 -mt-8 mb-4 grid grid-cols-3 gap-3">
+    <div id="stat-depts" class="stat-teal border rounded-2xl p-3 text-center">
+      <p class="text-2xl font-extrabold text-teal-700 dark:text-teal-300" id="stat-dept-count">—</p>
+      <p class="text-[10px] font-semibold text-teal-600 dark:text-teal-400 mt-0.5 uppercase tracking-wide">Depts</p>
+    </div>
+    <div id="stat-members" class="stat-blue border rounded-2xl p-3 text-center">
+      <p class="text-2xl font-extrabold text-blue-700 dark:text-blue-300" id="stat-member-count">—</p>
+      <p class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 mt-0.5 uppercase tracking-wide">Members</p>
+    </div>
+    <div id="stat-orders-count" class="stat-amber border rounded-2xl p-3 text-center">
+      <p class="text-2xl font-extrabold text-amber-700 dark:text-amber-300" id="stat-order-count">—</p>
+      <p class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 mt-0.5 uppercase tracking-wide">Pending</p>
+    </div>
+  </div>
+
+  <!-- ══ Tabs ══ -->
+  <div class="px-4 mb-0">
+    <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-t-2xl overflow-hidden shadow-sm">
+      <button onclick="switchTab('depts')" id="tab-depts"
+              class="tab-btn active flex-1 py-3 text-xs font-bold text-teal-700 dark:text-teal-300 transition-colors">
+        <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:18px">domain</span>
+        Departments
+      </button>
+      <button onclick="switchTab('members')" id="tab-members"
+              class="tab-btn flex-1 py-3 text-xs font-bold text-gray-400 dark:text-gray-500 transition-colors">
+        <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:18px">group</span>
+        Members
+      </button>
+      <button onclick="switchTab('orders')" id="tab-orders"
+              class="tab-btn flex-1 py-3 text-xs font-bold text-gray-400 dark:text-gray-500 transition-colors">
+        <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:18px">receipt_long</span>
+        Orders
+      </button>
+      <button onclick="switchTab('usage')" id="tab-usage"
+              class="tab-btn flex-1 py-3 text-xs font-bold text-gray-400 dark:text-gray-500 transition-colors">
+        <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:18px">analytics</span>
+        Usage
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Tab content wrapper ══ -->
+  <div class="px-4 bg-white dark:bg-gray-900 shadow-sm rounded-b-2xl mx-4 mb-4 pt-4 pb-5">
+
+    <!-- ══════════ DEPARTMENTS TAB ══════════ -->
+    <div id="pane-depts">
+      <div id="dept-list" class="space-y-3">
+        <div class="flex items-center justify-center py-12 text-gray-400">
+          <span class="material-symbols-outlined animate-spin" style="font-size:28px">progress_activity</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ MEMBERS TAB ══════════ -->
+    <div id="pane-members" class="hidden">
+      <div class="mb-4">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="font-size:17px">filter_list</span>
+          <select id="member-dept-filter" onchange="loadMembers()"
+                  class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500 appearance-none">
+            <option value="">All departments</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" style="font-size:16px">expand_more</span>
+        </div>
+      </div>
+      <div id="member-list" class="space-y-2">
+        <p class="text-center text-gray-400 text-sm py-8">Loading…</p>
+      </div>
+    </div>
+
+    <!-- ══════════ DEPT ORDERS TAB ══════════ -->
+    <div id="pane-orders" class="hidden">
+      <div id="consolidate-bar" class="hidden mb-4 p-3 bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-700 rounded-xl flex items-center gap-3">
+        <span class="material-symbols-outlined text-teal-600 dark:text-teal-400" style="font-size:20px">merge</span>
+        <span id="consolidate-count" class="text-sm font-semibold text-teal-700 dark:text-teal-300 flex-1">0 orders selected</span>
+        <button onclick="consolidateOrders()"
+                class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-lg transition-colors">
+          Send to Distributor
+        </button>
+      </div>
+      <div id="dept-order-list" class="space-y-3">
+        <p class="text-center text-gray-400 text-sm py-8">Loading…</p>
+      </div>
+    </div>
+
+    <!-- ══════════ USAGE TAB ══════════ -->
+    <div id="pane-usage" class="hidden">
+      <button onclick="showModal('usage-modal')"
+              class="w-full mb-4 flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-teal-300 dark:border-teal-700 rounded-xl text-teal-600 dark:text-teal-400 font-semibold text-sm hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors">
+        <span class="material-symbols-outlined" style="font-size:18px">add</span>
+        Record Product Usage
+      </button>
+      <div id="usage-list" class="space-y-2">
+        <p class="text-center text-gray-400 text-sm py-8">Loading…</p>
+      </div>
+    </div>
+
+  </div><!-- /tab content -->
+
+</main>
+
+{% include 'dashboard/_bottom_nav.html' %}
+
+<!-- ══════ Add Department Modal ══════ -->
+<div id="add-dept-modal" class="fixed inset-0 z-[200] flex items-end sm:items-center justify-center hidden">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="hideModal('add-dept-modal')"></div>
+  <div class="relative bg-white dark:bg-gray-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl">
+    <div class="flex items-center gap-3 mb-5">
+      <div class="h-10 w-10 bg-teal-50 dark:bg-teal-900/40 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined ms-fill text-teal-600" style="font-size:20px">domain_add</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-900 dark:text-white text-base">New Department</h3>
+        <p class="text-xs text-gray-400">Create a team unit for your organisation</p>
+      </div>
+    </div>
+    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Department Name</label>
+    <input id="new-dept-name" type="text" placeholder="e.g. Haematology, Emergency, ICU…"
+           class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500 mb-5">
+    <div class="flex gap-3">
+      <button onclick="hideModal('add-dept-modal')"
+              class="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+      <button onclick="createDept()"
+              class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold transition-colors">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ Assign Member Modal ══════ -->
+<div id="assign-modal" class="fixed inset-0 z-[200] flex items-end sm:items-center justify-center hidden">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="hideModal('assign-modal')"></div>
+  <div class="relative bg-white dark:bg-gray-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="h-10 w-10 bg-blue-50 dark:bg-blue-900/40 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined ms-fill text-blue-600" style="font-size:20px">person_add</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-900 dark:text-white text-base">Assign Member</h3>
+        <p id="assign-dept-label" class="text-xs text-gray-400"></p>
+      </div>
+    </div>
+    <div class="relative mb-3">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" style="font-size:17px">search</span>
+      <input id="assign-search" type="text" placeholder="Search by name or email…" oninput="filterAssignList()"
+             class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500">
+    </div>
+    <div id="assign-member-list" class="max-h-52 overflow-y-auto space-y-1.5 mb-4 -mx-1 px-1"></div>
+    <button onclick="hideModal('assign-modal')"
+            class="w-full py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Close</button>
+  </div>
+</div>
+
+<!-- ══════ Usage Recording Modal ══════ -->
+<div id="usage-modal" class="fixed inset-0 z-[200] flex items-end sm:items-center justify-center hidden">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="hideModal('usage-modal')"></div>
+  <div class="relative bg-white dark:bg-gray-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl">
+    <div class="flex items-center gap-3 mb-5">
+      <div class="h-10 w-10 bg-orange-50 dark:bg-orange-900/40 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined ms-fill text-orange-500" style="font-size:20px">inventory</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-900 dark:text-white text-base">Record Product Usage</h3>
+        <p class="text-xs text-gray-400">Log consumed products per department</p>
+      </div>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Department</label>
+        <select id="usage-dept" class="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500">
+          <option value="">Select department</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Product Name</label>
+        <input id="usage-product" type="text" placeholder="e.g. Gloves, Syringes…"
+               class="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Quantity</label>
+          <input id="usage-qty" type="number" min="1" placeholder="0"
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Unit</label>
+          <select id="usage-unit" class="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500">
+            <option>unit</option><option>box</option><option>pack</option><option>vial</option><option>ml</option><option>g</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Notes (optional)</label>
+        <input id="usage-notes" type="text" placeholder="Additional details…"
+               class="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-teal-500">
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="hideModal('usage-modal')"
+              class="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+      <button onclick="recordUsage()"
+              class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold transition-colors">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[300] px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-300 opacity-0 pointer-events-none bg-gray-900 dark:bg-gray-700 whitespace-nowrap"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let departments = [];
+let allOrgMembers = [];
+let selectedOrderIds = new Set();
+let assignTargetDeptId = null;
+const IS_ADMIN = {{ 'true' if current_user.role in ('admin', 'super_admin') else 'false' }};
+const USER_DEPT_ID = {{ current_user.department_id or 'null' }};
+
+// ── Utilities ──────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function toast(msg, ok=true) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.style.background = ok ? '#0d9488' : '#ef4444';
+  el.style.opacity = '1';
+  el.style.pointerEvents = 'auto';
+  setTimeout(() => { el.style.opacity='0'; el.style.pointerEvents='none'; }, 3000);
+}
+function showModal(id) { $(id).classList.remove('hidden'); }
+function hideModal(id) { $(id).classList.add('hidden'); }
+function rel(iso) {
+  if (!iso) return '';
+  const d = new Date(iso), now = new Date(), diff = Math.floor((now - d) / 60000);
+  if (diff < 1) return 'just now';
+  if (diff < 60) return `${diff}m ago`;
+  if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
+  return d.toLocaleDateString();
+}
+function fmt(n) { return '₦' + (n||0).toLocaleString(); }
+function statusPill(s) {
+  const map = {
+    pending:'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    dept_pending:'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    consolidated:'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+    approved:'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    rejected:'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  };
+  const cls = map[s] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+  return `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${cls}">${(s||'').replace('_',' ').toUpperCase()}</span>`;
+}
+
+// ── Tab switching ──────────────────────────────────────────────
+function switchTab(tab) {
+  ['depts','members','orders','usage'].forEach(t => {
+    $(`pane-${t}`).classList.toggle('hidden', t !== tab);
+    const btn = $(`tab-${t}`);
+    if (t === tab) {
+      btn.classList.add('active','text-teal-700','dark:text-teal-300');
+      btn.classList.remove('text-gray-400','dark:text-gray-500');
+    } else {
+      btn.classList.remove('active','text-teal-700','dark:text-teal-300');
+      btn.classList.add('text-gray-400','dark:text-gray-500');
+    }
+  });
+  if (tab === 'members') loadMembers();
+  if (tab === 'orders') loadDeptOrders();
+  if (tab === 'usage') loadUsage();
+}
+
+// ── Departments Tab ────────────────────────────────────────────
+async function loadDepartments() {
+  try {
+    const r = await fetch('/api/departments');
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    departments = d.data || [];
+    renderDepts();
+    populateDeptSelects();
+    $('stat-dept-count').textContent = departments.length;
+    const totalMembers = departments.reduce((s,d) => s + (d.member_count||0), 0);
+    $('stat-member-count').textContent = totalMembers;
+  } catch(e) {
+    $('dept-list').innerHTML = `<p class="text-center text-red-400 text-sm py-8">${e.message}</p>`;
+  }
+}
+
+function renderDepts() {
+  const el = $('dept-list');
+  if (!departments.length) {
+    el.innerHTML = `<div class="text-center py-14">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center">
+        <span class="material-symbols-outlined ms-fill text-teal-300 dark:text-teal-700" style="font-size:32px">domain</span>
+      </div>
+      <p class="text-gray-600 dark:text-gray-400 font-semibold mb-1">No departments yet</p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">Create departments to organise your teams and streamline orders</p>
+      ${IS_ADMIN ? `<button onclick="showModal('add-dept-modal')" class="inline-flex items-center gap-1.5 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition-colors"><span class="material-symbols-outlined" style="font-size:15px">add</span>Create first department</button>` : ''}
+    </div>`;
+    return;
+  }
+  el.innerHTML = departments.map((dept, i) => {
+    const colors = ['text-teal-600','text-blue-600','text-violet-600','text-rose-600','text-amber-600','text-emerald-600'];
+    const bgs = ['bg-teal-50 dark:bg-teal-900/30','bg-blue-50 dark:bg-blue-900/30','bg-violet-50 dark:bg-violet-900/30','bg-rose-50 dark:bg-rose-900/30','bg-amber-50 dark:bg-amber-900/30','bg-emerald-50 dark:bg-emerald-900/30'];
+    const c = colors[i % colors.length];
+    const bg = bgs[i % bgs.length];
+    return `
+    <div class="dept-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <div class="h-11 w-11 ${bg} rounded-xl flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined ms-fill ${c}" style="font-size:22px">domain</span>
+          </div>
+          <div class="min-w-0">
+            <p class="font-bold text-gray-900 dark:text-white text-sm truncate">${dept.name}</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="material-symbols-outlined text-gray-400" style="font-size:12px">group</span>
+              <p class="text-xs text-gray-500 dark:text-gray-400">${dept.member_count} member${dept.member_count !== 1 ? 's' : ''}</p>
+            </div>
+          </div>
+        </div>
+        ${IS_ADMIN ? `
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <button onclick="openAssignModal(${dept.id}, '${dept.name.replace(/'/g,"&#39;")}')"
+                  title="Assign member"
+                  class="h-8 w-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">
+            <span class="material-symbols-outlined" style="font-size:16px">person_add</span>
+          </button>
+          <button onclick="deleteDept(${dept.id})"
+                  title="Delete department"
+                  class="h-8 w-8 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors">
+            <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+          </button>
+        </div>
+        ` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function createDept() {
+  const name = $('new-dept-name').value.trim();
+  if (!name) return toast('Department name required', false);
+  try {
+    const r = await fetch('/api/departments', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name})
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    hideModal('add-dept-modal');
+    $('new-dept-name').value = '';
+    toast('Department created');
+    loadDepartments();
+  } catch(e) { toast(e.message, false); }
+}
+
+async function deleteDept(id) {
+  if (!confirm('Delete this department? Members will be unassigned.')) return;
+  try {
+    const r = await fetch(`/api/departments/${id}`, {method:'DELETE'});
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    toast('Department deleted');
+    loadDepartments();
+  } catch(e) { toast(e.message, false); }
+}
+
+// ── Members Tab ────────────────────────────────────────────────
+async function loadMembers() {
+  if (!IS_ADMIN) { $('member-list').innerHTML = `<p class="text-center text-gray-400 text-sm py-8">Only org admins can view members.</p>`; return; }
+  const filter = $('member-dept-filter').value;
+  try {
+    let members;
+    if (filter) {
+      const r = await fetch(`/api/departments/${filter}/members`);
+      const d = await r.json();
+      members = d.data || [];
+    } else {
+      const r = await fetch('/api/org-members');
+      const d = await r.json();
+      members = d.data || [];
+    }
+    allOrgMembers = members;
+    renderMembers(members);
+    $('stat-member-count').textContent = members.length;
+  } catch(e) { $('member-list').innerHTML = `<p class="text-center text-red-400 text-sm py-8">${e.message}</p>`; }
+}
+
+function renderMembers(members) {
+  const el = $('member-list');
+  if (!members.length) {
+    el.innerHTML = `<div class="text-center py-10">
+      <span class="material-symbols-outlined ms-fill text-gray-300 dark:text-gray-600 block text-4xl mb-2">group</span>
+      <p class="text-gray-400 text-sm">No members found</p>
+    </div>`;
+    return;
+  }
+  const deptMap = Object.fromEntries(departments.map(d => [d.id, d.name]));
+  el.innerHTML = members.map(m => {
+    const initial = (m.name||'?').charAt(0).toUpperCase();
+    const isAssigned = !!m.department_id;
+    return `
+    <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div class="h-10 w-10 rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center flex-shrink-0 text-teal-700 dark:text-teal-300 font-bold text-sm">
+        ${initial}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">${m.name}</p>
+        <p class="text-xs text-gray-400 truncate">${m.email}</p>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <p class="text-xs font-semibold ${isAssigned ? 'text-teal-600 dark:text-teal-400' : 'text-gray-400 dark:text-gray-500'}">
+          ${isAssigned ? deptMap[m.department_id] || '—' : 'Unassigned'}
+        </p>
+        <p class="text-[10px] text-gray-400 capitalize">${m.role}</p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Assign Member Modal ─────────────────────────────────────────
+async function openAssignModal(deptId, deptName) {
+  assignTargetDeptId = deptId;
+  $('assign-dept-label').textContent = `→ ${deptName}`;
+  $('assign-search').value = '';
+  showModal('assign-modal');
+  try {
+    const r = await fetch('/api/org-members');
+    const d = await r.json();
+    allOrgMembers = d.data || [];
+    renderAssignList(allOrgMembers);
+  } catch(e) { toast('Could not load members', false); }
+}
+
+function renderAssignList(members) {
+  const el = $('assign-member-list');
+  if (!members.length) { el.innerHTML = `<p class="text-center text-gray-400 text-sm py-4">No members found.</p>`; return; }
+  el.innerHTML = members.map(m => `
+    <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors" onclick="assignMember(${m.id})">
+      <div class="h-9 w-9 rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center text-teal-700 dark:text-teal-300 font-bold text-xs flex-shrink-0">
+        ${(m.name||'?').charAt(0).toUpperCase()}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">${m.name}</p>
+        <p class="text-xs text-gray-400 truncate">${m.email}</p>
+      </div>
+      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${m.department_id ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}">
+        ${m.department_id ? 'Assigned' : 'Free'}
+      </span>
+    </div>
+  `).join('');
+}
+
+function filterAssignList() {
+  const q = $('assign-search').value.toLowerCase();
+  renderAssignList(allOrgMembers.filter(m => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)));
+}
+
+async function assignMember(userId) {
+  if (!assignTargetDeptId) return;
+  try {
+    const r = await fetch(`/api/departments/${assignTargetDeptId}/assign-member`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({user_id: userId})
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    toast(d.message);
+    loadDepartments();
+  } catch(e) { toast(e.message, false); }
+}
+
+// ── Department Orders Tab ──────────────────────────────────────
+async function loadDeptOrders() {
+  try {
+    const r = await fetch('/api/dept-orders');
+    const d = await r.json();
+    const orders = d.data || [];
+    renderDeptOrders(orders);
+    const pending = orders.filter(o => o.status === 'dept_pending').length;
+    $('stat-order-count').textContent = pending;
+  } catch(e) { $('dept-order-list').innerHTML = `<p class="text-center text-red-400 text-sm py-8">${e.message}</p>`; }
+}
+
+function renderDeptOrders(orders) {
+  const el = $('dept-order-list');
+  if (!orders.length) {
+    el.innerHTML = `<div class="text-center py-14">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+        <span class="material-symbols-outlined ms-fill text-amber-300 dark:text-amber-700" style="font-size:32px">inbox</span>
+      </div>
+      <p class="text-gray-600 dark:text-gray-400 font-semibold mb-1">No department orders yet</p>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Department orders will appear here once submitted</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = orders.map(o => {
+    const isDeptPending = o.status === 'dept_pending';
+    return `
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        ${IS_ADMIN && isDeptPending ? `
+        <input type="checkbox" class="mt-1 accent-teal-600 h-4 w-4 flex-shrink-0 cursor-pointer"
+               onchange="toggleOrderSelect(${o.id}, this.checked)">
+        ` : '<div class="w-4 flex-shrink-0"></div>'}
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <p class="font-bold text-gray-900 dark:text-white text-sm">${o.order_number}</p>
+            ${statusPill(o.status)}
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2.5">
+            ${o.dept_name ? `<span class="font-semibold text-gray-700 dark:text-gray-300">${o.dept_name}</span> · ` : ''}${rel(o.created_at)}
+          </p>
+          <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-teal-400" style="font-size:13px">shopping_bag</span>
+              ${(o.items||[]).length} item(s)
+            </span>
+            <span class="font-bold text-gray-800 dark:text-gray-200">${fmt(o.total_amount)}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleOrderSelect(id, checked) {
+  if (checked) selectedOrderIds.add(id);
+  else selectedOrderIds.delete(id);
+  const bar = $('consolidate-bar');
+  const cnt = $('consolidate-count');
+  if (selectedOrderIds.size > 0) {
+    bar.classList.remove('hidden');
+    cnt.textContent = `${selectedOrderIds.size} order${selectedOrderIds.size !== 1 ? 's' : ''} selected`;
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
+async function consolidateOrders() {
+  if (!selectedOrderIds.size) return;
+  const notes = prompt('Notes for consolidated order (optional):') || '';
+  try {
+    const r = await fetch('/api/dept-orders/consolidate', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({order_ids: [...selectedOrderIds], notes})
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    toast(`Consolidated order ${d.data.order_number} sent to distributor`);
+    selectedOrderIds.clear();
+    $('consolidate-bar').classList.add('hidden');
+    loadDeptOrders();
+  } catch(e) { toast(e.message, false); }
+}
+
+// ── Usage Tab ──────────────────────────────────────────────────
+async function loadUsage() {
+  try {
+    const r = await fetch('/api/dept-product-usage');
+    const d = await r.json();
+    renderUsage(d.data || []);
+  } catch(e) { $('usage-list').innerHTML = `<p class="text-center text-red-400 text-sm py-8">${e.message}</p>`; }
+}
+
+function renderUsage(records) {
+  const el = $('usage-list');
+  if (!records.length) {
+    el.innerHTML = `<div class="text-center py-10">
+      <span class="material-symbols-outlined ms-fill text-gray-300 dark:text-gray-600 block text-4xl mb-2">analytics</span>
+      <p class="text-gray-400 text-sm">No usage records yet</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = records.map(u => `
+    <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div class="h-10 w-10 rounded-xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined ms-fill text-orange-500" style="font-size:18px">inventory</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">${u.product_name || 'Unknown product'}</p>
+        <p class="text-xs text-gray-400">${u.department_name || ''} · ${rel(u.created_at)}</p>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <p class="font-bold text-red-500 dark:text-red-400 text-sm">−${u.quantity}</p>
+        <p class="text-[10px] text-gray-400">${u.unit}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function recordUsage() {
+  const deptId = $('usage-dept').value;
+  const product = $('usage-product').value.trim();
+  const qty = $('usage-qty').value;
+  const unit = $('usage-unit').value;
+  const notes = $('usage-notes').value.trim();
+  if (!deptId) return toast('Select a department', false);
+  if (!product) return toast('Enter product name', false);
+  if (!qty || qty < 1) return toast('Enter a valid quantity', false);
+  try {
+    const r = await fetch('/api/dept-product-usage', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({dept_id: parseInt(deptId), product_name: product, quantity: parseInt(qty), unit, notes})
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    hideModal('usage-modal');
+    $('usage-product').value = '';
+    $('usage-qty').value = '';
+    $('usage-notes').value = '';
+    toast('Usage recorded');
+    loadUsage();
+  } catch(e) { toast(e.message, false); }
+}
+
+// ── Populate dept selects ──────────────────────────────────────
+function populateDeptSelects() {
+  const selects = [$('member-dept-filter'), $('usage-dept')];
+  selects.forEach(sel => {
+    if (!sel) return;
+    const extra = sel === $('member-dept-filter') ? '<option value="">All departments</option>' : '<option value="">Select department</option>';
+    sel.innerHTML = extra + departments.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+  });
+}
+
+// ── Init ───────────────────────────────────────────────────────
+loadDepartments();
+loadDeptOrders();
+</script>

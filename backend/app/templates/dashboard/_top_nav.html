@@ -1,0 +1,58 @@
+<!-- dashboard/_top_nav.html — included by all 5 org module pages -->
+<nav class="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/60">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-14">
+
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 select-none">
+        <img src="{{ url_for('static', filename='steryl_logo.jpeg') }}"
+             alt="Steryl" class="h-8 w-8 rounded-lg object-cover flex-shrink-0 shadow-sm">
+        <span class="font-bold text-gray-900 dark:text-white text-[17px] tracking-tight">
+          Steryl<span class="text-teal-500">Health</span>
+        </span>
+      </div>
+
+      <!-- Right controls -->
+      <div class="flex items-center gap-1.5">
+        <!-- Dark mode toggle -->
+        <button onclick="window.toggleDark()"
+                class="h-9 w-9 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400
+                       hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Toggle dark mode" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined dark:hidden" style="font-size:20px">dark_mode</span>
+          <span class="material-symbols-outlined hidden dark:block" style="font-size:20px">light_mode</span>
+        </button>
+
+        <!-- User avatar -->
+        <a href="{{ url_for('main.settings') }}"
+           class="flex items-center gap-2 pl-1 pr-2.5 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <div class="h-7 w-7 rounded-full bg-teal-100 dark:bg-teal-900/60 flex items-center justify-center flex-shrink-0 ring-2 ring-teal-200 dark:ring-teal-700">
+            <span class="text-xs font-bold text-teal-700 dark:text-teal-300 leading-none">
+              {{ (current_user.first_name[0])|upper if current_user.first_name else 'U' }}
+            </span>
+          </div>
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block max-w-[90px] truncate">
+            {{ current_user.first_name or 'User' }}
+          </span>
+        </a>
+
+        <!-- Logout -->
+        <a href="{{ url_for('main.logout') }}"
+           class="h-9 w-9 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500
+                  hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+           title="Sign out" aria-label="Sign out">
+          <span class="material-symbols-outlined" style="font-size:20px">logout</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Expose globally so each page can call it too
+  window.toggleDark = function() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('steryl-theme', isDark ? 'dark' : 'light');
+  };
+</script>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hospital Requests — Steryl Health OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+
+<!-- Request Detail Modal -->
+<div id="detail-overlay" class="fixed inset-0 bg-black/40 z-50 hidden flex items-start justify-center pt-12 px-4 pb-6 overflow-y-auto" onclick="closeDetail(event)">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl" onclick="event.stopPropagation()">
+    <div class="flex items-start justify-between px-8 py-6 border-b border-slate-100">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900" id="modal-req-number">Request #—</h2>
+        <p class="text-sm text-slate-500 mt-1" id="modal-req-meta"></p>
+      </div>
+      <button onclick="document.getElementById('detail-overlay').classList.add('hidden')" class="p-2 rounded-xl hover:bg-slate-100 text-slate-400 ml-4 shrink-0">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Status + Actions Banner -->
+    <div id="modal-status-banner" class="px-8 py-3 flex items-center gap-3 border-b border-slate-100">
+      <span id="modal-status-badge" class="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider"></span>
+      <span id="modal-action-btns" class="ml-auto"></span>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-3 gap-4 px-8 py-5 border-b border-slate-100">
+      <div class="text-center">
+        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Items</p>
+        <p class="text-2xl font-extrabold text-slate-900" id="modal-item-count">—</p>
+      </div>
+      <div class="text-center">
+        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Hospital</p>
+        <p class="text-base font-bold text-slate-900 truncate" id="modal-hospital">—</p>
+      </div>
+      <div class="text-center">
+        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Total</p>
+        <p class="text-2xl font-extrabold text-teal-700" id="modal-total">—</p>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="px-8 py-4 border-b border-slate-100">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Timeline</p>
+      <div class="flex flex-wrap gap-6" id="modal-timeline"></div>
+    </div>
+
+    <!-- Notes -->
+    <div id="modal-notes-wrap" class="px-8 py-4 border-b border-slate-100 hidden">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Notes</p>
+      <p class="text-sm text-slate-700" id="modal-notes"></p>
+    </div>
+
+    <!-- Line Items -->
+    <div class="px-8 py-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Requested Items</p>
+      <div class="overflow-x-auto rounded-2xl border border-slate-100">
+        <table class="w-full min-w-[560px] text-sm">
+          <thead class="bg-slate-50">
+            <tr class="text-xs font-semibold uppercase tracking-wider text-slate-500 text-left">
+              <th class="px-4 py-3">Product</th>
+              <th class="px-4 py-3">SKU</th>
+              <th class="px-4 py-3">Manufacturer</th>
+              <th class="px-4 py-3 text-right">Requested</th>
+              <th class="px-4 py-3 text-right">Approved</th>
+              <th class="px-4 py-3 text-right">Supplied</th>
+              <th class="px-4 py-3 text-right">Unit Price</th>
+              <th class="px-4 py-3 text-right">Subtotal</th>
+              <th class="px-4 py-3 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="modal-items-tbody" class="divide-y divide-slate-100"></tbody>
+          <tfoot class="bg-slate-50">
+            <tr>
+              <td colspan="7" class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Request Total</td>
+              <td class="px-4 py-3 text-right font-extrabold text-teal-700" id="modal-footer-total">—</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="px-8 pb-6 flex justify-end">
+      <button onclick="document.getElementById('detail-overlay').classList.add('hidden')" class="px-6 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold hover:bg-slate-50">Close</button>
+    </div>
+  </div>
+</div>
+
+<main class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+
+  <!-- Hero -->
+  <section class="rounded-3xl bg-gradient-to-r from-violet-700 to-purple-600 px-6 py-8 text-white shadow-lg">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-violet-100">Distributor Workspace</p>
+        <h1 class="mt-2 text-3xl font-bold">Hospital Purchase Requests</h1>
+        <p class="mt-2 max-w-xl text-sm text-violet-100">Review incoming requests from hospitals. Each request contains all items ordered. Click <strong>View</strong> for full breakdown then approve or reject.</p>
+      </div>
+      <a href="{{ url_for('main.distributor_marketplace') }}" class="self-start lg:self-auto rounded-xl bg-white text-violet-700 px-5 py-3 text-sm font-bold hover:bg-violet-50 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">storefront</span> My Catalog
+      </a>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+    <form method="get" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div>
+        <label class="mb-1.5 block text-xs font-bold text-slate-600 uppercase tracking-wider">Start Date</label>
+        <input type="date" name="start_date" value="{{ hospital_filters.start_date }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"/>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-xs font-bold text-slate-600 uppercase tracking-wider">End Date</label>
+        <input type="date" name="end_date" value="{{ hospital_filters.end_date }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"/>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-xs font-bold text-slate-600 uppercase tracking-wider">Status</label>
+        <select name="status" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+          <option value="all" {% if hospital_filters.status == 'all' %}selected{% endif %}>All Requests</option>
+          <option value="pending" {% if hospital_filters.status == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="approved" {% if hospital_filters.status == 'approved' %}selected{% endif %}>Approved</option>
+          <option value="supplied" {% if hospital_filters.status == 'supplied' %}selected{% endif %}>Supplied</option>
+          <option value="rejected" {% if hospital_filters.status == 'rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+      </div>
+      <div class="flex items-end gap-3">
+        <button type="submit" class="flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-violet-700">
+          <span class="material-symbols-outlined text-[18px]">filter_alt</span> Filter
+        </button>
+        <a href="{{ url_for('main.distributor_hospital_requests_page') }}" class="flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold hover:bg-slate-50">
+          <span class="material-symbols-outlined text-[18px]">restart_alt</span> Reset
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Summary Metrics -->
+  <section class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="col-span-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Requests</p>
+      <p class="mt-2 text-3xl font-extrabold text-slate-900">{{ hospital_summary.total_count }}</p>
+    </div>
+    <div class="col-span-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Review</p>
+      <p class="mt-2 text-3xl font-extrabold text-amber-600">{{ hospital_summary.pending_count }}</p>
+    </div>
+    <div class="col-span-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Completed</p>
+      <p class="mt-2 text-3xl font-extrabold text-emerald-600">{{ hospital_summary.completed_count }}</p>
+    </div>
+    <div class="col-span-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Value</p>
+      <p class="mt-2 text-3xl font-extrabold text-violet-700">${{ '{:,.2f}'.format(hospital_summary.total_amount) }}</p>
+    </div>
+  </section>
+
+  <!-- Requests Table -->
+  <section class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100">
+      <h2 class="font-bold text-slate-900">Incoming Hospital Requests</h2>
+      <p class="mt-0.5 text-sm text-slate-500">Click <strong>View</strong> to inspect items before approving or rejecting.</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[900px]">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <th class="px-6 py-4">Request #</th>
+            <th class="px-6 py-4">Hospital</th>
+            <th class="px-6 py-4 text-center">Items</th>
+            <th class="px-6 py-4 text-right">Total Value</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Requested</th>
+            <th class="px-6 py-4 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% if hospital_requests %}
+            {% for req in hospital_requests %}
+            <tr class="hover:bg-slate-50/60 transition-colors" id="row-{{ req.id }}">
+              <td class="px-6 py-5">
+                <p class="font-bold text-slate-900">{{ req.request_number }}</p>
+                <p class="text-xs text-slate-400 mt-0.5">ID #{{ req.id }}</p>
+              </td>
+              <td class="px-6 py-5 font-medium text-slate-800">{{ req.hospital_user.first_name if req.hospital_user else '—' }} {{ req.hospital_user.last_name if req.hospital_user else '' }}</td>
+              <td class="px-6 py-5 text-center">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-violet-50 text-violet-700 font-bold text-sm">{{ req.item_count or 0 }}</span>
+              </td>
+              <td class="px-6 py-5 text-right font-bold text-slate-900">${{ '{:,.2f}'.format(req.total_amount or 0) }}</td>
+              <td class="px-6 py-5">
+                {% if req.status == 'pending' %}
+                  <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider">Pending</span>
+                {% elif req.status == 'approved' %}
+                  <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">Approved</span>
+                {% elif req.status in ['supplied', 'completed'] %}
+                  <span class="px-2.5 py-1 rounded-lg bg-teal-100 text-teal-700 text-[10px] font-bold uppercase tracking-wider">{{ req.status }}</span>
+                {% elif req.status == 'rejected' %}
+                  <span class="px-2.5 py-1 rounded-lg bg-red-100 text-red-700 text-[10px] font-bold uppercase tracking-wider">Rejected</span>
+                {% else %}
+                  <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider">{{ req.status }}</span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-5 text-sm text-slate-500">{{ req.requested_at.strftime('%d %b %Y') if req.requested_at else '—' }}</td>
+              <td class="px-6 py-5 text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <button onclick="viewRequest({{ req.id }})" class="flex items-center gap-1.5 rounded-xl bg-violet-600 text-white px-3 py-2 text-xs font-bold hover:bg-violet-700 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">visibility</span> View
+                  </button>
+                  {% if req.status == 'pending' %}
+                  <button onclick="approveRequest({{ req.id }})" class="rounded-xl border border-emerald-600 text-emerald-700 px-3 py-2 text-xs font-bold hover:bg-emerald-50 transition-colors">
+                    Approve
+                  </button>
+                  <button onclick="rejectRequest({{ req.id }})" class="rounded-xl border border-red-500 text-red-600 px-3 py-2 text-xs font-bold hover:bg-red-50 transition-colors">
+                    Reject
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7" class="px-6 py-16 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <span class="material-symbols-outlined text-[48px] text-slate-300">inbox</span>
+                  <p class="font-semibold text-slate-500">No hospital requests yet</p>
+                  <p class="text-sm text-slate-400">When hospitals place orders, they will appear here.</p>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+var STATUS_STYLES = {
+  pending: 'bg-amber-100 text-amber-700',
+  approved: 'bg-emerald-100 text-emerald-700',
+  supplied: 'bg-teal-100 text-teal-700',
+  completed: 'bg-teal-100 text-teal-700',
+  rejected: 'bg-red-100 text-red-700',
+};
+var STATUS_LABELS = {
+  pending: 'Pending',
+  approved: 'Approved',
+  supplied: 'Supplied',
+  completed: 'Completed',
+  rejected: 'Rejected',
+};
+
+function fmt(v) { return new Intl.NumberFormat('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}).format(v||0); }
+
+async function viewRequest(requestId) {
+  try {
+    var resp = await fetch('/api/hospital/requests/' + requestId);
+    var result = await resp.json();
+    if (!result.success) { alert(result.message || 'Could not load request.'); return; }
+    renderModal(result.data);
+    document.getElementById('detail-overlay').classList.remove('hidden');
+  } catch(e) {
+    alert('Failed to load request details.');
+  }
+}
+
+function renderModal(req) {
+  document.getElementById('modal-req-number').textContent = 'Request ' + (req.request_number || '—');
+  document.getElementById('modal-req-meta').textContent = 'ID #' + req.id + ' · Submitted ' + (req.requested_at ? new Date(req.requested_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '—');
+  document.getElementById('modal-item-count').textContent = req.item_count || (req.items||[]).length;
+  document.getElementById('modal-hospital').textContent = req.hospital_user_name || '—';
+  document.getElementById('modal-total').textContent = '$' + fmt(req.total_amount);
+  document.getElementById('modal-footer-total').textContent = '$' + fmt(req.total_amount);
+
+  // Status badge
+  var statusStyle = STATUS_STYLES[req.status] || 'bg-slate-100 text-slate-600';
+  document.getElementById('modal-status-badge').className = 'px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ' + statusStyle;
+  document.getElementById('modal-status-badge').textContent = STATUS_LABELS[req.status] || req.status;
+
+  // Action buttons in modal
+  var btns = document.getElementById('modal-action-btns');
+  if (req.status === 'pending') {
+    btns.innerHTML = '<button onclick="approveRequest(' + req.id + ')" class="px-3 py-1 rounded-xl border border-emerald-600 text-emerald-700 text-xs font-bold hover:bg-emerald-50">Approve All</button>'
+      + '<button onclick="rejectRequest(' + req.id + ')" class="ml-2 px-3 py-1 rounded-xl border border-red-500 text-red-600 text-xs font-bold hover:bg-red-50">Reject</button>';
+  } else {
+    btns.innerHTML = '';
+  }
+
+  // Timeline
+  var tlEl = document.getElementById('modal-timeline');
+  var tl = [
+    { label: 'Requested', ts: req.requested_at },
+    { label: 'Approved', ts: req.approved_at },
+    { label: 'Supplied', ts: req.supplied_at },
+    { label: 'Completed', ts: req.completed_at },
+  ].filter(function(t) { return t.ts; });
+  tlEl.innerHTML = tl.length
+    ? tl.map(function(t) {
+        return '<div class="flex items-center gap-2"><span class="material-symbols-outlined text-violet-500 text-[18px]">check_circle</span><div><p class="text-xs font-bold text-slate-700">' + t.label + '</p><p class="text-xs text-slate-400">' + new Date(t.ts).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) + '</p></div></div>';
+      }).join('')
+    : '<p class="text-xs text-slate-400">No timeline events yet.</p>';
+
+  // Notes
+  var notesWrap = document.getElementById('modal-notes-wrap');
+  if (req.notes) {
+    notesWrap.classList.remove('hidden');
+    document.getElementById('modal-notes').textContent = req.notes;
+  } else {
+    notesWrap.classList.add('hidden');
+  }
+
+  // Items table
+  var items = req.items || [];
+  document.getElementById('modal-items-tbody').innerHTML = items.length
+    ? items.map(function(item) {
+        var itemStatus = STATUS_STYLES[item.status] || 'bg-slate-100 text-slate-600';
+        return '<tr class="hover:bg-slate-50/50">'
+          + '<td class="px-4 py-3 font-semibold text-slate-900">' + (item.product_name || '—') + '</td>'
+          + '<td class="px-4 py-3"><code class="text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-700">' + (item.product_sku || '—') + '</code></td>'
+          + '<td class="px-4 py-3 text-sm text-slate-600">' + (item.manufacturer_name || '—') + '</td>'
+          + '<td class="px-4 py-3 text-right font-medium text-slate-700">' + ((item.requested_quantity||0).toLocaleString()) + '</td>'
+          + '<td class="px-4 py-3 text-right font-medium text-emerald-700">' + (item.approved_quantity ? item.approved_quantity.toLocaleString() : '—') + '</td>'
+          + '<td class="px-4 py-3 text-right font-medium text-teal-700">' + (item.supplied_quantity ? item.supplied_quantity.toLocaleString() : '—') + '</td>'
+          + '<td class="px-4 py-3 text-right text-slate-600">$' + fmt(item.unit_price) + '</td>'
+          + '<td class="px-4 py-3 text-right font-bold text-slate-900">$' + fmt(item.subtotal) + '</td>'
+          + '<td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ' + itemStatus + '">' + (STATUS_LABELS[item.status]||item.status) + '</span></td>'
+          + '</tr>';
+      }).join('')
+    : '<tr><td colspan="9" class="px-4 py-6 text-center text-slate-400 text-sm">No items found.</td></tr>';
+}
+
+async function approveRequest(requestId) {
+  if (!confirm('Approve this hospital request? All items will be marked approved.')) return;
+  try {
+    var resp = await fetch('/api/distributor/hospital-requests/' + requestId + '/approve', { method: 'POST' });
+    var result = await resp.json();
+    if (result.success) {
+      showToast('Request approved successfully!', 'success');
+      setTimeout(function() { location.reload(); }, 1000);
+    } else {
+      showToast(result.message || 'Could not approve request.', 'error');
+    }
+  } catch(e) {
+    showToast('Network error. Please try again.', 'error');
+  }
+}
+
+async function rejectRequest(requestId) {
+  var reason = prompt('Enter a reason for rejection (optional):');
+  if (reason === null) return; // user canceled
+  try {
+    var resp = await fetch('/api/distributor/hospital-requests/' + requestId + '/reject', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ reason: reason || 'Request not approved.' }),
+    });
+    var result = await resp.json();
+    if (result.success) {
+      showToast('Request rejected.', 'info');
+      setTimeout(function() { location.reload(); }, 1000);
+    } else {
+      showToast(result.message || 'Could not reject request.', 'error');
+    }
+  } catch(e) {
+    showToast('Network error. Please try again.', 'error');
+  }
+}
+
+function closeDetail(e) {
+  if (e.target === document.getElementById('detail-overlay')) {
+    document.getElementById('detail-overlay').classList.add('hidden');
+  }
+}
+
+function showToast(msg, type) {
+  var t = document.createElement('div');
+  t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-3.5 rounded-2xl text-sm font-semibold shadow-2xl ' + (type === 'success' ? 'bg-emerald-600 text-white' : (type === 'info' ? 'bg-slate-700 text-white' : 'bg-red-600 text-white'));
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 3500);
+}
+</script>
+</body>
+</html>

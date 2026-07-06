@@ -1,894 +1,447 @@
-<!-- STERYL_UP/backend/app/templates/index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-
-    <!-- Content Security Policy (CSP) - adjust as needed -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;">
-
-    <!-- Additional security headers -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-    <title>Steryl — Precision You Can Trust</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Custom styles for enhanced design */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            scroll-behavior: smooth;
-        }
-        
-        /* Custom focus styles */
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-        
-        /* Navbar animation */
-        .navbar {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
-            transition: all 0.3s ease;
-        }
-        
-        .navbar.scrolled {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        }
-        
-        /* Button hover effect */
-        .btn-primary {
-            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3);
-        }
-        
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid #0d9488;
-            color: #0d9488;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: #0d9488;
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.2);
-        }
-        
-        /* Hero section animation */
-        .hero-gradient {
-            background: linear-gradient(135deg, rgba(13, 148, 136, 0.9) 0%, rgba(15, 118, 110, 0.85) 100%);
-        }
-        
-        /* Feature cards */
-        .feature-card {
-            background: white;
-            border-radius: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(13, 148, 136, 0.1);
-        }
-        
-        /* Stats counter animation */
-        .stat-number {
-            font-size: 3rem;
-            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Testimonial cards */
-        .testimonial-card {
-            background: white;
-            border-radius: 16px;
-            position: relative;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .testimonial-card:before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: 40px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 10px solid white;
-        }
-        
-        /* CTA section */
-        .cta-gradient {
-            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-        }
-        
-        /* Pulse animation for CTA */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7);
-            }
-            70% {
-                transform: scale(1.05);
-                box-shadow: 0 0 0 20px rgba(13, 148, 136, 0);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(13, 148, 136, 0);
-            }
-        }
-        
-        .pulse-animation {
-            animation: pulse 2s infinite;
-        }
-        
-        /* Section transitions */
-        section {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease;
-        }
-        
-        section.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steryl — Africa's Healthcare Supply Chain Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; overflow-x: hidden; background: #fff; }
+    .nav-link { transition: color 0.2s; }
+    .nav-link:hover { color: #0d9488; }
+    .hero-bg {
+      background: linear-gradient(135deg, #0f172a 0%, #0f2a2a 40%, #0d9488 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero-bg::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(13,148,136,0.25) 0%,transparent 70%); top:-150px; right:-100px; }
+    .hero-bg::after { content:''; position:absolute; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(8,145,178,0.2) 0%,transparent 70%); bottom:-100px; left:100px; }
+    .chain-node { animation: nodePulse 3s ease-in-out infinite; }
+    .chain-node:nth-child(2){animation-delay:0.6s} .chain-node:nth-child(3){animation-delay:1.2s} .chain-node:nth-child(4){animation-delay:1.8s} .chain-node:nth-child(5){animation-delay:2.4s}
+    @keyframes nodePulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(13,148,136,0.4)} 50%{transform:scale(1.04);box-shadow:0 0 0 8px rgba(13,148,136,0)} }
+    .flow-path { stroke-dasharray:200; stroke-dashoffset:200; animation:flowLine 2.5s linear infinite; }
+    @keyframes flowLine { 0%{stroke-dashoffset:200;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{stroke-dashoffset:0;opacity:0} }
+    .counter-num { background:linear-gradient(135deg,#0d9488,#0891b2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .ws-tab { cursor:pointer; transition:all 0.2s; }
+    .ws-tab.active { background:linear-gradient(135deg,#0d9488,#0f766e); color:white; border-color:transparent; }
+    .ws-preview { display:none; }
+    .ws-preview.active { display:block; }
+    .problem-card { transition:transform 0.2s,box-shadow 0.2s; }
+    .problem-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.1); }
+    .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.6s ease,transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .cta-bg { background:linear-gradient(135deg,#0f766e 0%,#0d9488 50%,#0891b2 100%); }
+    @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-8px)} }
+    .float-badge { animation:float 4s ease-in-out infinite; }
+    .float-badge:nth-child(2){animation-delay:1.3s} .float-badge:nth-child(3){animation-delay:2.6s}
+    .grad-text { background:linear-gradient(135deg,#2dd4bf,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  </style>
 </head>
+<body>
 
-<body class="bg-gradient-to-b from-teal-50 to-white">
-    <!-- Navbar -->
-    <header id="navbar" class="navbar shadow-sm fixed top-0 w-full z-50 py-3">
-        <div class="container mx-auto flex justify-between items-center px-4 md:px-8">
-            <div class="logo flex items-center space-x-3">
-                <div class="bg-gradient-to-br from-teal-600 to-teal-800 text-white rounded-xl p-3 flex items-center justify-center">
-                    <i class="fas fa-heartbeat text-xl"></i>
-                </div>
-                <span class="font-bold text-teal-700 text-2xl">Steryl</span>
-            </div>
-            
-            <!-- Mobile menu button -->
-            <button id="mobile-menu-button" class="md:hidden text-teal-700">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            
-            <!-- Desktop menu -->
-            <nav class="hidden md:flex space-x-8">
-                <a href="#home" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1 nav-link">
-                    <i class="fas fa-home"></i>
-                    <span>Home</span>
-                </a>
-                <a href="#about" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1 nav-link">
-                    <i class="fas fa-info-circle"></i>
-                    <span>About</span>
-                </a>
-                <a href="#features" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1 nav-link">
-                    <i class="fas fa-star"></i>
-                    <span>Features</span>
-                </a>
-                <a href="#testimonials" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1 nav-link">
-                    <i class="fas fa-comments"></i>
-                    <span>Testimonials</span>
-                </a>
-                <a href="#contact" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-1 nav-link">
-                    <i class="fas fa-envelope"></i>
-                    <span>Contact</span>
-                </a>
-                <div class="flex space-x-4">
-                    <a href="/login" class="btn-secondary py-2 px-5 rounded-xl font-medium">
-                        Login
-                    </a>
-                    <a href="/register" class="btn-primary py-2 px-5 rounded-xl text-white font-medium">
-                        Register
-                    </a>
-                </div>
-            </nav>
-        </div>
-        
-        <!-- Mobile menu -->
-        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg py-4 px-6">
-            <div class="flex flex-col space-y-4">
-                <a href="#home" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3 nav-link">
-                    <i class="fas fa-home w-6"></i>
-                    <span>Home</span>
-                </a>
-                <a href="#about" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3 nav-link">
-                    <i class="fas fa-info-circle w-6"></i>
-                    <span>About</span>
-                </a>
-                <a href="#features" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3 nav-link">
-                    <i class="fas fa-star w-6"></i>
-                    <span>Features</span>
-                </a>
-                <a href="#testimonials" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3 nav-link">
-                    <i class="fas fa-comments w-6"></i>
-                    <span>Testimonials</span>
-                </a>
-                <a href="#contact" class="text-teal-700 hover:text-teal-900 font-medium flex items-center space-x-3 nav-link">
-                    <i class="fas fa-envelope w-6"></i>
-                    <span>Contact</span>
-                </a>
-                <div class="pt-4 space-y-3">
-                    <a href="/login" class="btn-secondary w-full py-3 rounded-xl font-medium block text-center">
-                        Login
-                    </a>
-                    <a href="/register" class="btn-primary w-full py-3 rounded-xl text-white font-medium block text-center">
-                        Register
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-[100] bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5">
+      <img src="{{ url_for('static', filename='steryl_logo.jpeg') }}" alt="Steryl" class="h-9 w-9 rounded-xl object-cover shadow">
+      <span class="font-bold text-gray-900 text-lg tracking-tight">Steryl<span class="text-teal-500">Health</span></span>
+    </a>
+    <div class="hidden md:flex items-center gap-7">
+      <a href="/" class="nav-link text-sm font-medium text-teal-600">Home</a>
+      <a href="/demo" class="nav-link text-sm font-medium text-gray-600">Demo</a>
+      <a href="/invest" class="nav-link text-sm font-medium text-gray-600">Invest</a>
+      <a href="/about" class="nav-link text-sm font-medium text-gray-600">About</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/demo" class="hidden sm:block text-sm font-semibold text-teal-600 hover:text-teal-800 transition-colors">Watch Demo</a>
+      <a href="/invest" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">Invest Now →</a>
+    </div>
+  </div>
+</nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="pt-16 md:pt-20 visible">
-        <div class="relative overflow-hidden">
-            <div class="absolute inset-0 hero-gradient z-0"></div>
-            <div class="container mx-auto px-4 md:px-8 py-16 md:py-24 relative z-10">
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="text-white">
-                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                            Steryl — 
-                            <span class="block mt-2">Precision You Can Trust</span>
-                        </h1>
-                        <p class="text-xl mb-8 text-teal-100">
-                            A unified healthcare supply and digital infrastructure platform. Empowering hospitals, clinics, and laboratories with reliable equipment, smart workflows, and data-driven insights.
-                        </p>
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="/register" class="bg-white text-teal-700 py-4 px-8 rounded-xl text-lg font-bold hover:bg-teal-50 transition-all text-center pulse-animation">
-                                Get Started Free <i class="fas fa-arrow-right ml-2"></i>
-                            </a>
-                            <a href="#features" class="btn-secondary py-4 px-8 rounded-xl text-lg font-bold text-center">
-                                Learn More <i class="fas fa-play-circle ml-2"></i>
-                            </a>
-                        </div>
-                        <div class="mt-10 flex items-center space-x-6">
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-check-circle text-teal-200 text-xl"></i>
-                                <span class="text-teal-100">No credit card required</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-check-circle text-teal-200 text-xl"></i>
-                                <span class="text-teal-100">30-day free trial</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                            <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=2070" 
-                                 alt="Healthcare professionals using Steryl platform" 
-                                 class="w-full h-64 md:h-96 object-cover">
-                        </div>
-                        <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl hidden md:block">
-                            <div class="flex items-center space-x-4">
-                                <div class="bg-teal-100 p-3 rounded-xl">
-                                    <i class="fas fa-shield-alt text-teal-600 text-2xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-teal-800">HIPAA Compliant</h3>
-                                    <p class="text-gray-600 text-sm">Enterprise-grade security</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Wave divider -->
-            <div class="absolute bottom-0 left-0 right-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" class="w-full">
-                    <path fill="#f0fdfa" fill-opacity="1" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,138.7C672,128,768,160,864,181.3C960,203,1056,213,1152,197.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                </svg>
-            </div>
+<!-- HERO -->
+<section class="hero-bg pt-28 pb-16 px-5 md:pt-36 md:pb-24 relative z-10">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/30 mb-6">
+          <span class="h-2 w-2 rounded-full bg-teal-400 animate-pulse"></span>
+          <span class="text-teal-200 text-xs font-semibold tracking-wide uppercase">Pre-Launch · Founding Round Open</span>
         </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="py-12 md:py-16 visible">
-        <div class="container mx-auto px-4 md:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div class="text-center">
-                    <div class="stat-number font-bold mb-2" data-count="250">0</div>
-                    <p class="text-gray-600 font-medium">Healthcare Partners</p>
-                </div>
-                <div class="text-center">
-                    <div class="stat-number font-bold mb-2" data-count="5000">0</div>
-                    <p class="text-gray-600 font-medium">Active Users</p>
-                </div>
-                <div class="text-center">
-                    <div class="stat-number font-bold mb-2" data-count="99.9">0</div>
-                    <p class="text-gray-600 font-medium">Uptime %</p>
-                </div>
-                <div class="text-center">
-                    <div class="stat-number font-bold mb-2" data-count="24">0</div>
-                    <p class="text-gray-600 font-medium">/7 Support</p>
-                </div>
-            </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
+          The Operating<br>System for<br><span class="grad-text">African Healthcare</span>
+        </h1>
+        <p class="text-teal-100 text-lg leading-relaxed mb-8 max-w-lg">Steryl connects hospitals, diagnostic centres, pharmacies, manufacturers and distributors in a single real-time platform — eliminating stockouts, counterfeits and procurement delays.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/demo" class="px-6 py-3 bg-white text-teal-700 font-bold rounded-xl hover:bg-teal-50 transition-colors shadow-lg text-sm"><i class="fas fa-play-circle mr-2"></i>Watch the Demo</a>
+          <a href="/invest" class="px-6 py-3 bg-teal-500 hover:bg-teal-400 text-white font-bold rounded-xl transition-colors shadow-lg text-sm border border-teal-400"><i class="fas fa-chart-line mr-2"></i>View Investment Terms</a>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="py-16 md:py-24 bg-gradient-to-b from-white to-teal-50 visible">
-        <div class="container mx-auto px-4 md:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-teal-800 mb-4">Why Choose Steryl?</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Our platform is designed to transform healthcare operations with cutting-edge technology and seamless integration.</p>
-            </div>
-            
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="feature-card p-8">
-                    <div class="bg-teal-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-robot text-teal-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-teal-800 mb-4">AI-Powered Insights</h3>
-                    <p class="text-gray-600 mb-4">Advanced machine learning algorithms provide predictive analytics for inventory management and patient care optimization.</p>
-                    <a href="#" class="text-teal-600 font-medium inline-flex items-center">
-                        Learn more <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-                
-                <div class="feature-card p-8">
-                    <div class="bg-teal-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-exchange-alt text-teal-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-teal-800 mb-4">Seamless Integration</h3>
-                    <p class="text-gray-600 mb-4">Connect with existing EHR systems, laboratory equipment, and supply chain networks without disruption to workflows.</p>
-                    <a href="#" class="text-teal-600 font-medium inline-flex items-center">
-                        Learn more <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-                
-                <div class="feature-card p-8">
-                    <div class="bg-teal-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-shield-alt text-teal-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-teal-800 mb-4">Enterprise Security</h3>
-                    <p class="text-gray-600 mb-4">HIPAA compliant with end-to-end encryption, multi-factor authentication, and regular security audits.</p>
-                    <a href="#" class="text-teal-600 font-medium inline-flex items-center">
-                        Learn more <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-                
-                <div class="feature-card p-8">
-                    <div class="bg-teal-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-chart-line text-teal-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-teal-800 mb-4">Real-time Analytics</h3>
-                    <p class="text-gray-600 mb-4">Comprehensive dashboards and reporting tools to monitor performance, inventory, and patient outcomes in real-time.</p>
-                    <a href="#" class="text-teal-600 font-medium inline-flex items-center">
-                        Learn more <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-                
-                <div class="feature-card p-8">
-                    <div class="bg-teal-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-mobile-alt text-teal-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-teal-800 mb-4">Mobile First</h3>
-                    <p class="text-gray-600 mb-4">Fully responsive platform accessible on any device, with dedicated mobile apps for iOS and Android.</p>
-                    <a href="#" class="text-teal-600 font-medium inline-flex items-center">
-                        Learn more <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-                
-                <div class="feature-card p-8">
-                    <div class="bg-teal-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-headset text-teal-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-teal-800 mb-4">24/7 Support</h3>
-                    <p class="text-gray-600 mb-4">Dedicated customer success team available round-the-clock with average response time under 5 minutes.</p>
-                    <a href="#" class="text-teal-600 font-medium inline-flex items-center">
-                        Learn more <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-            </div>
+        <div class="flex flex-wrap gap-4 mt-8">
+          <div class="flex items-center gap-1.5 text-teal-200 text-xs"><i class="fas fa-shield-alt text-teal-400"></i><span>Secure & Compliant</span></div>
+          <div class="flex items-center gap-1.5 text-teal-200 text-xs"><i class="fas fa-bolt text-teal-400"></i><span>Live Platform</span></div>
+          <div class="flex items-center gap-1.5 text-teal-200 text-xs"><i class="fas fa-network-wired text-teal-400"></i><span>5 Org Types Connected</span></div>
         </div>
-    </section>
+      </div>
 
-    <!-- About Section -->
-    <section id="about" class="py-16 md:py-24 visible">
-        <div class="container mx-auto px-4 md:px-8">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-3xl md:text-4xl font-bold text-teal-800 mb-6">Transforming Healthcare Infrastructure</h2>
-                    <p class="text-gray-600 mb-6 text-lg">
-                        Steryl was founded with a single mission: to bridge the gap between healthcare providers and the technology they need to deliver exceptional patient care. We understand the unique challenges faced by modern healthcare facilities.
-                    </p>
-                    <p class="text-gray-600 mb-8 text-lg">
-                        Our platform integrates supply chain management, digital workflows, and data analytics into a single, cohesive solution that saves time, reduces costs, and improves patient outcomes.
-                    </p>
-                    <div class="space-y-4">
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-check-circle text-teal-600 text-xl mt-1"></i>
-                            <div>
-                                <h4 class="font-bold text-teal-800">Proven Results</h4>
-                                <p class="text-gray-600">Average 40% reduction in operational costs for our partners</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-check-circle text-teal-600 text-xl mt-1"></i>
-                            <div>
-                                <h4 class="font-bold text-teal-800">Industry Recognition</h4>
-                                <p class="text-gray-600">Award-winning platform recognized by leading healthcare institutions</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-check-circle text-teal-600 text-xl mt-1"></i>
-                            <div>
-                                <h4 class="font-bold text-teal-800">Global Reach</h4>
-                                <p class="text-gray-600">Serving healthcare providers across 25 countries worldwide</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="relative">
-                    <div class="bg-gradient-to-br from-teal-600 to-teal-800 rounded-2xl p-8 text-white">
-                        <h3 class="text-2xl font-bold mb-6">Our Vision for Healthcare</h3>
-                        <p class="mb-6 text-teal-100">
-                            We envision a future where every healthcare provider has access to the tools and insights needed to deliver the highest quality care, regardless of size or location.
-                        </p>
-                        <div class="grid grid-cols-2 gap-6">
-                            <div class="text-center">
-                                <div class="text-3xl font-bold mb-2">2026</div>
-                                <p class="text-teal-200 text-sm">Goal: 1000+ Partners</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-bold mb-2">100%</div>
-                                <p class="text-teal-200 text-sm">Renewable Energy Usage</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl hidden lg:block">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-teal-100 p-3 rounded-xl">
-                                <i class="fas fa-award text-teal-600 text-2xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-teal-800">Industry Award 2024</h3>
-                                <p class="text-gray-600 text-sm">Best Healthcare Platform</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <div class="relative z-10">
+        <div class="float-badge absolute -top-4 -left-4 bg-white rounded-2xl shadow-xl px-3 py-2 text-xs font-bold text-teal-700 border border-teal-100 flex items-center gap-2 z-20"><i class="fas fa-check-circle text-green-500"></i>Order #ORD-0041 Approved</div>
+        <div class="float-badge absolute top-16 -right-4 bg-white rounded-2xl shadow-xl px-3 py-2 text-xs font-bold text-blue-700 border border-blue-100 flex items-center gap-2 z-20"><i class="fas fa-truck text-blue-500"></i>Shipment dispatched</div>
+        <div class="float-badge absolute -bottom-4 left-8 bg-white rounded-2xl shadow-xl px-3 py-2 text-xs font-bold text-amber-700 border border-amber-100 flex items-center gap-2 z-20"><i class="fas fa-boxes text-amber-500"></i>Stock replenished — 240 units</div>
+
+        <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6 relative">
+          <p class="text-teal-200 text-xs font-semibold uppercase tracking-wide mb-5 text-center">Live Supply Chain Network</p>
+          <div class="flex justify-between items-center mb-3">
+            <div class="chain-node bg-teal-600 border-2 border-teal-400 rounded-2xl px-3 py-2.5 text-center w-[30%]"><i class="fas fa-hospital text-white text-lg mb-1 block"></i><p class="text-white text-[10px] font-bold">Hospital</p></div>
+            <div class="chain-node bg-blue-600 border-2 border-blue-400 rounded-2xl px-3 py-2.5 text-center w-[30%]"><i class="fas fa-flask-vial text-white text-lg mb-1 block"></i><p class="text-white text-[10px] font-bold">Diagnostic</p></div>
+            <div class="chain-node bg-violet-600 border-2 border-violet-400 rounded-2xl px-3 py-2.5 text-center w-[30%]"><i class="fas fa-pills text-white text-lg mb-1 block"></i><p class="text-white text-[10px] font-bold">Pharmacy</p></div>
+          </div>
+          <div class="flex justify-center mb-1">
+            <svg width="280" height="40" viewBox="0 0 280 40">
+              <path d="M47 2 L47 20 L140 20" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M140 2 L140 20" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M233 2 L233 20 L140 20" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path class="flow-path" d="M47 2 L47 18 L140 18" stroke="#ffffff" stroke-width="2" fill="none"/>
+              <path d="M140 20 L140 38" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path class="flow-path" d="M140 20 L140 36" stroke="#ffffff" stroke-width="2" fill="none" style="animation-delay:0.6s"/>
+            </svg>
+          </div>
+          <div class="flex justify-center mb-1">
+            <div class="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl px-5 py-3 text-center shadow-lg border-2 border-white/30">
+              <img src="{{ url_for('static', filename='steryl_logo.jpeg') }}" alt="Steryl" class="h-8 w-8 rounded-lg mx-auto mb-1 object-cover">
+              <p class="text-white text-xs font-black tracking-wide">STERYL PLATFORM</p>
+              <p class="text-teal-100 text-[9px]">Real-time · Verified · Traceable</p>
             </div>
+          </div>
+          <div class="flex justify-center mb-1">
+            <svg width="40" height="28"><path d="M20 2 L20 22" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.6"/><path class="flow-path" d="M20 2 L20 22" stroke="#fff" stroke-width="2" fill="none" style="animation-delay:1.2s"/><path d="M13 18 L20 26 L27 18" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.6"/></svg>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="chain-node bg-emerald-600 border-2 border-emerald-400 rounded-2xl px-3 py-2.5 text-center w-[45%]" style="animation-delay:1.5s"><i class="fas fa-warehouse text-white text-lg mb-1 block"></i><p class="text-white text-[10px] font-bold">Distributor</p></div>
+            <div class="chain-node bg-orange-600 border-2 border-orange-400 rounded-2xl px-3 py-2.5 text-center w-[45%]" style="animation-delay:2s"><i class="fas fa-industry text-white text-lg mb-1 block"></i><p class="text-white text-[10px] font-bold">Manufacturer</p></div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
+            <div class="text-center"><p class="text-white font-black text-lg" id="live-orders">—</p><p class="text-teal-200 text-[9px]">Orders Today</p></div>
+            <div class="text-center"><p class="text-white font-black text-lg" id="live-orgs">—</p><p class="text-teal-200 text-[9px]">Orgs Active</p></div>
+            <div class="text-center"><p class="text-white font-black text-lg">100%</p><p class="text-teal-200 text-[9px]">Uptime</p></div>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="py-16 md:py-24 bg-gradient-to-b from-teal-50 to-white visible">
-        <div class="container mx-auto px-4 md:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-teal-800 mb-4">Trusted by Healthcare Leaders</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">See what healthcare professionals are saying about their experience with Steryl.</p>
+<div class="-mt-1"><svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;height:60px;display:block"><path d="M0,30 C360,60 720,0 1080,30 C1260,45 1380,20 1440,30 L1440,60 L0,60 Z" fill="white"/></svg></div>
+
+<!-- THE PROBLEM -->
+<section class="py-20 px-5 bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <span class="inline-block px-3 py-1 bg-red-50 text-red-600 text-xs font-bold uppercase tracking-wide rounded-full mb-4">The Problem</span>
+      <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">Africa's healthcare supply chain<br>is fundamentally broken</h2>
+      <p class="text-gray-500 max-w-xl mx-auto text-base">Every day, patients suffer and facilities lose money because of procurement built on phone calls, spreadsheets and guesswork.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="problem-card bg-gradient-to-br from-red-50 to-rose-50 border border-red-100 rounded-3xl p-7 reveal">
+        <div class="h-14 w-14 bg-red-100 rounded-2xl flex items-center justify-center mb-5"><i class="fas fa-box-open text-red-500 text-2xl"></i></div>
+        <p class="text-5xl font-black text-red-600 mb-2">40%</p>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Facilities Face Stockouts</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">4 in 10 healthcare facilities run out of critical supplies monthly, forcing life-or-death decisions with no alternatives.</p>
+      </div>
+      <div class="problem-card bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100 rounded-3xl p-7 reveal" style="transition-delay:0.1s">
+        <div class="h-14 w-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-5"><i class="fas fa-skull-crossbones text-amber-600 text-2xl"></i></div>
+        <p class="text-5xl font-black text-amber-600 mb-2">30%</p>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Drugs Are Counterfeit</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Up to 30% of pharmaceuticals in circulation are substandard or falsified, with no traceability system to catch them.</p>
+      </div>
+      <div class="problem-card bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 rounded-3xl p-7 reveal" style="transition-delay:0.2s">
+        <div class="h-14 w-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-5"><i class="fas fa-clock text-blue-500 text-2xl"></i></div>
+        <p class="text-5xl font-black text-blue-600 mb-2">21 Days</p>
+        <h3 class="font-bold text-gray-900 text-lg mb-2">Average Procurement Cycle</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">The average order from request to delivery takes 3 weeks — driven by manual processes, calls, and paper-based approvals.</p>
+      </div>
+    </div>
+    <div class="mt-10 text-center reveal">
+      <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-50 border border-teal-200 rounded-full text-teal-700 text-sm font-semibold">
+        <i class="fas fa-arrow-down text-teal-500"></i>Steryl eliminates all three problems simultaneously
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE SOLUTION -->
+<section class="py-20 px-5 bg-gray-50">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-12 reveal">
+      <span class="inline-block px-3 py-1 bg-teal-50 text-teal-600 text-xs font-bold uppercase tracking-wide rounded-full mb-4">The Solution</span>
+      <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">One platform, every stakeholder,<br>zero blind spots</h2>
+      <p class="text-gray-500 max-w-xl mx-auto">Each organisation type gets a purpose-built workspace — all exchanging live data through the Steryl hub.</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-2 mb-8 reveal">
+      <button class="ws-tab active px-4 py-2 rounded-xl text-sm font-bold border border-teal-200 bg-white text-gray-600" onclick="switchWs('hospital',this)"><i class="fas fa-hospital mr-1.5"></i>Hospital</button>
+      <button class="ws-tab px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-600" onclick="switchWs('lab',this)"><i class="fas fa-flask-vial mr-1.5"></i>Diagnostic Centre</button>
+      <button class="ws-tab px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-600" onclick="switchWs('pharmacy',this)"><i class="fas fa-pills mr-1.5"></i>Pharmacy</button>
+      <button class="ws-tab px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-600" onclick="switchWs('distributor',this)"><i class="fas fa-warehouse mr-1.5"></i>Distributor</button>
+      <button class="ws-tab px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-600" onclick="switchWs('manufacturer',this)"><i class="fas fa-industry mr-1.5"></i>Manufacturer</button>
+    </div>
+
+    <div class="reveal">
+      <!-- Hospital -->
+      <div id="ws-hospital" class="ws-preview active">
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 class="text-2xl font-black text-gray-900 mb-3">Hospital & Clinic Workspace</h3>
+            <p class="text-gray-500 mb-5">Department-driven procurement. Nurses submit requests, admins consolidate, and the order routes automatically to the Steryl distributor — tracked every step.</p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-teal-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Multi-department order management</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-teal-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Admin consolidation to single distributor order</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-teal-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Real-time inventory & stock alerts</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-teal-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Full approval history & audit trail</span></li>
+            </ul>
+            <a href="/demo" class="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-teal-600 text-white font-bold rounded-xl text-sm hover:bg-teal-700 transition-colors"><i class="fas fa-play"></i>See it live</a>
+          </div>
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-5 py-3 flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-6 w-6 bg-white/20 rounded-lg flex items-center justify-center"><i class="fas fa-hospital text-white text-xs"></i></div><p class="text-white text-xs font-bold">Calabar General Hospital</p></div><span class="text-teal-200 text-[10px]">Dashboard</span></div>
+            <div class="p-4">
+              <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="bg-blue-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-blue-600">12</p><p class="text-[9px] text-blue-500">Pending Orders</p></div>
+                <div class="bg-teal-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-teal-600">3</p><p class="text-[9px] text-teal-500">Departments</p></div>
+                <div class="bg-green-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-green-600">89%</p><p class="text-[9px] text-green-500">Stock Healthy</p></div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 p-2 bg-amber-50 rounded-xl"><div class="h-6 w-6 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-box text-amber-500 text-[10px]"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">Surgical Gloves — Size M</p><p class="text-[9px] text-gray-500">ICU Dept · 50 boxes</p></div><span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Pending</span></div>
+                <div class="flex items-center gap-2 p-2 bg-green-50 rounded-xl"><div class="h-6 w-6 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-syringe text-green-500 text-[10px]"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">IV Cannula 18G</p><p class="text-[9px] text-gray-500">Emergency · 200 units</p></div><span class="text-[10px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">Approved</span></div>
+                <div class="flex items-center gap-2 p-2 bg-blue-50 rounded-xl"><div class="h-6 w-6 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-capsules text-blue-500 text-[10px]"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">Paracetamol 500mg Tabs</p><p class="text-[9px] text-gray-500">Pharmacy · 1,000 tabs</p></div><span class="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">In transit</span></div>
+              </div>
             </div>
-            
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="testimonial-card p-8">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-teal-600">DR</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-bold text-teal-800">Dr. Sarah Johnson</h4>
-                            <p class="text-gray-600 text-sm">Chief Medical Officer, Metro Health</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4 italic">
-                        "Steryl has transformed how we manage our surgical supply chain. The predictive analytics have reduced our inventory costs by 35% while ensuring we never run out of critical supplies."
-                    </p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card p-8">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-teal-600">JM</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-bold text-teal-800">James Miller</h4>
-                            <p class="text-gray-600 text-sm">Lab Director, BioTech Labs</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4 italic">
-                        "The integration capabilities are exceptional. We connected Steryl with our existing LIMS system in under 48 hours. The real-time dashboards have given us unprecedented visibility into our operations."
-                    </p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card p-8">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-teal-600">MR</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-bold text-teal-800">Maria Rodriguez</h4>
-                            <p class="text-gray-600 text-sm">Hospital Administrator, City General</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4 italic">
-                        "The mobile app has been a game-changer for our clinical staff. They can now place supply orders, check inventory, and view analytics right from their phones. The efficiency gains have been remarkable."
-                    </p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center mt-12">
-                <div class="inline-flex space-x-4">
-                    <button class="w-3 h-3 rounded-full bg-teal-600"></button>
-                    <button class="w-3 h-3 rounded-full bg-teal-200"></button>
-                    <button class="w-3 h-3 rounded-full bg-teal-200"></button>
-                </div>
-            </div>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- CTA Section -->
-    <section class="py-16 md:py-24 cta-gradient visible">
-        <div class="container mx-auto px-4 md:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Healthcare Operations?</h2>
-            <p class="text-xl text-teal-100 mb-10 max-w-3xl mx-auto">
-                Join thousands of healthcare providers who trust Steryl for precision, reliability, and innovation.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                <a href="/register" class="bg-white text-teal-700 py-4 px-10 rounded-xl text-lg font-bold hover:bg-teal-50 transition-all pulse-animation">
-                    Start Free Trial <i class="fas fa-rocket ml-2"></i>
-                </a>
-                <a href="#contact" class="bg-transparent border-2 border-white text-white py-4 px-10 rounded-xl text-lg font-bold hover:bg-white hover:text-teal-700 transition-all">
-                    Schedule a Demo <i class="fas fa-calendar-alt ml-2"></i>
-                </a>
+      <!-- Lab -->
+      <div id="ws-lab" class="ws-preview">
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 class="text-2xl font-black text-gray-900 mb-3">Diagnostic Centre Workspace</h3>
+            <p class="text-gray-500 mb-5">Labs manage reagents, consumables, and equipment by department — with usage tracking to predict reorder points before running dry.</p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-blue-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Reagent & consumable tracking per dept</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-blue-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Usage analytics — predict reorder points</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-blue-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Accreditation-ready order documentation</span></li>
+            </ul>
+            <a href="/demo" class="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 transition-colors"><i class="fas fa-play"></i>See it live</a>
+          </div>
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-3 flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-6 w-6 bg-white/20 rounded-lg"><i class="fas fa-flask-vial text-white text-xs"></i></div><p class="text-white text-xs font-bold">PathCare Diagnostics</p></div><span class="text-blue-200 text-[10px]">Dashboard</span></div>
+            <div class="p-4">
+              <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="bg-blue-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-blue-600">5</p><p class="text-[9px] text-blue-500">Departments</p></div>
+                <div class="bg-red-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-red-600">2</p><p class="text-[9px] text-red-500">Low Stock</p></div>
+                <div class="bg-teal-50 rounded-xl p-2.5 text-center"><p class="text-lg font-black text-teal-600">18</p><p class="text-[9px] text-teal-500">Orders/Month</p></div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 p-2 bg-red-50 rounded-xl border border-red-100"><div class="h-6 w-6 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-triangle-exclamation text-red-500 text-[10px]"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">EDTA Tubes 3ml</p><p class="text-[9px] text-gray-500">Haematology · 8 packs left</p></div><span class="text-[10px] font-bold text-red-600">CRITICAL</span></div>
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl"><div class="h-6 w-6 bg-gray-100 rounded-lg flex items-center justify-center"><i class="fas fa-vial text-gray-500 text-[10px]"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">Serum Separator Tubes</p><p class="text-[9px] text-gray-500">Biochemistry · 200 units</p></div><span class="text-[10px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">OK</span></div>
+              </div>
             </div>
-            <p class="text-teal-200 mt-8">
-                No credit card required • 30-day free trial • Full support included
-            </p>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- Contact Section -->
-    <section id="contact" class="py-16 md:py-24 visible">
-        <div class="container mx-auto px-4 md:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-teal-800 mb-4">Get In Touch</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Have questions? Our team is here to help you get started with Steryl.</p>
+      <!-- Pharmacy -->
+      <div id="ws-pharmacy" class="ws-preview">
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 class="text-2xl font-black text-gray-900 mb-3">Pharmacy Workspace</h3>
+            <p class="text-gray-500 mb-5">Order drugs from a verified catalogue sourced exclusively from licensed manufacturers — no counterfeits, full documentation at every step.</p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-violet-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-violet-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Verified, licensed product catalogue</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-violet-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-violet-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Automated reorder triggers</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-violet-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-violet-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Batch & expiry date tracking</span></li>
+            </ul>
+            <a href="/demo" class="inline-flex items-center gap-2 mt-6 px-5 py-2.5 bg-violet-600 text-white font-bold rounded-xl text-sm hover:bg-violet-700 transition-colors"><i class="fas fa-play"></i>See it live</a>
+          </div>
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-violet-600 to-violet-700 px-5 py-3 flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-6 w-6 bg-white/20 rounded-lg flex items-center justify-center"><i class="fas fa-pills text-white text-xs"></i></div><p class="text-white text-xs font-bold">Apex Pharmacy Ltd</p></div><span class="text-violet-200 text-[10px]">Orders</span></div>
+            <div class="p-4">
+              <div class="bg-gray-50 rounded-xl p-2.5 mb-3 flex items-center gap-2"><i class="fas fa-search text-gray-400 text-xs"></i><p class="text-xs text-gray-400">Search product catalogue…</p></div>
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 p-2 bg-white border border-gray-100 rounded-xl"><div class="h-8 w-8 bg-violet-100 rounded-lg flex items-center justify-center"><i class="fas fa-capsules text-violet-500 text-sm"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">Amoxicillin 500mg Caps</p><p class="text-[9px] text-gray-500">PharmaGen Ltd · ₦2,400/pack</p></div><button class="text-[10px] bg-violet-100 text-violet-700 font-bold px-2 py-1 rounded-lg">Add</button></div>
+                <div class="flex items-center gap-2 p-2 bg-white border border-gray-100 rounded-xl"><div class="h-8 w-8 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-heart-pulse text-red-500 text-sm"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">Amlodipine 5mg Tabs</p><p class="text-[9px] text-gray-500">MediCore · ₦1,800/pack</p></div><button class="text-[10px] bg-violet-100 text-violet-700 font-bold px-2 py-1 rounded-lg">Add</button></div>
+              </div>
             </div>
-            
-            <div class="grid md:grid-cols-2 gap-12">
-                <div>
-                    <h3 class="text-2xl font-bold text-teal-800 mb-6">Contact Information</h3>
-                    <div class="space-y-6">
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-teal-100 p-3 rounded-xl">
-                                <i class="fas fa-map-marker-alt text-teal-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-teal-800">Our Office</h4>
-                                <p class="text-gray-600">123 Healthcare Ave, Suite 500<br>San Francisco, CA 94107</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-teal-100 p-3 rounded-xl">
-                                <i class="fas fa-phone text-teal-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-teal-800">Phone Number</h4>
-                                <p class="text-gray-600">+1 (555) 123-4567<br>Mon-Fri, 9am-6pm PST</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-teal-100 p-3 rounded-xl">
-                                <i class="fas fa-envelope text-teal-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-teal-800">Email Address</h4>
-                                <p class="text-gray-600">info@steryl.com<br>support@steryl.com</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-10">
-                        <h4 class="font-bold text-teal-800 mb-4">Follow Us</h4>
-                        <div class="flex space-x-4">
-                            <a href="#" class="bg-teal-100 text-teal-600 w-12 h-12 rounded-xl flex items-center justify-center hover:bg-teal-200 transition-all">
-                                <i class="fab fa-twitter text-xl"></i>
-                            </a>
-                            <a href="#" class="bg-teal-100 text-teal-600 w-12 h-12 rounded-xl flex items-center justify-center hover:bg-teal-200 transition-all">
-                                <i class="fab fa-linkedin text-xl"></i>
-                            </a>
-                            <a href="#" class="bg-teal-100 text-teal-600 w-12 h-12 rounded-xl flex items-center justify-center hover:bg-teal-200 transition-all">
-                                <i class="fab fa-facebook text-xl"></i>
-                            </a>
-                            <a href="#" class="bg-teal-100 text-teal-600 w-12 h-12 rounded-xl flex items-center justify-center hover:bg-teal-200 transition-all">
-                                <i class="fab fa-instagram text-xl"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-2xl shadow-xl p-8">
-                    <h3 class="text-2xl font-bold text-teal-800 mb-6">Send Us a Message</h3>
-                    <form id="contactForm">
-                        <div class="space-y-6">
-                            <div>
-                                <label class="block text-teal-800 font-medium mb-2">Your Name</label>
-                                <input type="text" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:border-teal-500 transition-all" placeholder="John Doe" required>
-                            </div>
-                            <div>
-                                <label class="block text-teal-800 font-medium mb-2">Email Address</label>
-                                <input type="email" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:border-teal-500 transition-all" placeholder="john@example.com" required>
-                            </div>
-                            <div>
-                                <label class="block text-teal-800 font-medium mb-2">Organization</label>
-                                <input type="text" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:border-teal-500 transition-all" placeholder="Your hospital or clinic">
-                            </div>
-                            <div>
-                                <label class="block text-teal-800 font-medium mb-2">Message</label>
-                                <textarea rows="4" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:border-teal-500 transition-all" placeholder="Tell us about your needs..." required></textarea>
-                            </div>
-                            <button type="submit" class="btn-primary w-full py-4 text-white font-bold rounded-xl">
-                                Send Message <i class="fas fa-paper-plane ml-2"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- Footer -->
-    <footer class="bg-gradient-to-r from-teal-800 to-teal-900 text-white py-12">
-        <div class="container mx-auto px-4 md:px-8">
-            <div class="grid md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center space-x-3 mb-6">
-                        <div class="bg-teal-500 rounded-xl p-2">
-                            <i class="fas fa-heartbeat text-xl"></i>
-                        </div>
-                        <span class="font-bold text-2xl">Steryl</span>
-                    </div>
-                    <p class="text-teal-200 mb-6">Precision healthcare infrastructure for modern providers.</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-teal-200 hover:text-white">
-                            <i class="fab fa-twitter text-xl"></i>
-                        </a>
-                        <a href="#" class="text-teal-200 hover:text-white">
-                            <i class="fab fa-linkedin text-xl"></i>
-                        </a>
-                        <a href="#" class="text-teal-200 hover:text-white">
-                            <i class="fab fa-facebook text-xl"></i>
-                        </a>
-                        <a href="#" class="text-teal-200 hover:text-white">
-                            <i class="fab fa-instagram text-xl"></i>
-                        </a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold text-xl mb-6">Product</h4>
-                    <ul class="space-y-3">
-                        <li><a href="#features" class="text-teal-200 hover:text-white transition-all">Features</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Pricing</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">API</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Documentation</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Release Notes</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold text-xl mb-6">Company</h4>
-                    <ul class="space-y-3">
-                        <li><a href="#about" class="text-teal-200 hover:text-white transition-all">About Us</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Careers</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Blog</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Press</a></li>
-                        <li><a href="#contact" class="text-teal-200 hover:text-white transition-all">Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold text-xl mb-6">Resources</h4>
-                    <ul class="space-y-3">
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Help Center</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Community</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Privacy</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Terms</a></li>
-                        <li><a href="#" class="text-teal-200 hover:text-white transition-all">Status</a></li>
-                    </ul>
-                </div>
+      <!-- Distributor -->
+      <div id="ws-distributor" class="ws-preview">
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 class="text-2xl font-black text-gray-900 mb-3">Distributor Workspace</h3>
+            <p class="text-gray-500 mb-5">Steryl Admin receives all organisation orders through the platform — full visibility, approval authority, and shipment tracking in one place.</p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-emerald-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Centralised queue from all org types</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-emerald-600 text-[10px]"></i></div><span class="text-sm text-gray-700">One-click approval & dispatch</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-emerald-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Revenue analytics and shipment logs</span></li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 px-5 py-3 flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-6 w-6 bg-white/20 rounded-lg flex items-center justify-center"><i class="fas fa-warehouse text-white text-xs"></i></div><p class="text-white text-xs font-bold">Steryl Admin</p></div><span class="text-emerald-200 text-[10px]">Marketplace</span></div>
+            <div class="p-4">
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <div class="bg-emerald-50 rounded-xl p-2.5 text-center"><p class="text-xl font-black text-emerald-600">24</p><p class="text-[9px] text-emerald-600">Pending Orders</p></div>
+                <div class="bg-blue-50 rounded-xl p-2.5 text-center"><p class="text-xl font-black text-blue-600">₦4.2M</p><p class="text-[9px] text-blue-600">This Month GMV</p></div>
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-2 p-2 bg-amber-50 rounded-xl"><div class="h-6 w-6 bg-amber-100 rounded-full flex items-center justify-center text-[10px] font-bold text-amber-700">H</div><div class="flex-1"><p class="text-xs font-bold text-gray-800">Calabar General Hospital</p><p class="text-[9px] text-gray-500">₦320,000 · 3 items</p></div><button class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-1 rounded-lg">Approve</button></div>
+                <div class="flex items-center gap-2 p-2 bg-amber-50 rounded-xl"><div class="h-6 w-6 bg-amber-100 rounded-full flex items-center justify-center text-[10px] font-bold text-amber-700">D</div><div class="flex-1"><p class="text-xs font-bold text-gray-800">PathCare Diagnostics</p><p class="text-[9px] text-gray-500">₦180,000 · 6 items</p></div><button class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-1 rounded-lg">Approve</button></div>
+              </div>
             </div>
-            
-            <div class="border-t border-teal-700 pt-8 text-center text-teal-300">
-                <p>&copy; 2026 Steryl Health Ltd. All rights reserved. | <a href="/privacy" class="hover:text-white">Privacy Policy</a> | <a href="/terms" class="hover:text-white">Terms of Service</a></p>
-                <p class="mt-2 text-sm">Steryl is a registered trademark of Steryl Health Ltd.</p>
-            </div>
+          </div>
         </div>
-    </footer>
+      </div>
 
-    <script>
-        // Initialize page functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Navbar scroll effect
-            const navbar = document.getElementById('navbar');
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            });
-            
-            // Mobile menu toggle
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            
-            mobileMenuButton.addEventListener('click', function() {
-                mobileMenu.classList.toggle('hidden');
-                // Change icon based on menu state
-                const icon = this.querySelector('i');
-                if (mobileMenu.classList.contains('hidden')) {
-                    icon.className = 'fas fa-bars text-xl';
-                } else {
-                    icon.className = 'fas fa-times text-xl';
-                }
-            });
-            
-            // Smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    if (this.getAttribute('href') === '#') return;
-                    
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    const targetElement = document.querySelector(targetId);
-                    
-                    if (targetElement) {
-                        // Close mobile menu if open
-                        mobileMenu.classList.add('hidden');
-                        mobileMenuButton.querySelector('i').className = 'fas fa-bars text-xl';
-                        
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 80,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-            
-            // Animate numbers in stats section
-            function animateStats() {
-                const counters = document.querySelectorAll('.stat-number');
-                const speed = 200;
-                
-                counters.forEach(counter => {
-                    const target = +counter.getAttribute('data-count');
-                    const count = +counter.innerText.replace('%', '');
-                    const increment = target / speed;
-                    
-                    if (count < target) {
-                        counter.innerText = Math.ceil(count + increment).toFixed(counter.getAttribute('data-count').includes('.') ? 1 : 0);
-                        if (counter.getAttribute('data-count').includes('%')) {
-                            counter.innerText += '%';
-                        }
-                        setTimeout(animateStats, 1);
-                    } else {
-                        counter.innerText = target;
-                        if (counter.getAttribute('data-count').includes('%')) {
-                            counter.innerText += '%';
-                        }
-                    }
-                });
-            }
-            
-            // Intersection Observer for scroll animations
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-            
-            const observer = new IntersectionObserver(function(entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        
-                        // Animate stats when stats section is visible
-                        if (entry.target.querySelector('.stat-number')) {
-                            setTimeout(animateStats, 300);
-                        }
-                        
-                        // Stop observing after animation
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-            
-            // Observe all sections
-            document.querySelectorAll('section').forEach(section => {
-                observer.observe(section);
-            });
-            
-            // Contact form submission
-            const contactForm = document.getElementById('contactForm');
-            contactForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const submitButton = this.querySelector('button[type="submit"]');
-                const originalText = submitButton.innerHTML;
-                
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
-                submitButton.disabled = true;
-                
-                // Simulate form submission
-                setTimeout(() => {
-                    alert('Thank you for your message! Our team will contact you within 24 hours. (This is a demo)');
-                    contactForm.reset();
-                    submitButton.innerHTML = originalText;
-                    submitButton.disabled = false;
-                }, 1500);
-            });
-            
-            // Feature card links
-            document.querySelectorAll('.feature-card a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    alert('This feature would show more detailed information in a real application.');
-                });
-            });
-            
-            // Testimonial navigation dots
-            document.querySelectorAll('.testimonial-card + div button').forEach((button, index) => {
-                button.addEventListener('click', function() {
-                    // Update active dot
-                    document.querySelectorAll('.testimonial-card + div button').forEach(btn => {
-                        btn.classList.remove('bg-teal-600');
-                        btn.classList.add('bg-teal-200');
-                    });
-                    this.classList.remove('bg-teal-200');
-                    this.classList.add('bg-teal-600');
-                    
-                    // In a real application, this would switch testimonials
-                    alert('This would cycle through testimonials in a real application.');
-                });
-            });
-            
-            // Initialize first testimonial dot as active
-            document.querySelector('.testimonial-card + div button:first-child').classList.remove('bg-teal-200');
-            document.querySelector('.testimonial-card + div button:first-child').classList.add('bg-teal-600');
-        });
-    </script>
+      <!-- Manufacturer -->
+      <div id="ws-manufacturer" class="ws-preview">
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 class="text-2xl font-black text-gray-900 mb-3">Manufacturer Workspace</h3>
+            <p class="text-gray-500 mb-5">Manufacturers list SKUs, manage batch production, scan barcodes and track exactly where every unit goes — from factory floor to facility.</p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-orange-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-orange-600 text-[10px]"></i></div><span class="text-sm text-gray-700">SKU catalogue with batch management</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-orange-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-orange-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Barcode generation & print queue</span></li>
+              <li class="flex items-start gap-3"><div class="h-5 w-5 rounded-full bg-orange-100 flex items-center justify-center mt-0.5 flex-shrink-0"><i class="fas fa-check text-orange-600 text-[10px]"></i></div><span class="text-sm text-gray-700">Full unit-level traceability</span></li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-5 py-3 flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-6 w-6 bg-white/20 rounded-lg flex items-center justify-center"><i class="fas fa-industry text-white text-xs"></i></div><p class="text-white text-xs font-bold">PharmaGen Ltd</p></div><span class="text-orange-200 text-[10px]">SKU Inventory</span></div>
+            <div class="p-4">
+              <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="bg-orange-50 rounded-xl p-2 text-center"><p class="text-base font-black text-orange-600">48</p><p class="text-[9px] text-orange-500">SKUs</p></div>
+                <div class="bg-blue-50 rounded-xl p-2 text-center"><p class="text-base font-black text-blue-600">12</p><p class="text-[9px] text-blue-500">Batches</p></div>
+                <div class="bg-green-50 rounded-xl p-2 text-center"><p class="text-base font-black text-green-600">2.4K</p><p class="text-[9px] text-green-500">Units Out</p></div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl"><div class="h-8 w-8 bg-orange-100 rounded-lg flex items-center justify-center"><i class="fas fa-capsules text-orange-500 text-sm"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">Amoxicillin 500mg</p><p class="text-[9px] text-gray-500">Batch B-2024-0041 · 10,000 units</p></div><span class="text-[10px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">Active</span></div>
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl"><div class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-syringe text-blue-500 text-sm"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-800">IV Cannula 18G</p><p class="text-[9px] text-gray-500">Batch B-2024-0038 · 5,000 units</p></div><span class="text-[10px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">Active</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-20 px-5 bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <span class="inline-block px-3 py-1 bg-teal-50 text-teal-600 text-xs font-bold uppercase tracking-wide rounded-full mb-4">How It Works</span>
+      <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">Order to doorstep in 3 steps</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 relative">
+      <div class="hidden md:block absolute top-10 left-[calc(16.67%+20px)] right-[calc(16.67%+20px)] h-0.5 bg-gradient-to-r from-teal-200 via-teal-400 to-teal-200"></div>
+      <div class="text-center reveal">
+        <div class="h-20 w-20 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-teal-200 relative z-10"><i class="fas fa-cart-shopping text-white text-2xl"></i></div>
+        <p class="text-sm font-black text-teal-600 uppercase tracking-wide mb-2">Step 1</p>
+        <h3 class="text-xl font-black text-gray-900 mb-2">Facility Submits Order</h3>
+        <p class="text-gray-500 text-sm">A department head selects products from the verified catalogue, sets quantities, and submits — the request enters the system instantly.</p>
+      </div>
+      <div class="text-center reveal" style="transition-delay:0.15s">
+        <div class="h-20 w-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-200 relative z-10"><i class="fas fa-shield-check text-white text-2xl"></i></div>
+        <p class="text-sm font-black text-blue-600 uppercase tracking-wide mb-2">Step 2</p>
+        <h3 class="text-xl font-black text-gray-900 mb-2">Steryl Verifies & Routes</h3>
+        <p class="text-gray-500 text-sm">The platform validates the order, runs checks against the manufacturer catalogue, and routes it to the Steryl distributor — no manual email or call.</p>
+      </div>
+      <div class="text-center reveal" style="transition-delay:0.3s">
+        <div class="h-20 w-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-200 relative z-10"><i class="fas fa-truck-fast text-white text-2xl"></i></div>
+        <p class="text-sm font-black text-emerald-600 uppercase tracking-wide mb-2">Step 3</p>
+        <h3 class="text-xl font-black text-gray-900 mb-2">Delivered & Tracked</h3>
+        <p class="text-gray-500 text-sm">The distributor approves, dispatches and the facility tracks delivery in real time. Inventory updates automatically on receipt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NUMBERS -->
+<section class="py-20 px-5 bg-gray-50">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-14 reveal"><h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">Built to scale across the continent</h2><p class="text-gray-500">Every metric you need to know before you invest.</p></div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="bg-white border border-gray-100 rounded-3xl p-6 text-center shadow-sm reveal"><p class="text-4xl font-black counter-num mb-2">5</p><p class="text-gray-700 font-semibold text-sm">Account Types</p><p class="text-gray-400 text-xs mt-1">Fully integrated workspaces</p></div>
+      <div class="bg-white border border-gray-100 rounded-3xl p-6 text-center shadow-sm reveal" style="transition-delay:0.1s"><p class="text-4xl font-black counter-num mb-2">100%</p><p class="text-gray-700 font-semibold text-sm">Supply Chain</p><p class="text-gray-400 text-xs mt-1">End-to-end coverage</p></div>
+      <div class="bg-white border border-gray-100 rounded-3xl p-6 text-center shadow-sm reveal" style="transition-delay:0.2s"><p class="text-4xl font-black counter-num mb-2">Live</p><p class="text-gray-700 font-semibold text-sm">Platform Status</p><p class="text-gray-400 text-xs mt-1">Operational today</p></div>
+      <div class="bg-white border border-gray-100 rounded-3xl p-6 text-center shadow-sm reveal" style="transition-delay:0.3s"><p class="text-4xl font-black counter-num mb-2">$6B+</p><p class="text-gray-700 font-semibold text-sm">Market Size</p><p class="text-gray-400 text-xs mt-1">Africa healthcare supply</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-bg py-20 px-5 relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10"><div class="absolute top-0 left-0 w-96 h-96 rounded-full bg-white" style="transform:translate(-30%,-30%)"></div><div class="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-white" style="transform:translate(30%,30%)"></div></div>
+  <div class="max-w-3xl mx-auto text-center relative z-10 reveal">
+    <h2 class="text-3xl md:text-4xl font-black text-white mb-4">Be part of the solution.<br>Be part of the founding round.</h2>
+    <p class="text-teal-100 text-lg mb-8">Steryl is opening a limited founding share round. Early investors capture maximum equity at ground-floor valuation — before the platform launches to the public.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="/demo" class="px-7 py-3.5 bg-white text-teal-700 font-black rounded-xl hover:bg-teal-50 transition-colors shadow-lg text-sm"><i class="fas fa-play-circle mr-2"></i>Watch Full Demo</a>
+      <a href="/invest" class="px-7 py-3.5 bg-teal-400/30 hover:bg-teal-400/50 text-white font-black rounded-xl transition-colors border border-white/30 text-sm"><i class="fas fa-handshake mr-2"></i>View Investment Terms</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 py-12 px-5">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-4 gap-8 mb-10">
+      <div class="md:col-span-2">
+        <div class="flex items-center gap-2.5 mb-4"><img src="{{ url_for('static', filename='steryl_logo.jpeg') }}" alt="Steryl" class="h-9 w-9 rounded-xl object-cover"><span class="font-bold text-white text-lg">Steryl<span class="text-teal-400">Health</span></span></div>
+        <p class="text-gray-400 text-sm leading-relaxed max-w-xs">Africa's end-to-end healthcare supply chain platform — connecting every stakeholder, eliminating every inefficiency.</p>
+      </div>
+      <div>
+        <p class="text-white font-bold text-sm mb-3">Platform</p>
+        <div class="space-y-2">
+          <a href="/demo" class="block text-gray-400 hover:text-teal-400 text-sm transition-colors">Product Demo</a>
+          <a href="/register" class="block text-gray-400 hover:text-teal-400 text-sm transition-colors">Register Organisation</a>
+          <a href="/login" class="block text-gray-400 hover:text-teal-400 text-sm transition-colors">Sign In</a>
+        </div>
+      </div>
+      <div>
+        <p class="text-white font-bold text-sm mb-3">Investors</p>
+        <div class="space-y-2">
+          <a href="/invest" class="block text-gray-400 hover:text-teal-400 text-sm transition-colors">Investment Terms</a>
+          <a href="/invest#revenue" class="block text-gray-400 hover:text-teal-400 text-sm transition-colors">Revenue Model</a>
+          <a href="/invest#faq" class="block text-gray-400 hover:text-teal-400 text-sm transition-colors">Investor FAQ</a>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
+      <p class="text-gray-500 text-xs">&copy; 2026 Steryl Health Ltd. All rights reserved.</p>
+      <p class="text-gray-600 text-xs">This page is for informational purposes only and does not constitute a public securities offering.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+function animateCount(id, target, duration=2000) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  let start=0; const step=target/(duration/16);
+  const timer=setInterval(()=>{start+=step;if(start>=target){el.textContent=target;clearInterval(timer);return;}el.textContent=Math.floor(start);},16);
+}
+setTimeout(()=>{animateCount('live-orders',47);animateCount('live-orgs',12);},800);
+
+function switchWs(ws,btn) {
+  document.querySelectorAll('.ws-preview').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ws-tab').forEach(t=>{t.classList.remove('active','text-white');t.classList.add('text-gray-600');});
+  document.getElementById('ws-'+ws).classList.add('active');
+  btn.classList.add('active','text-white'); btn.classList.remove('text-gray-600');
+}
+
+const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
 </body>
 </html>

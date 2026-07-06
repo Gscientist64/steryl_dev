@@ -1,0 +1,911 @@
+<style>
+    :root {
+        --manufacturer-ink: #0f172a;
+        --manufacturer-muted: #475569;
+        --manufacturer-border: rgba(148, 163, 184, 0.18);
+        --manufacturer-teal: #0f766e;
+        --manufacturer-teal-soft: #ccfbf1;
+        --manufacturer-surface: rgba(255, 255, 255, 0.78);
+    }
+
+    * {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body.manufacturer-body {
+        min-height: 100vh;
+        padding-bottom: 7rem;
+        background:
+            radial-gradient(circle at top left, rgba(45, 212, 191, 0.22), transparent 28%),
+            radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 24%),
+            linear-gradient(180deg, #f8fafc 0%, #eef6f7 100%);
+        color: var(--manufacturer-ink);
+    }
+
+    .manufacturer-shell {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .manufacturer-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        background: rgba(248, 250, 252, 0.86);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    }
+
+    .manufacturer-panel {
+        background: var(--manufacturer-surface);
+        border: 1px solid var(--manufacturer-border);
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .manufacturer-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.75rem;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        background:
+            linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(15, 118, 110, 0.92) 55%, rgba(17, 94, 89, 0.88));
+        color: white;
+        box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+    }
+
+    .manufacturer-hero::before,
+    .manufacturer-hero::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        filter: blur(2px);
+    }
+
+    .manufacturer-hero::before {
+        width: 17rem;
+        height: 17rem;
+        top: -8rem;
+        right: -3rem;
+    }
+
+    .manufacturer-hero::after {
+        width: 12rem;
+        height: 12rem;
+        bottom: -6rem;
+        left: 18%;
+    }
+
+    .manufacturer-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .manufacturer-nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.8rem 1rem;
+        border-radius: 1rem;
+        color: #526074;
+        font-size: 0.94rem;
+        font-weight: 600;
+        transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .manufacturer-nav-link:hover {
+        background: rgba(15, 118, 110, 0.08);
+        color: var(--manufacturer-teal);
+        transform: translateY(-1px);
+    }
+
+    .manufacturer-nav-link.is-active {
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(20, 184, 166, 0.18));
+        color: var(--manufacturer-teal);
+        box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.14);
+    }
+
+    .manufacturer-metric-card {
+        border-radius: 1.35rem;
+        padding: 1.25rem;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .manufacturer-metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 22px 42px rgba(15, 23, 42, 0.1);
+    }
+
+    .manufacturer-table-shell {
+        overflow: hidden;
+        border-radius: 1.5rem;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+    }
+
+    .manufacturer-table-shell table thead {
+        background: rgba(248, 250, 252, 0.9);
+    }
+
+    .manufacturer-table-shell tbody tr:hover {
+        background: rgba(240, 253, 250, 0.85);
+    }
+
+    .manufacturer-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .manufacturer-action-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 0.95rem;
+        background: linear-gradient(135deg, #0f766e, #14b8a6);
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 18px 36px rgba(15, 118, 110, 0.22);
+        transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    }
+
+    .manufacturer-action-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 22px 44px rgba(15, 118, 110, 0.28);
+    }
+
+    .manufacturer-action-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 0.95rem;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: rgba(255, 255, 255, 0.88);
+        color: #0f172a;
+        font-weight: 700;
+        transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .manufacturer-action-secondary:hover {
+        background: rgba(240, 253, 250, 1);
+        transform: translateY(-1px);
+    }
+
+    .manufacturer-bottom-nav {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 45;
+        width: min(92vw, 880px);
+        padding: 0.6rem;
+        border-radius: 1.4rem;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        box-shadow: 0 28px 60px rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+
+    .manufacturer-bottom-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        padding: 0.65rem 0.8rem;
+        border-radius: 1rem;
+        color: rgba(226, 232, 240, 0.72);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .manufacturer-bottom-nav a:hover,
+    .manufacturer-bottom-nav a.is-active {
+        background: rgba(45, 212, 191, 0.14);
+        color: #f8fafc;
+        transform: translateY(-1px);
+    }
+
+    .manufacturer-icon-button {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(255, 255, 255, 0.72);
+        color: #0f172a;
+        transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .manufacturer-icon-button:hover {
+        background: rgba(240, 253, 250, 1);
+        transform: translateY(-1px);
+        box-shadow: 0 18px 32px rgba(15, 23, 42, 0.08);
+    }
+
+    .manufacturer-icon-button__badge {
+        position: absolute;
+        top: 0.35rem;
+        right: 0.35rem;
+        display: none;
+        min-width: 1.15rem;
+        height: 1.15rem;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.28rem;
+        border-radius: 999px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .manufacturer-icon-button__badge.is-visible {
+        display: inline-flex;
+    }
+
+    .manufacturer-notification-shell {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        pointer-events: none;
+    }
+
+    .manufacturer-notification-shell.is-open {
+        pointer-events: auto;
+    }
+
+    .manufacturer-notification-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.34);
+        opacity: 0;
+        transition: opacity 180ms ease;
+    }
+
+    .manufacturer-notification-shell.is-open .manufacturer-notification-overlay {
+        opacity: 1;
+    }
+
+    .manufacturer-notification-drawer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        width: min(28rem, 100vw);
+        height: 100%;
+        background: rgba(255, 255, 255, 0.97);
+        border-left: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: -24px 0 60px rgba(15, 23, 42, 0.18);
+        transform: translateX(100%);
+        transition: transform 220ms ease;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .manufacturer-notification-shell.is-open .manufacturer-notification-drawer {
+        transform: translateX(0);
+    }
+
+    .manufacturer-notification-header {
+        padding: 1.25rem 1.25rem 1rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 0.92));
+    }
+
+    .manufacturer-notification-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .manufacturer-notification-summary-card {
+        border-radius: 1rem;
+        border: 1px solid rgba(226, 232, 240, 0.88);
+        background: white;
+        padding: 0.85rem;
+    }
+
+    .manufacturer-notification-summary-card p:last-child {
+        margin-top: 0.35rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .manufacturer-notification-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-top: 1rem;
+    }
+
+    .manufacturer-notification-toolbar-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: white;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #0f172a;
+        transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .manufacturer-notification-toolbar-button:hover {
+        background: rgba(240, 253, 250, 1);
+        transform: translateY(-1px);
+    }
+
+    .manufacturer-notification-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        padding: 1rem 1.1rem;
+        border-top: 1px solid rgba(226, 232, 240, 0.7);
+        transition: background 160ms ease;
+    }
+
+    .manufacturer-notification-item:hover {
+        background: rgba(240, 253, 250, 0.86);
+    }
+
+    .manufacturer-notification-item[data-read='true'] {
+        background: rgba(248, 250, 252, 0.94);
+    }
+
+    .manufacturer-notification-item[data-read='true'] .manufacturer-notification-item__title,
+    .manufacturer-notification-item[data-read='true'] .manufacturer-notification-action {
+        color: #64748b;
+    }
+
+    .manufacturer-notification-item__content {
+        display: flex;
+        gap: 0.9rem;
+    }
+
+    .manufacturer-notification-item__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .manufacturer-notification-section-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.25rem 0.55rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .manufacturer-notification-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--manufacturer-teal);
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .manufacturer-notification-read-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        background: white;
+        color: #0f172a;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .manufacturer-notification-read-button:hover {
+        background: rgba(240, 253, 250, 1);
+        transform: translateY(-1px);
+    }
+
+    .manufacturer-notification-read-button[disabled] {
+        cursor: not-allowed;
+        opacity: 0.55;
+        transform: none;
+    }
+
+    body.manufacturer-body.is-drawer-open {
+        overflow: hidden;
+    }
+
+    .manufacturer-notification-section-label {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        padding: 0.9rem 1.1rem 0.55rem;
+        background: rgba(248, 250, 252, 0.92);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .manufacturer-notification-body {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .manufacturer-notification-footer {
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
+        padding: 1rem 1.25rem;
+        background: rgba(248, 250, 252, 0.9);
+    }
+
+    .manufacturer-notification-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .manufacturer-notification-item__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .manufacturer-notification-item__icon[data-variant='success'] {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .manufacturer-notification-item__icon[data-variant='warning'] {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .manufacturer-notification-item__icon[data-variant='info'] {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .manufacturer-notification-item__icon[data-variant='error'] {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    @media (max-width: 768px) {
+        .manufacturer-shell {
+            padding: 1rem;
+        }
+
+        .manufacturer-hero {
+            border-radius: 1.35rem;
+        }
+
+        .manufacturer-topbar .manufacturer-nav-inline {
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+            scrollbar-width: none;
+        }
+
+        .manufacturer-topbar .manufacturer-nav-inline::-webkit-scrollbar {
+            display: none;
+        }
+
+        .manufacturer-notification-summary {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<header class="manufacturer-topbar">
+    <div class="manufacturer-shell py-4">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg shadow-slate-900/15">
+                    <span class="material-symbols-outlined">factory</span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Steryl Manufacturer Workspace</p>
+                    <h1 class="text-xl font-bold text-slate-900">{{ manufacturer_page_title or 'Manufacturer Operations' }}</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 self-start lg:self-auto">
+                <button type="button" id="manufacturer-notifications-button" class="manufacturer-icon-button" aria-label="Open notifications" aria-expanded="false" aria-controls="manufacturer-notification-drawer">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span id="manufacturer-notification-badge" class="manufacturer-icon-button__badge">0</span>
+                </button>
+                {% if manufacturer_primary_action_href and manufacturer_primary_action_label %}
+                <a href="{{ manufacturer_primary_action_href }}" class="manufacturer-action-primary px-4 py-3 text-sm">
+                    {% if manufacturer_primary_action_icon %}<span class="material-symbols-outlined text-[18px]">{{ manufacturer_primary_action_icon }}</span>{% endif %}
+                    <span>{{ manufacturer_primary_action_label }}</span>
+                </a>
+                {% endif %}
+                <a href="{{ url_for('main.logout') }}" class="manufacturer-action-secondary px-4 py-3 text-sm">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                    <span>Logout</span>
+                </a>
+                <div class="manufacturer-panel flex items-center gap-3 rounded-2xl px-4 py-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-100 text-sm font-bold text-teal-700">
+                        <span id="user-initial">U</span>
+                    </div>
+                    <div class="hidden sm:block">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Authenticated User</p>
+                        <p class="text-sm font-semibold text-slate-800" id="user-name">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="manufacturer-nav-inline mt-4 flex items-center gap-2 overflow-x-auto">
+            <a href="{{ url_for('main.manufacturer_skus') }}" class="manufacturer-nav-link {% if request.endpoint == 'main.manufacturer_skus' %}is-active{% endif %}">
+                <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                <span>Catalog</span>
+            </a>
+            <a href="{{ url_for('main.manufacturer_requests') }}" class="manufacturer-nav-link {% if request.endpoint in ['main.manufacturer_requests', 'main.manufacturer_approve_request', 'main.manufacturer_reject_request', 'main.manufacturer_supply_request'] %}is-active{% endif %}">
+                <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                <span>Requests</span>
+            </a>
+            <a href="{{ url_for('main.manufacturer_reports') }}" class="manufacturer-nav-link {% if request.endpoint == 'main.manufacturer_reports' %}is-active{% endif %}">
+                <span class="material-symbols-outlined text-[18px]">assessment</span>
+                <span>Reports</span>
+            </a>
+            <a href="{{ url_for('main.manufacturer_batches') }}" class="manufacturer-nav-link {% if request.endpoint == 'main.manufacturer_batches' %}is-active{% endif %}">
+                <span class="material-symbols-outlined text-[18px]">library_books</span>
+                <span>Batches</span>
+            </a>
+            <a href="{{ url_for('main.manufacturer_batch_register') }}" class="manufacturer-nav-link {% if request.endpoint == 'main.manufacturer_batch_register' %}is-active{% endif %}">
+                <span class="material-symbols-outlined text-[18px]">edit_square</span>
+                <span>Register Batch</span>
+            </a>
+            <a href="{{ url_for('main.manufacturer_print_queue') }}" class="manufacturer-nav-link {% if request.endpoint == 'main.manufacturer_print_queue' %}is-active{% endif %}">
+                <span class="material-symbols-outlined text-[18px]">print</span>
+                <span>Print Queue</span>
+            </a>
+        </nav>
+    </div>
+</header>
+
+<nav class="manufacturer-bottom-nav">
+    <div class="grid grid-cols-6 gap-2">
+            <a href="{{ url_for('main.manufacturer_skus') }}" class="{% if request.endpoint == 'main.manufacturer_skus' %}is-active{% endif %}">
+                <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                <span>Catalog</span>
+        </a>
+        <a href="{{ url_for('main.manufacturer_requests') }}" class="{% if request.endpoint in ['main.manufacturer_requests', 'main.manufacturer_approve_request', 'main.manufacturer_reject_request', 'main.manufacturer_supply_request'] %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+            <span>Requests</span>
+        </a>
+        <a href="{{ url_for('main.manufacturer_reports') }}" class="{% if request.endpoint == 'main.manufacturer_reports' %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">assessment</span>
+            <span>Reports</span>
+        </a>
+        <a href="{{ url_for('main.manufacturer_batches') }}" class="{% if request.endpoint == 'main.manufacturer_batches' %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">package_2</span>
+            <span>Batches</span>
+        </a>
+        <a href="{{ url_for('main.manufacturer_batch_register') }}" class="{% if request.endpoint == 'main.manufacturer_batch_register' %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">add_box</span>
+            <span>Register</span>
+        </a>
+        <a href="{{ url_for('main.manufacturer_print_queue') }}" class="{% if request.endpoint == 'main.manufacturer_print_queue' %}is-active{% endif %}">
+            <span class="material-symbols-outlined text-[20px]">print</span>
+            <span>Labels</span>
+        </a>
+    </div>
+</nav>
+
+<div id="manufacturer-notification-shell" class="manufacturer-notification-shell" aria-hidden="true">
+    <div id="manufacturer-notification-overlay" class="manufacturer-notification-overlay"></div>
+    <aside id="manufacturer-notification-drawer" class="manufacturer-notification-drawer" role="dialog" aria-modal="true" aria-labelledby="manufacturer-notification-title">
+        <div class="manufacturer-notification-header">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p id="manufacturer-notification-title" class="text-lg font-bold text-slate-900">Notifications</p>
+                    <p class="mt-1 text-sm text-slate-500">A standard notification center for manufacturer-scoped operational alerts.</p>
+                </div>
+                <button type="button" id="manufacturer-notification-close" class="manufacturer-icon-button h-11 w-11" aria-label="Close notifications">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="manufacturer-notification-summary">
+                <div class="manufacturer-notification-summary-card">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Total Alerts</p>
+                    <p id="manufacturer-notification-summary-total">0</p>
+                </div>
+                <div class="manufacturer-notification-summary-card">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Action Required</p>
+                    <p id="manufacturer-notification-summary-action">0</p>
+                </div>
+                <div class="manufacturer-notification-summary-card">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Ready Now</p>
+                    <p id="manufacturer-notification-summary-ready">0</p>
+                </div>
+            </div>
+            <div class="manufacturer-notification-actions">
+                <button type="button" id="manufacturer-notification-refresh" class="manufacturer-notification-toolbar-button">
+                    <span class="material-symbols-outlined text-[18px]">refresh</span>
+                    <span>Refresh</span>
+                </button>
+                <button type="button" id="manufacturer-notification-mark-all-read" class="manufacturer-notification-toolbar-button">
+                    <span class="material-symbols-outlined text-[18px]">done_all</span>
+                    <span>Mark all read</span>
+                </button>
+                <span id="manufacturer-notification-count-pill" class="manufacturer-tag bg-slate-100 text-slate-700">0 items</span>
+                <span id="manufacturer-notification-updated" class="text-xs text-slate-400">Updated just now</span>
+            </div>
+        </div>
+        <div id="manufacturer-notifications-list" class="manufacturer-notification-body">
+            <div class="manufacturer-notification-empty">
+                <span class="material-symbols-outlined text-[34px] text-slate-300">notifications</span>
+                <p class="text-sm">Loading notifications...</p>
+            </div>
+        </div>
+        <div class="manufacturer-notification-footer">
+            <div class="flex items-center justify-between gap-3 text-sm text-slate-500">
+                <span>Notifications are filtered to the current manufacturer account.</span>
+                <a href="{{ url_for('main.manufacturer_print_queue') }}" class="font-semibold text-teal-700 hover:text-teal-800">Open Print Queue</a>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<script>
+(() => {
+    const notificationButton = document.getElementById('manufacturer-notifications-button');
+    const notificationShell = document.getElementById('manufacturer-notification-shell');
+    const notificationOverlay = document.getElementById('manufacturer-notification-overlay');
+    const notificationDrawer = document.getElementById('manufacturer-notification-drawer');
+    const notificationClose = document.getElementById('manufacturer-notification-close');
+    const notificationRefresh = document.getElementById('manufacturer-notification-refresh');
+    const notificationMarkAllRead = document.getElementById('manufacturer-notification-mark-all-read');
+    const notificationList = document.getElementById('manufacturer-notifications-list');
+    const notificationBadge = document.getElementById('manufacturer-notification-badge');
+    const notificationCountPill = document.getElementById('manufacturer-notification-count-pill');
+    const summaryTotal = document.getElementById('manufacturer-notification-summary-total');
+    const summaryAction = document.getElementById('manufacturer-notification-summary-action');
+    const summaryReady = document.getElementById('manufacturer-notification-summary-ready');
+    const updatedLabel = document.getElementById('manufacturer-notification-updated');
+    const pageBody = document.body;
+
+    if (!notificationButton || !notificationShell || !notificationOverlay || !notificationDrawer || !notificationClose || !notificationRefresh || !notificationMarkAllRead || !notificationList || !notificationBadge || !notificationCountPill || !summaryTotal || !summaryAction || !summaryReady || !updatedLabel) {
+        return;
+    }
+
+    const formatCount = (count) => count === 1 ? '1 unread' : `${count} unread`;
+    const formatUpdatedTime = () => new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date());
+    let currentNotifications = [];
+
+    const setLoadingState = () => {
+        notificationList.innerHTML = `
+            <div class="manufacturer-notification-empty">
+                <span class="material-symbols-outlined text-[34px] text-slate-300">hourglass_top</span>
+                <p class="text-sm">Refreshing notifications...</p>
+            </div>
+        `;
+    };
+
+    const openDrawer = () => {
+        notificationShell.classList.add('is-open');
+        notificationShell.setAttribute('aria-hidden', 'false');
+        notificationButton.setAttribute('aria-expanded', 'true');
+        pageBody.classList.add('is-drawer-open');
+    };
+
+    const closeDrawer = () => {
+        notificationShell.classList.remove('is-open');
+        notificationShell.setAttribute('aria-hidden', 'true');
+        notificationButton.setAttribute('aria-expanded', 'false');
+        pageBody.classList.remove('is-drawer-open');
+    };
+
+    const renderNotifications = (payload) => {
+        const items = payload?.items || [];
+        const unreadCount = payload?.unread_count || 0;
+        const summary = payload?.summary || {};
+        currentNotifications = items;
+
+        notificationCountPill.textContent = formatCount(unreadCount);
+        notificationBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        notificationBadge.classList.toggle('is-visible', unreadCount > 0);
+        summaryTotal.textContent = summary.total_alerts || 0;
+        summaryAction.textContent = summary.critical_actions || 0;
+        summaryReady.textContent = summary.label_actions || 0;
+        notificationMarkAllRead.disabled = unreadCount === 0;
+        updatedLabel.textContent = `Updated ${formatUpdatedTime()}`;
+
+        if (!items.length) {
+            notificationList.innerHTML = `
+                <div class="manufacturer-notification-empty">
+                    <span class="material-symbols-outlined text-[34px] text-slate-300">notifications_off</span>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-700">No new manufacturer alerts right now.</p>
+                        <p class="mt-1 text-sm text-slate-500">The queue, catalog, and batch activity are currently clear.</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const priorityItems = items.filter((item) => item.priority <= 2);
+        const regularItems = items.filter((item) => !priorityItems.includes(item));
+
+        const renderSection = (label, sectionItems) => {
+            if (!sectionItems.length) {
+                return '';
+            }
+            return `
+                <div class="manufacturer-notification-section-label">${label}</div>
+                ${sectionItems.map((item) => `
+                    <div class="manufacturer-notification-item" data-read="${item.is_read ? 'true' : 'false'}">
+                        <div class="manufacturer-notification-item__content">
+                            <span class="manufacturer-notification-item__icon" data-variant="${item.variant || 'info'}">
+                                <span class="material-symbols-outlined text-[18px]">${item.icon || 'notifications'}</span>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="flex items-center justify-between gap-3">
+                                    <span class="manufacturer-notification-section-tag">${item.section || 'Operations'}</span>
+                                    <span class="manufacturer-tag bg-slate-100 text-slate-700">${item.count}</span>
+                                </span>
+                                <span class="manufacturer-notification-item__title mt-3 block text-sm font-semibold text-slate-900">${item.title}</span>
+                                <span class="mt-1 block text-sm leading-6 text-slate-500">${item.message}</span>
+                            </span>
+                        </div>
+                        <div class="manufacturer-notification-item__footer">
+                            <a href="${item.href || '#'}" class="manufacturer-notification-action">
+                                <span>${item.action_label || 'Open item'}</span>
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                            </a>
+                            <button type="button" class="manufacturer-notification-read-button" data-notification-id="${item.id}" data-notification-signature="${item.signature}" ${item.is_read ? 'disabled' : ''}>
+                                <span class="material-symbols-outlined text-[16px]">${item.is_read ? 'done' : 'mark_email_read'}</span>
+                                <span>${item.is_read ? 'Read' : 'Mark as read'}</span>
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        };
+
+        notificationList.innerHTML = renderSection('Action Required', priorityItems) + renderSection('Operational Updates', regularItems);
+    };
+
+    const postNotificationAction = async (url, body) => {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: body ? JSON.stringify(body) : '{}'
+        });
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error(data.message || 'Notification action failed');
+        }
+        renderNotifications(data.data);
+    };
+
+    const loadNotifications = async () => {
+        try {
+            const response = await fetch('/api/manufacturer/notifications');
+            const data = await response.json();
+            if (data.success) {
+                renderNotifications(data.data);
+            } else {
+                notificationList.innerHTML = '<div class="manufacturer-notification-empty"><span class="material-symbols-outlined text-[34px] text-slate-300">error</span><p class="text-sm">Notifications are unavailable right now.</p></div>';
+            }
+        } catch (error) {
+            notificationList.innerHTML = '<div class="manufacturer-notification-empty"><span class="material-symbols-outlined text-[34px] text-slate-300">error</span><p class="text-sm">Notifications are unavailable right now.</p></div>';
+        }
+    };
+
+    notificationButton.addEventListener('click', () => {
+        const shouldOpen = !notificationShell.classList.contains('is-open');
+        if (shouldOpen) {
+            openDrawer();
+            setLoadingState();
+            loadNotifications();
+        } else {
+            closeDrawer();
+        }
+    });
+
+    notificationOverlay.addEventListener('click', closeDrawer);
+    notificationClose.addEventListener('click', closeDrawer);
+    notificationRefresh.addEventListener('click', () => {
+        setLoadingState();
+        loadNotifications();
+    });
+
+    notificationMarkAllRead.addEventListener('click', async () => {
+        if (!currentNotifications.some((item) => !item.is_read)) {
+            return;
+        }
+
+        try {
+            await postNotificationAction('/api/manufacturer/notifications/read-all');
+        } catch (error) {
+            if (window.showNotice) {
+                window.showNotice(error.message || 'Unable to update notifications right now.', 'error');
+            }
+        }
+    });
+
+    notificationList.addEventListener('click', async (event) => {
+        const button = event.target.closest('.manufacturer-notification-read-button');
+        if (!button || button.disabled) {
+            return;
+        }
+
+        event.preventDefault();
+
+        try {
+            await postNotificationAction('/api/manufacturer/notifications/read', {
+                notification_id: button.dataset.notificationId,
+                signature: button.dataset.notificationSignature
+            });
+        } catch (error) {
+            if (window.showNotice) {
+                window.showNotice(error.message || 'Unable to update notifications right now.', 'error');
+            }
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && notificationShell.classList.contains('is-open')) {
+            closeDrawer();
+        }
+    });
+
+    loadNotifications();
+})();
+</script>
